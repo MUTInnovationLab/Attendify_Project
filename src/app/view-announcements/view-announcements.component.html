@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="megaphone-outline" style="color: white;"></ion-icon>
+      <span style="color: white;">Announcements</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" style="color: white;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" style="background-color: #ff9800;">
+  <ion-list>
+    <ion-item *ngFor="let announcement of announcements">
+      <ion-label>
+        <h2>{{ announcement.moduleCode }} </h2>
+        <h2> {{ announcement.title }}</h2>
+        <p>{{ announcement.content }}</p>
+        <p><small>By: {{ announcement.userEmail }} on {{ announcement.formattedDate }}</small></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+

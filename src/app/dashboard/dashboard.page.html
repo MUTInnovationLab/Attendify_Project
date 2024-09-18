@@ -1,0 +1,123 @@
+<ion-content>
+  <div class="header">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+    <h4>Dashboard</h4>
+    <ion-icon name="person-circle-outline"></ion-icon>
+  </div>
+
+  <h2>Welcome, Admin</h2>
+
+  <div class="grid-container">
+    <div>
+      <ion-card-content>
+        <ion-icon name="people-outline"></ion-icon>
+        <h3>Department Admins</h3>
+        <p class="number">{{ (deptAdmins$ | async)?.length }}</p>
+      </ion-card-content>
+    </div>
+
+    <div (click)="openDepartmentsAnalyticsModal()">
+      <ion-card-content>
+        <ion-icon name="analytics-outline"></ion-icon>
+        <h3>Departments Analytics</h3>
+        <p class="number">8</p>
+      </ion-card-content>
+    </div>
+    
+  </div>
+
+  <div class="display-content">
+    <ion-label>view admins</ion-label>
+    <ion-icon name="add-outline" button (click)="openAddAdminModal()" slot="end"></ion-icon>
+  </div>
+
+  <div id="admin-container">
+    <div class="admin-details" *ngFor="let deptAdmin of (deptAdmins$ | async)">
+      <ion-label>
+        <h3>{{ deptAdmin.fullName }}</h3>
+        <p>{{ deptAdmin.email }}</p>
+        <p>{{ deptAdmin.department }}</p>
+      </ion-label>
+      <div>
+        <ion-note slot="end">{{ deptAdmin.staffNumber }}</ion-note>
+        <div>
+          <ion-icon name="create-outline" slot="end" (click)="editDeptAdmin(deptAdmin)"></ion-icon>
+          <ion-icon name="trash-outline" slot="end" (click)="deleteDeptAdmin(deptAdmin.id!)"></ion-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-modal #addAdminModal>
+  <ng-template>
+    <ion-content class="ion-padding add-admin-modal">
+      <div class="add-admin-container">
+        <h3>{{ selectedDeptAdminId ? 'Edit Admin' : 'Add Admin' }}</h3>
+        <ion-icon name="close-outline" (click)="dismissModal()" button></ion-icon>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Full Name</ion-label>
+        <ion-input
+          type="text"
+          [(ngModel)]="deptAdminFullName"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Email Address</ion-label>
+        <ion-input
+          type="email"
+          [(ngModel)]="deptAdminEmail"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Staff Number</ion-label>
+        <ion-input
+          type="text"
+          [(ngModel)]="deptAdminStaffNumber"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Department</ion-label>
+        <ion-select [(ngModel)]="deptAdminDepartment" required>
+          <ion-select-option
+            *ngFor="let department of departments"
+            [value]="department">
+            {{ department }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button expand="block" (click)="onSubmit()">
+        {{ selectedDeptAdminId ? 'Update Admin' : 'Add Admin' }}
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal #departmentsAnalyticsModal>
+  <ng-template>
+    <ion-content class="ion-padding departments-analytics-modal">
+      <div class="modal-header">
+        <h3>Departments Analytics</h3>
+        <ion-icon name="close-outline" (click)="dismissDepartmentsAnalyticsModal()" button></ion-icon>
+      </div>
+
+      <div class="analytics-container">
+        <div class="analytics-item" *ngFor="let dept of departmentsAnalytics">
+          <h4>{{ dept.name }}</h4>
+          <p>Admins: {{ dept.adminCount }}</p>
+          <p>Active Users: {{ dept.activeUsers }}</p>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

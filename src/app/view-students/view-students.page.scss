@@ -1,0 +1,115 @@
+/* Custom styles for the header */
+ion-header {
+    --background: #ff9800; /* Header background color */
+  }
+  
+  ion-toolbar {
+    --background: #ff9800; /* Toolbar background color */
+  }
+  
+  .custom-title {
+    color: #ffffff; /* Title text color set to white */
+    text-align: center; /* Center align title text */
+  }
+  
+  /* Custom styles for the close icon button */
+  .close-icon {
+    color: #ffffff; /* Close icon color */
+  }
+  
+  /* Custom styles for the table container */
+  .table-container {
+    overflow-x: auto; /* Allow horizontal scrolling if content overflows */
+    display: block; /* Make sure container behaves as block */
+  }
+  
+  /* Custom styles for the table */
+  table {
+    width: 100%;
+    min-width: 600px; /* Minimum width for horizontal scrolling */
+    border-collapse: collapse;
+    margin: 0; /* Remove margin */
+  }
+  
+  thead th {
+    background-color: #ff9800; /* Header background color */
+    color: white; /* Header text color */
+    height: 50px; /* Increase the height of the table header */
+    font-size: 18px; /* Increase the font size of the table header */
+    font-style: italic;
+    font-family: 'Times New Roman', Times, serif;
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0; /* Stick to the top of the container */
+    z-index: 1; /* Ensure headers stay above other content */
+  }
+  
+  th, td {
+    
+    padding: 15px; /* Increase padding for readability */
+    text-align: left;
+    white-space: nowrap; /* Prevent text wrapping */
+    color: rgb(255, 255, 255); /* Set the font color of all <th> and <td> elements to white */
+  }
+  
+  tbody tr:nth-child(odd), tbody tr:nth-child(even) {
+    background-color: #854836; /* Row background color */
+  }
+  
+  /* Fix columns in place */
+  .sticky-column {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    left: 0;
+    background-color: #854836; /* Background color for sticky columns */
+    z-index: 2; /* Ensure columns stay above other content */
+  }
+  
+  /* Custom styles for IonCard */
+  ion-card {
+    max-width: 100%; /* Ensure card width is responsive */
+    margin: 0; /* Remove margin */
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Ensure the card header and content expand to full width */
+  ion-card-header, ion-card-content {
+    padding: 0; /* Remove padding */
+  }
+  
+  /* Custom styles for card titles */
+  ion-card-title {
+    background-color: #854836;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    color: #ffffff; /* Card title color */
+  }
+  
+  /* Custom styles for buttons */
+  ion-button {
+    --border-radius: 10px;
+  }
+  
+  /* Custom styles for icons */
+  ion-icon {
+    font-size: 2rem;
+  }
+  
+  /* Ensure the table and its container fill the available space */
+  .custom-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Make the grid take full height */
+    width: 100%; /* Make the grid cover the page width */
+  }
+  
+  /* Custom background color */
+  .custom-background {
+    --background: #f4ede1;
+  }
+  
+  
+  
+  

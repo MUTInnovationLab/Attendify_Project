@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="custom-title">View Students</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" class="close-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content class="ion-padding custom-background">
+  <!-- Search Bar -->
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
+    (ionInput)="filterStudents()"
+    placeholder="Search by name or student number"
+    class="search-bar"
+  ></ion-searchbar>
+
+  <ion-grid class="custom-grid">
+    <ion-row>
+      <ion-col>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Student List</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Student Number</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let student of filteredStudents" (click)="onStudentClick(student)">
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.surname }}</td>
+                    <td>{{ student.studentNumber }}</td>
+                    <td>{{ student.email }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="selectedStudent">
+      <ion-col>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Modules for {{ selectedStudent.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="table-container">
+              <table *ngIf="studentModules.length > 0; else noModules">
+                <thead>
+                  <tr>
+                    <th>Module Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let module of studentModules">
+                    <td>{{ module }}</td> <!-- Adjust if studentModules is an array of objects -->
+                  </tr>
+                </tbody>
+              </table>
+              <ng-template #noModules>
+                <p></p>
+              </ng-template>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+

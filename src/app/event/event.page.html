@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add Event</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Add New Event</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="addEvent()" #eventForm="ngForm">
+        <ion-item>
+          <ion-label>Date and Time</ion-label>
+          <ion-datetime
+            [(ngModel)]="newEvent.date"
+            name="date"
+            display-format="MMM DD, YYYY HH:mm"
+            picker-format="MMM DD, YYYY HH:mm"
+            placeholder="Select Date and Time"
+            required
+          ></ion-datetime>
+        </ion-item>
+        <ion-item>
+          <ion-label>Description</ion-label>
+          <ion-textarea
+            [(ngModel)]="newEvent.description"
+            name="description"
+            placeholder="Event Description"
+            required
+          ></ion-textarea>
+        </ion-item>
+        <ion-button
+          expand="full"
+          type="submit"
+          [disabled]="!eventForm.form.valid"
+        >
+          Add Event
+        </ion-button>
+        <ion-note color="danger" *ngIf="eventForm.form.invalid">
+          Please fill out all required fields.
+        </ion-note>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

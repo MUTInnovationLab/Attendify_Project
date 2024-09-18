@@ -1,0 +1,198 @@
+/* dept-an.page.scss */
+
+/* Global styles for the page */
+.custom-background {
+    background: linear-gradient(135deg, #004d40, #00796b);
+    color: var(--ion-color-primary-contrast);
+    font-family: var(--ion-font-family);
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  ion-header {
+    --background: var(--ion-color-primary);
+    --color: var(--ion-color-primary-contrast);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  ion-toolbar {
+    --background: var(--ion-color-primary);
+  }
+  
+  ion-title {
+    font-family: var(--ion-font-family-accent);
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Card Styles */
+  .department-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 16px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .analytics-card {
+    width: 100%;
+    height: 400px; /* Ensure the canvas has a height */
+  }  
+  
+  .icon {
+    font-size: 48px;
+    color: var(--ion-color-primary);
+    margin-bottom: 8px;
+  }
+  
+  .card-title {
+    font-size: 20px;
+    font-family: var(--ion-font-family-secondary);
+  }
+  
+  /* Search Bar Styles */
+  ion-searchbar {
+    --background: var(--ion-color-secondary);
+    --color: var(--ion-color-secondary-contrast);
+    --placeholder-color: var(--ion-color-secondary-contrast);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Table Styles */
+  .tablecard {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 16px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  thead {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+  }
+  
+  th, td {
+    padding: 12px;
+    text-align: left;
+  }
+  
+  tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  input {
+    border: none;
+    background: transparent;
+    width: 100%;
+  }
+  
+  /* Button Styles */
+  .ion-button {
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .view-student-button {
+    background: var(--ion-color-tertiary);
+    color: var(--ion-color-tertiary-contrast);
+    border-radius: 20px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    font-family: var(--ion-font-family-accent);
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    &:hover {
+      background: var(--ion-color-tertiary-shade);
+    }
+  }
+  
+  button[fill="clear"] {
+    --background: transparent;
+    --color: var(--ion-color-primary);
+    border-radius: 20px;
+  }
+  
+  ion-button.icon {
+    --background: transparent;
+    --color: var(--ion-color-primary);
+    border-radius: 50%;
+    padding: 8px;
+    font-size: 24px;
+    transition: color 0.3s, background-color 0.3s;
+    &:hover {
+      --color: var(--ion-color-primary-contrast);
+      --background: var(--ion-color-primary);
+    }
+  }
+  
+  /* Animation Styles */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .custom-background {
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  ion-card {
+    animation: slideIn 0.5s ease-in-out;
+  }
+  
+  .editing {
+    background: rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    ion-title {
+      font-size: 20px;
+    }
+  
+    .department-card, .tablecard {
+      margin: 8px;
+      padding: 8px;
+    }
+  
+    table {
+      font-size: 14px;
+    }
+  
+    th, td {
+      padding: 8px;
+    }
+  
+    ion-button.view-student-button {
+      font-size: 14px;
+      padding: 6px 12px;
+    }
+  }
+  

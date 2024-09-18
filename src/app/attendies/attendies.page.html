@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <ion-icon name="arrow-back-outline" routerLink="/lecture"></ion-icon>
+      Attendance Details
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleRequestsTable()">Requests</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+     <!-- Attendance Table -->
+    <ion-row>
+      <ion-col size="12">
+        <ion-button expand="full" (click)="toggleTable()">Show/Hide Attendance Table</ion-button>
+        <div *ngIf="showTable">
+          <table class="attendance-table" *ngIf="students.length > 0">
+            <!-- Table content -->
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Module</th>
+                <th>Name</th>
+                <th>Scan Date</th>
+                <th>Student Number</th>
+                <th>Surname</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students">
+                <td>{{ student.email }}</td>
+                <td>{{ student.module }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.scanDate }}</td>
+                <td>{{ student.studentNumber }}</td>
+                <td>{{ student.surname }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p *ngIf="students.length === 0">No attendance data found.</p>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <!-- Requests Table -->
+    <ion-row *ngIf="showRequestsTable">
+      <ion-col size="12">
+        <h2>Pending Requests</h2>
+        <table class="attendance-table" *ngIf="requestedInvites.length > 0"> 
+          <!-- Table content -->
+         <thead>
+            <tr>
+              <th>Email</th>
+              <th>Module Code</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Student No</th>
+              <th>Surname</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of requestedInvites">
+              <td>{{ student.email }}</td>
+              <td>{{ student.moduleCode }}</td>
+              <td>{{ student.name }}</td>
+              <td>{{ student.status }}</td>
+              <td>{{ student.studentNumber }}</td>
+              <td>{{ student.surname }}</td>
+              <td>
+                <ion-button color="success" (click)="approveStudent(student)">Approve</ion-button>
+                <ion-button color="danger" (click)="declineStudent(student)">Decline</ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="requestedInvites.length === 0">No pending requests found.</p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content> 

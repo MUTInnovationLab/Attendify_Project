@@ -1,0 +1,91 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login"></ion-back-button>
+    </ion-buttons>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleUserInfo()">
+        <ion-label>{{ currentUser.name }}</ion-label>
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="frame">
+    <div class="spacer"></div>
+
+    <ion-card *ngIf="showUserInfo" class="user-info-card">
+      <div class="user-info">
+        <div class="user-info-item">
+          <ion-icon name="school-outline"></ion-icon>
+          <div>
+            <p>{{ currentUser.moduleCode }}</p>
+          </div>
+        </div>
+
+        <div class="user-info-item">
+          <ion-icon name="finger-print-outline"></ion-icon>
+          <div>
+            <p>{{ currentUser.studentNumber }}</p>
+          </div>
+        </div>
+
+        <div class="user-info-item">
+          <ion-icon name="person-outline"></ion-icon>
+          <div>
+            <p>{{ currentUser.name }}</p>
+          </div>
+        </div>
+
+        <div class="user-info-item">
+          <ion-icon name="people-outline"></ion-icon>
+          <div>
+            <p>{{ currentUser.surname }}</p>
+          </div>
+        </div>
+
+        <div class="user-info-item">
+          <ion-icon name="mail-outline"></ion-icon>
+          <div>
+            <p>{{ currentUser.email }}</p>
+          </div>
+        </div>
+      </div>
+      <ion-button fill="clear" class="edit-button" (click)="editUserInfo()">
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-card>
+
+    <div *ngIf="!showUserInfo" class="container">
+      <h3>Welcome Student</h3>
+      <div class="actions-card">
+        <div class="cont">
+          <div class="navigationButtons" [routerLink]="['/student-records']">
+            <ion-icon name="document-text"></ion-icon>
+            <ion-label>Attendance Records</ion-label>
+          </div>
+
+          <div class="navigationButtons" (click)="viewCalendar()">
+            <ion-icon name="calendar"></ion-icon>
+            <ion-label>View Calendar</ion-label>
+          </div>
+        </div>
+
+        <div class="cont">
+          <div class="navigationButtons" (click)="openAnnouncementModal()">
+            <ion-icon name="megaphone"></ion-icon>
+            <ion-label>Announcements</ion-label>
+          </div>
+
+          <div class="navigationButtons" routerLink="/stude-scan">
+            <ion-icon name="scan"></ion-icon>
+            <ion-label>Scan QR Code</ion-label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

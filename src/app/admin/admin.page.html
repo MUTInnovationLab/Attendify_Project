@@ -1,0 +1,33 @@
+
+<ion-content [fullscreen]="true">
+  <form (ngSubmit)="submitForm()" class="form">
+    <p class="title">Attendify</p>
+    <p class="message">Add Lecturer to  Attendify app</p>
+    <div class="flex">
+      <label>
+        <input required="" placeholder="" type="text" class="input" [(ngModel)]="fullName" name="fullName">
+        <span>Full Name</span>
+      </label>
+
+      <label>
+        <input required="" placeholder="" type="text" class="input" [(ngModel)]="staffNumber" name="staffNumber">
+        <span>Staff Number</span>
+      </label>
+    </div>
+
+    <label>
+      <input required="" placeholder="" type="email" class="input" [(ngModel)]="email" name="email">
+      <span>Email</span>
+    </label>
+
+    <label>
+      <input required="" placeholder="" type="text" class="input" [(ngModel)]="position" name="position">
+      <span>Position</span>
+    </label>
+    <label>
+      <input required="" placeholder="" type="text" class="input" [(ngModel)]="department" name="department">
+      <span>Department</span>
+    </label>
+    <button type="submit" class="submit">Submit</button>
+  </form>
+</ion-content>

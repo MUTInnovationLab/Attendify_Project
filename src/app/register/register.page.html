@@ -1,0 +1,48 @@
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="register-container">
+    <div class="form-container">
+      <h1 class="title">Attendify Register</h1>
+      <form class="form">
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating" class="ion-text-uppercase">Email</ion-label>
+          <ion-input type="text" name="email" id="email" [(ngModel)]="email"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating" class="ion-text-uppercase">Name</ion-label>
+          <ion-input type="text" name="name" id="name" [(ngModel)]="name"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating" class="ion-text-uppercase">Surname</ion-label>
+          <ion-input type="text" name="surname" id="surname" [(ngModel)]="surname"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating" class="ion-text-uppercase">Student Number</ion-label>
+          <ion-input type="text" name="studentnumber" id="studentnumber" [(ngModel)]="studentNumber"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating" class="ion-text-uppercase">Password</ion-label>
+          <ion-input type="password" name="password" id="password" [(ngModel)]="password"></ion-input>
+          <ion-button fill="clear" slot="end" class="forgot-btn">
+            <a rel="noopener noreferrer" routerLink="/reset">Forgot Password?</a>
+          </ion-button>
+        </ion-item>
+
+        <ion-button class="sign-btn ion-margin-top" (click)="register()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Sign Up</ion-text>
+        </ion-button>
+      </form>
+    </div>
+
+    <div class="divider-container ion-margin-top">
+      <div class="divider-line"></div>
+      <p class="divider-text">Already have an account?</p>
+      <div class="divider-line"></div>
+    </div>
+
+    <p class="signup-text ion-text-center ion-margin-top">
+      <span>Go to login with your account</span>
+      <a rel="noopener noreferrer" routerLink="/login" class="signup-link">Log-in</a>
+    </p>
+  </div>
+</ion-content>

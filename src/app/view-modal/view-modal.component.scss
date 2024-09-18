@@ -1,0 +1,38 @@
+ion-header {
+    --background: #ff9800; /* Header background color */
+    --color: white; /* Header text color */
+  }
+  
+  ion-toolbar {
+    --background: #ff9800; /* Toolbar background color */
+  }
+  
+  ion-title {
+    color: white; /* Title text color */
+  }
+  
+  ion-buttons {
+    ion-button {
+      color: white; /* Button text color */
+    }
+  }
+  
+  ion-content {
+    --background: #cebfa6; /* Content background color */
+    ion-list {
+      ion-item {
+        --background: #cebfa6; /* Item background color, set to transparent if not needed */
+        ion-label {
+          color: black; /* Label text color */
+        }
+      }
+    }
+  }
+  
+  ion-button {
+    --background: blue; /* Button background color */
+    --color: white; /* Button text color */
+    --border-radius: 4px; /* Optional: rounded corners for the button */
+    --padding: 8px 16px; /* Optional: padding for the button */
+  }
+  

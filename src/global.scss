@@ -1,0 +1,83 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Global Variables */
+:root {
+    /* Primary Color */
+    --ion-color-primary: #C89229;
+    --ion-color-primary-rgb: 200, 146, 41;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade: #a77a20;
+    --ion-color-primary-tint: #d9a544;
+  
+    /* Secondary Color */
+    --ion-color-secondary: #56231F;
+    --ion-color-secondary-rgb: 86, 35, 31;
+    --ion-color-secondary-contrast: #ffffff;
+    --ion-color-secondary-contrast-rgb: 255, 255, 255;
+    --ion-color-secondary-shade: #481d1a;
+    --ion-color-secondary-tint: #6d3735;
+  
+    /* Tertiary Color */
+    --ion-color-tertiary: #006281;
+    --ion-color-tertiary-rgb: 0, 98, 129;
+    --ion-color-tertiary-contrast: #ffffff;
+    --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+    --ion-color-tertiary-shade: #00546f;
+    --ion-color-tertiary-tint: #267e98;
+  
+    /* Custom Fonts */
+    --ion-font-family: 'Poppins', sans-serif;
+    --ion-font-family-secondary: 'Roboto', sans-serif;
+    --ion-font-family-accent: 'Montserrat', sans-serif;
+  }
+  
+  body {
+    font-family: var(--ion-font-family);
+  }
+  
+  /* Apply custom fonts to specific elements */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--ion-font-family-secondary);
+  }
+  
+  .button-custom {
+    font-family: var(--ion-font-family-accent);
+  }
+  

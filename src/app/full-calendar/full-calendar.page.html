@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Full Calendar</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngFor="let month of months; let i = index">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ month }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="calendar-grid">
+          <div *ngFor="let day of getDaysInMonth(i)">
+            <div class="day">
+              <span>{{ day }}</span>
+              <ul>
+                <li *ngFor="let event of getEventsByMonth(i)">
+                  {{ event.date | date:'dd' }} - {{ event.description }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

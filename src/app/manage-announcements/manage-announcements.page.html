@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Manage Announcements</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Create New Announcement</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-select [(ngModel)]="selectedModule" placeholder="Select Module" (ionChange)="loadAnnouncements()">
+        <ion-select-option *ngFor="let module of modules" [value]="module">{{ module }}</ion-select-option>
+      </ion-select>
+      <ion-input [(ngModel)]="announcementTitle" placeholder="Title"></ion-input>
+      <ion-textarea [(ngModel)]="announcementContent" placeholder="Content"></ion-textarea>
+      <ion-button (click)="submitAnnouncement()">Submit</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Announcements Section -->
+  <ion-card *ngIf="announcements.length > 0">
+    <ion-card-header>
+      <ion-card-title>Announcements</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let announcement of announcements">
+          <ion-label>
+            <h2>{{ announcement.title }}</h2>
+            <p>{{ announcement.content }}</p>
+            <p><small>{{ announcement.formattedDate }}</small></p> <!-- Display date and time -->
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+ 
+</ion-content>
+
+

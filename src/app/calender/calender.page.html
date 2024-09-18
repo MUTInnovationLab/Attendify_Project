@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Academic Calendar</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Date picker for selecting the date -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Select Date</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-datetime
+        presentation="date"
+        [value]="currentDate"
+        (ionChange)="onDateChange($event)">
+      </ion-datetime>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Display events for the selected date -->
+  <ion-card *ngIf="eventsForTheDay.length > 0">
+    <ion-card-header>
+      <ion-card-title>Events for {{ selectedDate }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let event of eventsForTheDay">
+          <ion-label>
+            <p>{{ event.description }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Show message if no events are available -->
+  <ion-card *ngIf="eventsForTheDay.length === 0">
+    <ion-card-content>
+      <p>No events available for the selected date.</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

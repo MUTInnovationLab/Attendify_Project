@@ -1,0 +1,76 @@
+.header-toolbar {
+    --background: #ff9800;
+    --color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 16px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 28px;
+    color: #ff9800;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .form {
+    padding: 16px 0;
+  }
+  
+  .forgot-btn {
+    --color: #666;
+    --color-activated: #333;
+    font-size: 14px;
+    text-transform: capitalize;
+  }
+  
+  .sign-btn {
+    --background: #ff9800;
+    --color: #fff;
+    --border-radius: 20px;
+    font-weight: bold;
+    height: 48px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .divider-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 24px 0;
+  }
+  
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: #ccc;
+  }
+  
+  .divider-text {
+    margin: 0 16px;
+    font-weight: bold;
+    color: #ff9800;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .signup-text {
+    color: #666;
+  }
+  
+  .signup-link {
+    color: #ff9800;
+    text-decoration: none;
+    font-weight: bold;
+    padding-left: 4px;
+  }
+  ion-content {
+    --background: #ff9800; /* Set your desired background color */
+  }

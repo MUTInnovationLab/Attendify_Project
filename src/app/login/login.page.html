@@ -1,0 +1,38 @@
+
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="form-container">
+      <h1 class="title">Attendify Login</h1>
+      <form class="form">
+        <ion-item lines="none">
+          <ion-label position="floating" class="ion-text-uppercase">Username</ion-label>
+          <ion-input type="text" name="username" id="username" [(ngModel)]="email"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label position="floating" class="ion-text-uppercase">Password</ion-label>
+          <ion-input type="password" name="password" id="password" [(ngModel)]="password"></ion-input>
+          <ion-button fill="clear" slot="end" class="forgot-btn ion-text-capitalize">
+            <a rel="noopener noreferrer" routerLink="/reset">Forgot Password?</a>
+          </ion-button>
+        </ion-item>
+
+        <ion-button class="sign-btn ion-margin-top" (click)="login()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Sign in</ion-text>
+        </ion-button>
+      </form>
+    </div>
+
+    <div class="divider-container ion-margin-top">
+      <div class="divider-line"></div>
+      <p class="divider-text ion-text-uppercase">Create your account!!</p>
+      <div class="divider-line"></div>
+    </div>
+
+    <p class="signup-text ion-text-center ion-margin-top">
+      <span class="ion-text-uppercase">Don't have an account?</span>
+      <a rel="noopener noreferrer" routerLink="/register" href="#" class="signup-link">Sign up</a>
+    </p>
+  </div>
+</ion-content>

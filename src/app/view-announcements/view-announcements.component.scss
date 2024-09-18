@@ -1,0 +1,24 @@
+ion-list {
+    --background: #ff9800;
+  }
+  
+  ion-item {
+    --background: white;
+    --color: black;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  
+  ion-label h2 {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+  
+  ion-label p {
+    margin: 5px 0;
+  }
+  
+  ion-label small {
+    color: gray;
+  }
+  

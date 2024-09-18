@@ -1,0 +1,7 @@
+{
+  "name": "Attendify_Project",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

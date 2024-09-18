@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Select Modules</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterModules()" placeholder="Search modules"></ion-searchbar>
+ 
+  <ion-list>
+    <ion-item *ngFor="let module of filteredModules">
+      <ion-label>{{ module.moduleName }}</ion-label>
+      <ion-checkbox slot="end" 
+                    [checked]="isModuleSelected(module)" 
+                    (ionChange)="toggleModuleSelection(module)">
+      </ion-checkbox>
+    </ion-item>
+  </ion-list>
+ 
+  <ion-card *ngFor="let module of selectedModules">
+    <ion-card-header>
+      <ion-card-title>{{ module.moduleName }}</ion-card-title>
+      <ion-card-subtitle>{{ module.moduleCode }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Module Level:</strong> {{ module.moduleLevel }}</p>
+      <p><strong>User Email:</strong> {{ module.userEmail }}</p>
+      <p *ngIf="module.place"><strong>Place:</strong> {{ module.place }}</p>
+    </ion-card-content>
+    <ion-button fill="clear" color="danger" (click)="cancelSelection(module)">
+      Cancel Selection
+    </ion-button>
+  </ion-card>
+
+  <ion-button expand="full" (click)="submitSelection()" [disabled]="selectedModules.length === 0">
+    Request to Join Selected Modules ({{ selectedModules.length }})
+  </ion-button>
+</ion-content>
