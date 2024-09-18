@@ -14,6 +14,7 @@ export class FullCalendarPage implements OnInit {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+  weekDays: string[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   events: any[] = []; // All events for the year
 
   constructor(private firestore: AngularFirestore) {}
@@ -34,10 +35,16 @@ export class FullCalendarPage implements OnInit {
     });
   }
 
-  getDaysInMonth(month: number) {
+  getDaysInMonth(month: number): number[] {
     const year = new Date().getFullYear();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const startDay = new Date(year, month, 1).getDay(); // Get the start day of the month
+    const daysArray = Array.from({ length: startDay }, () => 0); // Empty days before the first of the month
+    return [...daysArray, ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  }
+
+  isEventOnDay(eventDate: string, day: number): boolean {
+    const date = new Date(eventDate);
+    return date.getDate() === day;
   }
 }
-
