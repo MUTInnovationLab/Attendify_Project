@@ -9,10 +9,10 @@
   </ion-toolbar>
 </ion-header>
 
-
 <ion-content class="ion-padding custom-background">
-  <!-- Search Bar -->
+  <!-- Search Bar (hide when a student is selected) -->
   <ion-searchbar
+    *ngIf="!selectedStudent"
     [(ngModel)]="searchTerm"
     (ionInput)="filterStudents()"
     placeholder="Search by name or student number"
@@ -20,7 +20,39 @@
   ></ion-searchbar>
 
   <ion-grid class="custom-grid">
-    <ion-row>
+    <!-- Selected Student's Modules (Show when a student is selected) -->
+    <ion-row *ngIf="selectedStudent">
+      <ion-col>
+        <ion-card class="small-card">
+          <ion-card-header>
+            <ion-card-title>Modules for {{ selectedStudent.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="table-container">
+              <table *ngIf="studentModules.length > 0; else noModules">
+                <thead>
+                  <tr>
+                    <th>Module Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let module of studentModules">
+                    <td>{{ module }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <ng-template #noModules>
+                <p>No modules available for this student.</p>
+              </ng-template>
+            </div>
+          </ion-card-content>
+          <ion-button expand="block" (click)="clearSelection()">Back to Student List</ion-button>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Student List Table (Hide when a student is selected) -->
+    <ion-row *ngIf="!selectedStudent">
       <ion-col>
         <ion-card>
           <ion-card-header>
@@ -51,37 +83,5 @@
         </ion-card>
       </ion-col>
     </ion-row>
-
-    <ion-row *ngIf="selectedStudent">
-      <ion-col>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Modules for {{ selectedStudent.name }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="table-container">
-              <table *ngIf="studentModules.length > 0; else noModules">
-                <thead>
-                  <tr>
-                    <th>Module Code</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let module of studentModules">
-                    <td>{{ module }}</td> <!-- Adjust if studentModules is an array of objects -->
-                  </tr>
-                </tbody>
-              </table>
-              <ng-template #noModules>
-                <p></p>
-              </ng-template>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
   </ion-grid>
 </ion-content>
-
-
-

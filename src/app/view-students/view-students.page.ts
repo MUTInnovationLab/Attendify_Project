@@ -68,6 +68,12 @@ export class ViewStudentsPage implements OnInit {
   }
 
 
+  clearSelection() {
+    this.selectedStudent = null;
+  }
+  
+
+
   async fetchModulesForStudent(studentNumber: number): Promise<string[]> {
     const modules: string[] = [];
     
