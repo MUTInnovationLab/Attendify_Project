@@ -1,0 +1,35 @@
+ion-card {
+    margin: 20px;
+  }
+  
+  :host {
+    background-color:  #dabf98; /* Change page background color */
+  }
+  
+  ion-content {
+    --background: transparent; /* Make ion-content background transparent to show the page's background */
+  }
+  
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+  
+  .progress-container {
+    width: 100%;
+    background-color: #ddd; /* Grey background for the progress bar container */
+    height: 30px;
+    position: relative;
+    border-radius: 15px; /* Rounded corners */
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #4caf50; /* Green for the filled portion */
+    width: 0; /* Start at 0 and then animate it */
+    color: white;
+    text-align: center;
+    line-height: 30px; /* Center the text vertically */
+    border-radius: 15px;
+    transition: width 1s ease-in-out; /* Smooth animation */
+  }

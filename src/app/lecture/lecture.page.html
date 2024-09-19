@@ -49,10 +49,9 @@
       <ion-button fill="outline" color="danger" (click)="deleteModule()">Delete</ion-button>
       <ion-button fill="solid" class="addbutton" (click)="showAddCard = true">Add</ion-button>
       <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" [disabled]="!selectedModuleId">Add Students</ion-button>
+      
       <ion-button fill="solid" color="primary" (click)="viewStudents()">View Students</ion-button> <!-- New button added -->
       
-      <ion-button fill="solid" color="secondary" (click)="openAnnouncement()" [disabled]="!selectedModuleId">Make Announcement</ion-button>
-
     </div>
   </ion-card>
 
@@ -123,4 +122,4 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-</ion-content>
+</ion-content>   

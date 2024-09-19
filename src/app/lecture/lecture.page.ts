@@ -15,6 +15,7 @@ import { MakeAnnouncementComponent } from '../make-announcement/make-announcemen
   styleUrls: ['./lecture.page.scss'],
 })
 export class LecturePage implements OnInit {
+
   showAddCard: boolean = false;
 
   contact_nom: string = '';
@@ -45,8 +46,7 @@ export class LecturePage implements OnInit {
     private auth: AngularFireAuth,
     private db: AngularFirestore,
     private alertController: AlertController,
-    private toastController: ToastController,
-    private modalController: ModalController,
+    private toastController: ToastController
   ) {
     this.navController = navCtrl;
     this.searchTerms.pipe(
@@ -57,39 +57,23 @@ export class LecturePage implements OnInit {
     });
   }
 
-
-  async openAnnouncement() {
+  /*async openAddStudentsModal() {
+    console.log('Button clicked, openAddStudentsModal called');
     if (!this.selectedModuleId) {
       alert('Please select a module first.');
       return;
     }
-
+    
     this.showAddStudentsModal = true;
-    this.selectedModule = this.tableData.find(module => module.id === this.selectedModuleId); // Ensure this finds the correct module
+    this.selectedModule = this.tableData.find(module => module.id === this.selectedModuleId);
+    await this.fetchExistingStudents();
+    await this.fetchRegisteredStudents();
+  }
+  */
+  
 
-    if (!this.selectedModule) {
-      console.error('Selected module not found in tableData.');
-      return;
-    }
 
-    console.log('Opening announcement modal with moduleCode:', this.selectedModule.moduleCode);
-
-    const modal = await this.modalController.create({
-      component: MakeAnnouncementComponent,
-      cssClass: 'announcement-modal',
-      componentProps: {
-        moduleCode: this.selectedModule.moduleCode // Pass the correct moduleCode to the modal
-      }
-    });
-
-    modal.onDidDismiss().then((dataReturned) => {
-      console.log('Modal data:', dataReturned.data);
-      this.showAddStudentsModal = false; // Reset modal state
-    });
-
-    return await modal.present();
-}
-
+  
   async openAddStudentsModal() {
     if (!this.selectedModuleId) {
       alert('Please select a module first.');
@@ -234,6 +218,7 @@ export class LecturePage implements OnInit {
         console.log('User not logged in or email is null.');
       }
     });
+    this.showAddStudentsModal = true; 
   }
 
   async presentConfirmationAlert() {
@@ -359,15 +344,7 @@ export class LecturePage implements OnInit {
     });
   }
 
-  gotoQRscan(moduleCode: string) {
-    this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
-  }
-
-  gotoProfile() {
-    this.router.navigate(['profile']);
-  }
-
-  gotoAttendies() {
+  gottoAttendies() {
     this.router.navigate(['attendies']);
   }
 
@@ -392,5 +369,15 @@ export class LecturePage implements OnInit {
         // Update the table selection after data is loaded
         this.updateTableSelection();
       });
+  }gotoQRscan(moduleCode: string) {
+    this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
   }
+
+  gotoProfile() {
+    this.router.navigate(['profile']);
+  }
+
+  
+
+  
 }

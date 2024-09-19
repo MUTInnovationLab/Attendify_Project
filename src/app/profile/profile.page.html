@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/login"></ion-back-button>
     </ion-buttons>
-
+ 
     <ion-buttons slot="end">
       <ion-button (click)="toggleUserInfo()">
         <ion-label>{{ currentUser.name }}</ion-label>
@@ -22,6 +22,7 @@
         <div class="user-info-item">
           <ion-icon name="school-outline"></ion-icon>
           <div>
+          
             <p>{{ currentUser.moduleCode }}</p>
           </div>
         </div>
@@ -29,6 +30,7 @@
         <div class="user-info-item">
           <ion-icon name="finger-print-outline"></ion-icon>
           <div>
+           
             <p>{{ currentUser.studentNumber }}</p>
           </div>
         </div>
@@ -36,6 +38,7 @@
         <div class="user-info-item">
           <ion-icon name="person-outline"></ion-icon>
           <div>
+           
             <p>{{ currentUser.name }}</p>
           </div>
         </div>
@@ -43,6 +46,7 @@
         <div class="user-info-item">
           <ion-icon name="people-outline"></ion-icon>
           <div>
+           
             <p>{{ currentUser.surname }}</p>
           </div>
         </div>
@@ -50,6 +54,7 @@
         <div class="user-info-item">
           <ion-icon name="mail-outline"></ion-icon>
           <div>
+          
             <p>{{ currentUser.email }}</p>
           </div>
         </div>
@@ -60,32 +65,49 @@
     </ion-card>
 
     <div *ngIf="!showUserInfo" class="container">
-      <h3>Welcome Student</h3>
-      <div class="actions-card">
-        <div class="cont">
-          <div class="navigationButtons" [routerLink]="['/student-records']">
-            <ion-icon name="document-text"></ion-icon>
-            <ion-label>Attendance Records</ion-label>
-          </div>
+    <h3 class="heading">Welcome</h3>
+    <div class="actions-card">
 
-          <div class="navigationButtons" (click)="viewCalendar()">
-            <ion-icon name="calendar"></ion-icon>
-            <ion-label>View Calendar</ion-label>
-          </div>
+     
+      <!-- <div class="actions"> -->
+        <div class="cont">
+        <div class="navigationButtons" [routerLink]="['/student-records']">
+          <ion-icon name="document-text" ></ion-icon>
+          <ion-label>Attendance Records</ion-label>
         </div>
 
-        <div class="cont">
-          <div class="navigationButtons" (click)="openAnnouncementModal()">
-            <ion-icon name="megaphone"></ion-icon>
-            <ion-label>Announcements</ion-label>
-          </div>
+        <div class="navigationButtons"  (click)="viewCalendar()">
 
-          <div class="navigationButtons" routerLink="/stude-scan">
-            <ion-icon name="scan"></ion-icon>
-            <ion-label>Scan QR Code</ion-label>
-          </div>
+
+          
+          <ion-icon name="calendar" ></ion-icon>
+         
+           
+          <a href="assets/2024-University-Almanac.pdf" download="2024-University-Almanac.pdf" class="download-link">
+            Download Calendar
+          </a>
+         
         </div>
+      </div>
+      <div class="cont">
+        <div class="navigationButtons" routerLink="/view-announcements">
+          <ion-icon name="megaphone" ></ion-icon>
+          <ion-label>Announcements</ion-label>
+        </div>
+
+        <div class="navigationButtons" routerLink="/stude-scan">
+          <ion-icon name="scan" ></ion-icon>
+          <ion-label>Scan QR Code</ion-label>
+        </div>
+
+        <div class="navigationButtons" routerLink="/view-modal">
+          <ion-icon name="add"></ion-icon>
+          <ion-label>Module Addition</ion-label>
+        </div>
+
       </div>
     </div>
   </div>
+  </div>
 </ion-content>
+
