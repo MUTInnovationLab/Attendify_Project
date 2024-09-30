@@ -114,7 +114,7 @@ student:any;
     BarcodeScanner.showBackground(); // Make the background of WebView visible again
   }
 
-  async CaptureAttendiesDetails(moduleCode:string = "SS01"){
+  async CaptureAttendiesDetails(moduleCode:string = ""){
 
          alert(JSON.stringify(this.student));
         
