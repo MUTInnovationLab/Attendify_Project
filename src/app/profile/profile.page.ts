@@ -4,9 +4,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ModalController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
-// Adjust the path according to the actual location of the file
-
-
+// Adjust the path according to the actual location of the fil
 
 
 interface StudentData {
@@ -24,14 +22,13 @@ interface StudentData {
 })
 export class ProfilePage implements OnInit {
   showUserInfo = false;
-  currentUser: StudentData = { email: '', name: '', studentNumber: '', surname: '' , moduleCode: ''};
+  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
 
   constructor(
     private auth: AngularFireAuth,
     private firestore: AngularFirestore,
     private modalController: ModalController,
-    private alertController: AlertController,
-    modalCtrl: ModalController
+    private alertController: AlertController
   ) {}
 
   toggleUserInfo() {
@@ -43,23 +40,18 @@ export class ProfilePage implements OnInit {
   }
 
   viewCalendar() {
-    const url = 'assets/0206261057080 Thandeka Nkosi.pdf'; // path to your PDF file
-    window.open(url, '_blank');
-  }
+    
+  } 
 
-  async openAnnouncementModal() {
-    const modal = await this.modalController.create({ // Use this.modalController
-      component: ViewAnnouncementsComponent
-    });
-    return await modal.present();
-  }
+    
+
 
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('User signed in:', user.email);
         this.firestore
-          .collection('registeredStudents', (ref) =>
+          .collection('enrolledModules', (ref) =>
             ref.where('email', '==', user.email)
           )
           .get()
@@ -143,8 +135,8 @@ export class ProfilePage implements OnInit {
 
   updateUserInfo(data: any) {
     this.firestore
-      .collection('registeredStudents')
-      .doc(this.currentUser.email) // Use student number as document ID
+      .collection('enrolledModules')
+      .doc(this.currentUser.studentNumber) // Use student number as document ID
       .update(data)
       .then(() => {
         this.currentUser = { ...this.currentUser, ...data };

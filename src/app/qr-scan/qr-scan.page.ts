@@ -11,7 +11,7 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 })
 export class QrScanPage implements OnInit {
 
-  qrCodeDataUrl: string = 'CF100';
+  qrCodeDataUrl: string = '';
   qrCodeText: string = '';
   qrCodeSize: number = 200;
   scannedResult: any;
@@ -34,7 +34,7 @@ export class QrScanPage implements OnInit {
     // Update the QR code every 5 seconds
     setInterval(() => {
       this.generateQRCode();
-      this.cdr.detectChanges(); // Trigger change detection
+      this.cdr.detectChanges(); 
     }, 5000);
   }
   
