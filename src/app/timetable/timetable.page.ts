@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 
-// Define the structure of your module data
 interface Module {
   moduleCode: string;
   faculty: string;
@@ -26,14 +25,16 @@ export class TimetablePage implements OnInit {
   selectedModuleCode: string = '';
   room: string = '';
   daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  selectedDay: string = '';
-  allModules: Module[] = []; // Store the full module data
-  timeSlot: string = '';
+  selectedDays: string[] = [];  // Changed to an array to hold multiple days
+  allModules: Module[] = [];
+  startTime: string = '12:00'; // Default start time
+  endTime: string = '13:00'; // Default end time
 
   constructor(private firestore: AngularFirestore, private toastController: ToastController) {}
 
   ngOnInit() {
     this.loadModules();
+    this.setDefaultTimes();
   }
 
   loadCourses() {
@@ -41,13 +42,11 @@ export class TimetablePage implements OnInit {
     return faculty ? faculty.courses : [];
   }
 
-  // Updated to fetch all module data with specific typing
   async loadModules() {
     try {
       const modulesSnapshot = await this.firestore.collection<Module>('modules').get().toPromise();
-  
+
       if (modulesSnapshot && modulesSnapshot.docs.length > 0) {
-        // Type each document correctly
         this.allModules = modulesSnapshot.docs.map(doc => doc.data() as Module);
         console.log('All Modules:', this.allModules);
       } else {
@@ -68,30 +67,51 @@ export class TimetablePage implements OnInit {
     this.selectedModuleCode = '';
   }
 
+  setDefaultTimes() {
+    const currentDate = new Date();
+    const hours = ('0' + currentDate.getHours()).slice(-2); 
+    const minutes = ('0' + currentDate.getMinutes()).slice(-2);
+    this.startTime = `${hours}:${minutes}`; 
+    this.endTime = `${hours}:${('0' + (currentDate.getMinutes() + 60) % 60).slice(-2)}`; 
+  }
+
   async addTimetable() {
-    if (!this.selectedFaculty || !this.selectedCourse || !this.selectedModuleCode || !this.selectedDay || !this.timeSlot) {
+    if (!this.selectedFaculty || !this.selectedCourse || !this.selectedModuleCode || !this.selectedDays.length || !this.startTime || !this.endTime) {
       console.error('Please complete all fields before submitting the timetable.');
       this.showToast('Please complete all fields.');
       return;
     }
 
-    const timetableEntry = {
-      faculty: this.selectedFaculty,
-      course: this.selectedCourse,
-      room: this.room,
-      day: this.selectedDay,
-      moduleCode: this.selectedModuleCode,
-      timeSlot: this.timeSlot,
-    };
-
-    try {
-      await this.firestore.collection('timetables').add(timetableEntry);
-      this.showToast('Timetable entry added successfully!');
-      this.clearFields();
-    } catch (error) {
-      console.error('Error adding timetable entry: ', error);
-      this.showToast('Failed to add timetable entry.');
+    if (this.startTime >= this.endTime) {
+      this.showToast('End time must be after start time.');
+      return;
     }
+
+    // Create the timeSlot string by combining start and end times
+    const timeSlot = `${this.startTime} - ${this.endTime}`;
+
+    // Iterate over each selected day and create a timetable entry
+    for (const day of this.selectedDays) {
+      const timetableEntry = {
+        faculty: this.selectedFaculty,
+        course: this.selectedCourse,
+        moduleCode: this.selectedModuleCode,
+        day: day,
+        room: this.room,
+        timeSlot: timeSlot, // Store the timeSlot as a single field
+      };
+
+      try {
+        await this.firestore.collection('timetables').add(timetableEntry);
+      } catch (error) {
+        console.error('Error adding timetable entry: ', error);
+        this.showToast('Failed to add timetable entry.');
+        return;
+      }
+    }
+
+    this.showToast('Timetable entries added successfully!');
+    this.clearFields();
   }
 
   clearFields() {
@@ -99,8 +119,9 @@ export class TimetablePage implements OnInit {
     this.selectedCourse = '';
     this.selectedModuleCode = '';
     this.room = '';
-    this.selectedDay = '';
-    this.timeSlot = '';
+    this.selectedDays = [];  // Reset selected days
+    this.startTime = '12:00';
+    this.endTime = '13:00';
   }
 
   async showToast(message: string) {

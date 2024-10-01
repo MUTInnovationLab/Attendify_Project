@@ -26,7 +26,6 @@
   <ion-item>
     <ion-label>Select Module Code</ion-label>
     <ion-select [(ngModel)]="selectedModuleCode" [disabled]="!selectedFaculty || !selectedCourse">
-      <!-- Access the moduleCode property of each module in allModules -->
       <ion-select-option *ngFor="let module of allModules" [value]="module.moduleCode">
         {{ module.moduleCode }}
       </ion-select-option>
@@ -35,7 +34,7 @@
 
   <ion-item>
     <ion-label>Select Day</ion-label>
-    <ion-select [(ngModel)]="selectedDay">
+    <ion-select multiple [(ngModel)]="selectedDays">
       <ion-select-option *ngFor="let day of daysOfWeek" [value]="day">
         {{ day }}
       </ion-select-option>
@@ -47,14 +46,19 @@
     <ion-input [(ngModel)]="room"></ion-input>
   </ion-item>
 
+  <!-- Start Time Picker -->
   <ion-item>
-    <ion-label>Time Slot</ion-label>
-    <ion-input [(ngModel)]="timeSlot"></ion-input>
+    <ion-label>Start Time</ion-label>
+    <ion-input [(ngModel)]="startTime" type="time"></ion-input>
+  </ion-item>
+
+  <!-- End Time Picker -->
+  <ion-item>
+    <ion-label>End Time</ion-label>
+    <ion-input [(ngModel)]="endTime" type="time"></ion-input>
   </ion-item>
 
   <ion-button expand="block" (click)="addTimetable()">
     Submit Timetable
   </ion-button>
-
-
 </ion-content>

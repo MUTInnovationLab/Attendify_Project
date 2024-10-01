@@ -1,32 +1,52 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Timetable</ion-title>
-  </ion-toolbar>
+<ion-header class="header">
+  <h4>View Timetable</h4>
 </ion-header>
 
-<ion-content>
-  <div class="timetable-container">
-    <table>
+<ion-content class="timetable-content">
+  <!-- Dropdown to select Faculty -->
+  <ion-item>
+    <ion-label>Select Faculty</ion-label>
+    <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange()">
+      <ion-select-option *ngFor="let faculty of faculties" [value]="faculty.name">
+        {{ faculty.name }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Dropdown to select Course -->
+  <ion-item>
+    <ion-label>Select Course</ion-label>
+    <ion-select [(ngModel)]="selectedCourse" (ionChange)="onCourseChange()" [disabled]="!selectedFaculty">
+      <ion-select-option *ngFor="let course of loadCourses()" [value]="course">
+        {{ course }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Button to load timetable -->
+  <ion-button expand="block" (click)="loadTimetable()">Load Timetable</ion-button>
+
+  <!-- Message when no timetable entries are found -->
+  <div *ngIf="hasSearched && timetableData.length === 0">
+    <p>No timetable entries found.</p>
+  </div>
+
+  <!-- Timetable Display -->
+  <div *ngIf="timetableData.length > 0">
+    <table class="timetable-table">
       <thead>
         <tr>
           <th>Day</th>
-          <th>7:00-8:00</th>
-          <th>9:00-10:00</th>
-          <th>11:00-12:00</th>
-          <th>13:00-14:00</th>
-          <th>14:05-15:00</th>
+          <th *ngFor="let timeSlot of timeSlots">{{ timeSlot }}</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let day of daysOfWeek">
           <td>{{ day }}</td>
-          <td>{{ getModuleForTime(day, '7:00-8:00') }}</td>
-          <td>{{ getModuleForTime(day, '9:00-10:00') }}</td>
-          <td>{{ getModuleForTime(day, '11:00-12:00') }}</td>
-          <td>{{ getModuleForTime(day, '13:00-14:00') }}</td>
-          <td>{{ getModuleForTime(day, '14:05-15:00') }}</td>
+          <td *ngFor="let timeSlot of timeSlots">{{ getModuleForTimeSlot(day, timeSlot) }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 </ion-content>
+
