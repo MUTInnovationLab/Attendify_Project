@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="flex: 1; max-width: 65%;">
+      <canvas id="modulesChart" width="400" height="200"></canvas>
+    </div>
+    <div style="flex: 1; max-width: 30%; text-align: center;">
+      <h2>Track My Attendance</h2>
+      
+      <!-- Toggle Button to Show/Hide Progress -->
+      <button (click)="toggleProgressBar()">
+        {{ showProgressBar ? 'Hide Progress' : 'Show Progress' }}
+      </button>
+      
+      <!-- Display the Progress Bar Only if showProgressBar is True -->
+      <div *ngIf="showProgressBar" class="progress-container">
+        <div id="attendanceProgressBar" class="progress-bar">
+          <!-- The text will be updated with the calculated percentage -->
+          {{ progressPercentage }}%
+        </div>
+      </div>
+    </div>  
+    
+  </div>
+</ion-content>

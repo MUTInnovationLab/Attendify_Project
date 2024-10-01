@@ -8,13 +8,13 @@ import { Observable } from 'rxjs';
   styleUrls: ['./full-calendar.page.scss'],
 })
 export class FullCalendarPage implements OnInit {
-
-  events$!: Observable<any[]>; // Use definite assignment assertion
+  events$!: Observable<any[]>;
   months: string[] = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
-  events: any[] = []; // All events for the year
+  weekDays: string[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  events: any[] = [];
 
   constructor(private firestore: AngularFirestore) {}
 
@@ -34,10 +34,20 @@ export class FullCalendarPage implements OnInit {
     });
   }
 
-  getDaysInMonth(month: number) {
+  getDaysInMonth(month: number): number[] {
     const year = new Date().getFullYear();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const startDay = new Date(year, month, 1).getDay();
+    const daysArray = Array(startDay).fill(0);
+    return [...daysArray, ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  }
+
+  isEventOnDay(eventDate: string, day: number): boolean {
+    const date = new Date(eventDate);
+    return date.getDate() === day;
+  }
+
+  getMonthsForColumn(columnIndex: number): number[] {
+    return [0, 1, 2, 3].map(i => columnIndex * 4 + i);
   }
 }
-

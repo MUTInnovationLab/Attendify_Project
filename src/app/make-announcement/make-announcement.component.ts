@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular'; // Import ModalController
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AuthService } from '../services/auth.service'; // Adjust the path as necessary
 
@@ -16,7 +16,7 @@ export class MakeAnnouncementComponent implements OnInit {
   showAddStudentsModal: boolean = true; // Flag to control modal visibility
 
   constructor(
-    private navCtrl: NavController,
+    private modalController: ModalController, // Inject ModalController
     private firestore: AngularFirestore,
     private authService: AuthService
   ) {}
@@ -81,6 +81,8 @@ export class MakeAnnouncementComponent implements OnInit {
   }
 
   dismiss() {
-    this.navCtrl.navigateBack('/lecture');
+    this.modalController.dismiss().catch(err => {
+      console.error('Error dismissing modal:', err);
+    });
   }
 }

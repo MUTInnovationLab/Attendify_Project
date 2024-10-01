@@ -1,17 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { IonicModule } from '@ionic/angular';
-import { FullCalendarPageRoutingModule } from './full-calendar-routing.module';
-import { FullCalendarPage } from './full-calendar.page';
+
+import { StudentRecordsPageRoutingModule } from './student-records-routing.module';
+
+import { StudentRecordsPage } from './student-records.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    FullCalendarPageRoutingModule
+    StudentRecordsPageRoutingModule
   ],
-  declarations: [FullCalendarPage]
+  declarations: [StudentRecordsPage]
 })
-export class FullCalendarPageModule {}
+export class StudentRecordsPageModule {}

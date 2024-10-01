@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import firebase from 'firebase/compat/app';
 import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { ModalController } from '@ionic/angular'; 
 
 
 
@@ -36,7 +37,9 @@ export class ViewAnnouncementsComponent implements OnInit {
   announcements: Announcement[] = [];
   studentEmail: string | null = null;
 
-  constructor(private firestore: AngularFirestore, private afAuth: AngularFireAuth,
+  constructor(private firestore: AngularFirestore, 
+    private modalController: ModalController,
+    private afAuth: AngularFireAuth,
     private navCtrl: NavController, private router: Router) {}
 
   async ngOnInit() {
@@ -126,7 +129,9 @@ export class ViewAnnouncementsComponent implements OnInit {
   }
 
   dismiss() {
-    this.router.navigate(['/profile']); // Adjust '/profile' to your actual profile route
+    this.modalController.dismiss().catch(err => {
+      console.error('Error dismissing modal:', err);
+    });
   }
   
 }
