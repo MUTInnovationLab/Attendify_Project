@@ -96,6 +96,10 @@ const routes: Routes = [
     path: 'full-calendar',
     loadChildren: () => import('./full-calendar/full-calendar.module').then( m => m.FullCalendarPageModule)
   },
+  {
+    path: 'manage-timetable',
+    loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
+  },
 
 ];
 
