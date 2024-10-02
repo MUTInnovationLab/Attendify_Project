@@ -102,12 +102,8 @@ const routes: Routes = [
     loadChildren: () => import('./student-records/student-records.module').then( m => m.StudentRecordsPageModule)
   },
   {
-    path: 'timetable',
-    loadChildren: () => import('./timetable/timetable.module').then( m => m.TimetablePageModule)
-  },
-  {
-    path: 'timetable-view',
-    loadChildren: () => import('./timetable-view/timetable-view.module').then( m => m.TimetableViewPageModule)
+    path: 'manage-timetable',
+    loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
   },
 
 
