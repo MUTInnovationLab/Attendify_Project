@@ -18,24 +18,24 @@ export class AcademicCalendarService {
   }
 
   deleteAllEventsForYear(year: number): Promise<void> {
-    const startDate = new Date(year, 0, 1); // January 1st of the given year
-    const endDate = new Date(year, 11, 31, 23, 59, 59, 999); // December 31st of the given year (last millisecond)
-  
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59, 999);
+
     return this.firestore.collection('academic-events', ref =>
       ref.where('date', '>=', startDate)
         .where('date', '<=', endDate)
     ).get().toPromise()
     .then(snapshot => {
-      if (!snapshot || snapshot.empty) { // Check if snapshot is undefined or empty
+      if (!snapshot || snapshot.empty) {
         console.log(`No events found for the year ${year}`);
         return;
       }
-  
+
       const batch = this.firestore.firestore.batch();
       snapshot.docs.forEach(doc => {
         batch.delete(doc.ref);
       });
-  
+
       return batch.commit();
     })
     .then(() => {
@@ -46,9 +46,7 @@ export class AcademicCalendarService {
       throw error;
     });
   }
-  
 
-  // New method to get all events for a specific year
   getEventsForYear(year: number): Observable<any[]> {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31, 23, 59, 59, 999);
@@ -61,8 +59,9 @@ export class AcademicCalendarService {
       map(actions => actions.map(a => {
         const data = a.payload.doc.data() as any;
         const id = a.payload.doc.id;
-        return { id, ...data };
-      }))
+        return { id, ...data, date: data.date.toDate() };
+      })),
+      map(events => events.sort((a, b) => a.date.getTime() - b.date.getTime()))
     );
   }
 }

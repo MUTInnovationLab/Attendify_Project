@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AcademicCalendarService } from '../services/academic-calendar.service'; // Adjust path as necessary
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-event',
@@ -15,20 +16,32 @@ export class EventPage {
   selectedYear: number = new Date().getFullYear();
   eventsForYear: any[] = [];
 
-  constructor(private academicCalendarService: AcademicCalendarService) { }
+  constructor(
+    private academicCalendarService: AcademicCalendarService,
+    private toastController: ToastController
+  ) { }
+
+  async presentToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      position: 'bottom',
+    });
+    toast.present();
+  }
 
   addEvent() {
     if (this.newEvent.date && this.newEvent.description) {
       if (this.eventIdToUpdate) {
         this.academicCalendarService.updateEvent(this.eventIdToUpdate, this.newEvent).then(() => {
-          console.log('Event updated successfully');
+          this.presentToast('Event updated successfully');
           this.resetForm();
         }).catch(error => {
           console.error('Error updating event: ', error);
         });
       } else {
         this.academicCalendarService.addEvent(this.newEvent).then(() => {
-          console.log('Event added successfully');
+          this.presentToast('Event added successfully');
           this.resetForm();
         }).catch(error => {
           console.error('Error adding event: ', error);
@@ -44,11 +57,10 @@ export class EventPage {
     this.newEvent = { ...eventData };
   }
 
-  // Modify the method to accept a year parameter
   deleteAllEventsForYear(year: number) {
     if (confirm(`Are you sure you want to delete all events for ${year}?`)) {
       this.academicCalendarService.deleteAllEventsForYear(year).then(() => {
-        console.log(`All events for ${year} deleted successfully`);
+        this.presentToast(`All events for ${year} deleted successfully`);
         this.loadEventsForYear();
       }).catch(error => {
         console.error('Error deleting events: ', error);

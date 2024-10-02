@@ -15,9 +15,32 @@ interface Module {
 })
 export class TimetablePage implements OnInit {
   faculties: any[] = [
-    { name: 'Engineering', courses: ['Electrical', 'Chemical', 'Civil'] },
-    { name: 'Natural Science', courses: ['Information Technology', 'Agriculture'] },
-    { name: 'Management and Science', courses: ['Human Resources', 'Accounting'] },
+    { name: 'Faculty Of Engineering', courses:
+       ['Diploma in Building', 'Diploma in Chemical Engineering', 'Diploma in Civil Engineering',
+        'Diploma in Electrical Engineering', 'Diploma in Mechanical Engineering', 'Diploma in Surveying',
+        'Diploma in Construction Management & Quantity Surveying', 'Advanced Diploma in Chemical Engineering',
+        'Advanced Diploma in Mechanical Engineering ' ] },
+
+
+    { name: 'Faculty Of Natural Sciences​', courses:
+       ['Diploma in Agriculture', 'Diploma in Analytical Chemistry','Diploma in Community Extension',
+        'Diploma in Information Technology','Diploma in Nature Conservation','Bachelor of Science in Environmental Health',
+        'Bachelor of Health Sciences in Medical Laboratory Science','Bachelor of Applied Science in Nature Conservation',
+        'Advanced Diploma in Agriculture in Crop Production','Advanced Diploma in Agriculture in Animal Production',
+        'Advanced Diploma in Analytical Chemistry','Advanced Diploma in Agriculture Extension and Community Development',
+        'Advanced Diploma in ICT in Applications Development','Advanced Diploma in Nature Conservation','Post graduate Diploma in Nature Conservation',
+        'Master of Nature Conservation'
+       ] },
+
+
+    { name: 'Faculty Of Management​ Sciences', courses:
+       ['Diploma in Accounting', 'Diploma in Cost & Management Accounting', 'Diploma in Office Management & Technology',
+        'Diploma in Public Finance and Accounting','Diploma in Local Government and Finance','Diploma in Public Management',
+        'Diploma in Marketing','Diploma in Human Resource Management','Advanced Diploma in Cost and Management Accounting',
+        'Advanced Diploma in Accounting','Advanced Diploma in Office Management and Technology','Advanced Diploma in Human Resource Management',
+        'Advanced Diploma in Marketing','Advanced Diploma in Public Management','Postgraduate Diploma in Marketing',
+        'Postgraduate Diploma in Human Resources Management','Postgraduate Diploma in Public Management'
+       ] },
   ];
 
   selectedFaculty: string = '';

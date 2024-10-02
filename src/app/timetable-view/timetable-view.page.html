@@ -23,8 +23,23 @@
     </ion-select>
   </ion-item>
 
+  <!-- Dropdown to select Level -->
+  <ion-item>
+    <ion-label>Select Level</ion-label>
+    <ion-select [(ngModel)]="selectedLevel" (ionChange)="onLevelChange()" [disabled]="!selectedCourse">
+      <ion-select-option *ngFor="let level of levels" [value]="level">
+        {{ level }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
   <!-- Button to load timetable -->
   <ion-button expand="block" (click)="loadTimetable()">Load Timetable</ion-button>
+
+  <!-- Display Department -->
+  <div *ngIf="department" class="department-header">
+    <h5>Department: {{ department }}</h5>
+  </div>
 
   <!-- Message when no timetable entries are found -->
   <div *ngIf="hasSearched && timetableData.length === 0">
@@ -49,4 +64,3 @@
     </table>
   </div>
 </ion-content>
-

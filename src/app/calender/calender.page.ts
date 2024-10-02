@@ -30,6 +30,7 @@ export class CalenderPage implements OnInit {
 
   loadEvents() {
     this.events$.subscribe(events => {
+      // Filter events for the selected day
       this.eventsForTheDay = events.filter(event =>
         event.date.substring(0, 10) === this.selectedDate
       );
@@ -46,9 +47,13 @@ export class CalenderPage implements OnInit {
         groupedEvents[eventMonth].push(event);
       });
 
-      // Sort events within each month
+      // Sort events by date within each month in ascending order
       Object.keys(groupedEvents).forEach(month => {
-        groupedEvents[month].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        groupedEvents[month].sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateA - dateB; // Ascending order
+        });
       });
 
       // Assign the sorted and grouped events to allEventsGroupedByMonth
