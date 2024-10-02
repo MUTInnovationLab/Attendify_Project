@@ -19,13 +19,10 @@
           <ion-col size="12">
             <ion-item>
               <ion-label>Faculty</ion-label>
-              <ion-select [(ngModel)]="newTimetable.faculty" name="faculty" placeholder="Select Faculty" required>
+              <ion-select [(ngModel)]="newTimetable.faculty" name="faculty" (ionChange)="updateDepartments()" placeholder="Select Faculty" required>
                 <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{faculty}}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['faculty']?.valid">
-              Faculty is required.
-            </ion-note>
           </ion-col>
         </ion-row>
       
@@ -38,9 +35,6 @@
                 <ion-select-option *ngFor="let department of departments" [value]="department">{{department}}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['department']?.valid">
-              Department is required.
-            </ion-note>
           </ion-col>
         </ion-row>
       
@@ -53,13 +47,10 @@
                 <ion-select-option *ngFor="let year of years" [value]="year">{{year}}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['year']?.valid">
-              Year of Study is required.
-            </ion-note>
           </ion-col>
         </ion-row>
-      
-        <!-- Add Timetable Event (Course, Time, Lecturer) -->
+        
+        <!-- Select Course -->
         <ion-row>
           <ion-col size="12">
             <ion-item>
@@ -68,89 +59,89 @@
                 <ion-select-option *ngFor="let course of courses" [value]="course">{{course}}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['course']?.valid">
-              Course is required.
-            </ion-note>
           </ion-col>
         </ion-row>
       </ion-card>
 
-        <ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Add Timetable Event</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
           <ion-row>
             <ion-col size="6">
               <ion-item>
-                <ion-label>Start Time</ion-label>
-                <ion-datetime display-format="HH:mm" [(ngModel)]="event.startTime" name="startTime" required></ion-datetime>
+                <ion-label>Day</ion-label>
+                <ion-select [(ngModel)]="event.day" name="day" required>
+                  <ion-select-option *ngFor="let day of DAYS_OF_WEEK" [value]="day">{{day}}</ion-select-option>
+                </ion-select>
               </ion-item>
-              <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['startTime']?.valid">
-                Start Time is required.
-              </ion-note>
             </ion-col>
-          
             <ion-col size="6">
               <ion-item>
-                <ion-label>End Time</ion-label>
-                <ion-datetime display-format="HH:mm" [(ngModel)]="event.endTime" name="endTime" required></ion-datetime>
+                <ion-label>Time</ion-label>
+                <ion-select [(ngModel)]="event.timeSlot" name="timeSlot" placeholder="Select Time Slot" required>
+                  <ion-select-option *ngFor="let time of TIME_SLOTS" [value]="time">{{time}}</ion-select-option>
+                </ion-select>
               </ion-item>
-              <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['endTime']?.valid">
-                End Time is required.
-              </ion-note>
-            </ion-col>
-          
-            <ion-col size="12">
-              <ion-item>
-                <ion-label>Lecturer</ion-label>
-                <ion-input [(ngModel)]="event.lecturer" name="lecturer" placeholder="Enter Lecturer Name" required></ion-input>
-              </ion-item>
-              <ion-note color="danger" *ngIf="timetableForm.submitted && !timetableForm.controls['lecturer']?.valid">
-                Lecturer is required.
-              </ion-note>
-            </ion-col>
-          
-            <ion-col size="12">
-              <ion-button expand="block" color="primary" (click)="addEvent()">Add to Timetable</ion-button>
             </ion-col>
           </ion-row>
-        </ion-card>
-        
-        <!-- Display Added Events -->
-        <ion-card *ngIf="newTimetable.events.length > 0">
-          <ion-card-header>
-            <ion-card-title>Timetable for {{newTimetable.faculty}} - {{newTimetable.department}} (Year {{newTimetable.year}})</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list>
-              <ion-item *ngFor="let event of newTimetable.events">
-                <ion-label>
-                  <h2>{{event.course}}</h2>
-                  <p>{{event.startTime}} - {{event.endTime}} | Lecturer: {{event.lecturer}}</p>
-                </ion-label>
+          <ion-row>
+            <ion-col size="12">
+              <ion-item>
+                <ion-label>Module</ion-label>
+                <ion-select [(ngModel)]="event.module" name="module" placeholder="Select Module" required>
+                  <ion-select-option *ngFor="let module of modules" [value]="module">{{module}}</ion-select-option>
+                </ion-select>
               </ion-item>
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
-
-      <!-- Display Added Events -->
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <ion-item>
+                <ion-label>Lecture Venue</ion-label>
+                <ion-input [(ngModel)]="event.lectureVenue" name="lectureVenue" placeholder="Enter the lecture venue" required></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <ion-button expand="block" (click)="addEvent()">Add Event</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+        
+      <!-- Display Timetable -->
       <ion-card *ngIf="newTimetable.events.length > 0">
         <ion-card-header>
-          <ion-card-title>Timetable for {{newTimetable.faculty}} - {{newTimetable.department}} (Year {{newTimetable.year}})</ion-card-title>
+          <ion-card-title>Timetable for {{newTimetable.faculty}} - {{newTimetable.department}} {{newTimetable.course}} (Year {{newTimetable.year}})</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <ion-list>
-            <ion-item *ngFor="let event of newTimetable.events">
-              <ion-label>
-                <h2>{{event.course}}</h2>
-                <p>{{event.startTime}} - {{event.endTime}} | Lecturer: {{event.lecturer}}</p>
-              </ion-label>
-            </ion-item>
-          </ion-list>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="2"><strong>Time</strong></ion-col>
+              <ion-col size="2" *ngFor="let day of DAYS_OF_WEEK"><strong>{{day}}</strong></ion-col>
+            </ion-row>
+            <ion-row *ngFor="let time of TIME_SLOTS">
+              <ion-col size="2">{{time}}</ion-col>
+              <ion-col size="2" *ngFor="let day of DAYS_OF_WEEK">
+                <ng-container *ngFor="let event of newTimetable.events">
+                  <div *ngIf="event.day === day && event.timeSlot === time">
+                    {{event.module}}<br>
+                    {{event.lectureVenue}}
+                  </div>
+                </ng-container>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-card-content>
       </ion-card>
 
       <!-- Save Timetable -->
       <ion-row>
         <ion-col size="12">
-          <ion-button expand="block" color="primary" type="submit">Save Timetable</ion-button>
+          <ion-button expand="block" type="submit">Save Timetable</ion-button>
         </ion-col>
       </ion-row>
     </ion-grid>
