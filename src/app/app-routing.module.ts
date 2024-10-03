@@ -89,10 +89,7 @@ const routes: Routes = [
     path: 'event',
     loadChildren: () => import('./event/event.module').then( m => m.EventPageModule)
   },
-  {
-    path: 'full-calendar',
-    loadChildren: () => import('./full-calendar/full-calendar.module').then( m => m.FullCalendarPageModule)
-  },
+ 
   {
     path: 'dept-analytics',
     loadChildren: () => import('./dept-analytics/dept-analytics.module').then( m => m.DeptAnalyticsPageModule)

@@ -50,9 +50,9 @@ export class CalenderPage implements OnInit {
       // Sort events by date within each month in ascending order
       Object.keys(groupedEvents).forEach(month => {
         groupedEvents[month].sort((a, b) => {
-          const dateA = new Date(a.date).getTime();
-          const dateB = new Date(b.date).getTime();
-          return dateA - dateB; // Ascending order
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA.getDate() - dateB.getDate(); // Compare day of the month
         });
       });
 

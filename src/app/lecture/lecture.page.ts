@@ -46,7 +46,8 @@ export class LecturePage implements OnInit {
     private auth: AngularFireAuth,
     private db: AngularFirestore,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private modalController: ModalController
   ) {
     this.navController = navCtrl;
     this.searchTerms.pipe(
@@ -72,6 +73,29 @@ export class LecturePage implements OnInit {
   */
   
 
+  async openAnnouncementModal() {
+    if (!this.selectedModuleId) {
+      alert('Please select a module first.');
+      return;
+    }
+  
+    const selectedModule = this.tableData.find(module => module.id === this.selectedModuleId);
+    
+    if (!selectedModule) {
+      alert('Module not found.');
+      return;
+    }
+  
+    const modal = await this.modalController.create({
+      component: MakeAnnouncementComponent,
+      componentProps: {
+        moduleCode: selectedModule.moduleCode, // Use the actual module code like "CIV100"
+      }
+    });
+  
+    await modal.present();
+  }
+  
 
   
   async openAddStudentsModal() {

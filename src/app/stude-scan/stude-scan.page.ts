@@ -131,11 +131,7 @@ student:any;
         };
 
         await this.firestore.collection('AttendedStudents').doc(moduleCode).collection(attendanceDetails.scanDate).doc(this.email).set(attendanceDetails);
-        console.log('Attendance stored successfully.');
-
-
-
-
+        console.log('Attendance stored successfully.')
 
   }
    
