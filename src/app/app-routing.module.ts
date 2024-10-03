@@ -81,10 +81,6 @@ const routes: Routes = [
     loadChildren: () => import('./component/component.module').then( m => m.ComponentPageModule)
   },
   {
-    path: 'manage-announcements',
-    loadChildren: () => import('./manage-announcements/manage-announcements.module').then( m => m.ManageAnnouncementsPageModule)
-  },
-  {
     path: 'calender',
     loadChildren: () => import('./calender/calender.module').then( m => m.CalenderPageModule)
   },

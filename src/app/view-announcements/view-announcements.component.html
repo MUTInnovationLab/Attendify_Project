@@ -1,23 +1,23 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
-      <ion-icon name="people-outline" style="color: white;"></ion-icon>
-      <span style="color: white;">Announcement</span>
+      <ion-icon name="people-outline"></ion-icon>
+      <span>Announcement</span>
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
-        <ion-icon name="close-outline" style="color: white;"></ion-icon>
+        <ion-icon name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" style="background-color: #ff9800;">
+<ion-content class="ion-padding">
   <ion-list>
     <ion-item *ngFor="let announcement of announcements">
       <ion-label>
-        <h2>{{ announcement.moduleCode }} </h2>
-        <h2> {{ announcement.title }}</h2>
+        <h2>{{ announcement.moduleCode }}</h2>
+        <h2>{{ announcement.title }}</h2>
         <p>{{ announcement.content }}</p>
         <p><small>By: {{ announcement.userEmail }} on {{ announcement.formattedDate }}</small></p>
       </ion-label>

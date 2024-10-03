@@ -1,0 +1,47 @@
+ion-content {
+  --background: linear-gradient(135deg, #56231F, #a77a20);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #56231F; /* Header background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h4 {
+  margin: 0;
+  font-weight: bold;
+  color: #ffffff; /* Header text color */
+}
+
+.timetable-content {
+  padding: 16px; /* Optional padding for content */
+}
+
+.timetable-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px; /* Space above the table */
+}
+
+.timetable-table th, .timetable-table td {
+  border: 1px solid #a77a20; /* Border color */
+  padding: 8px;
+  text-align: center;
+}
+
+.timetable-table th {
+  background-color: #56231F; /* Header background color */
+  color: #ffffff; /* Header text color */
+}
+
+.timetable-table td {
+  background-color: #ffffff; /* White background for table cells */
+  color: #56231F; /* Table cell text color */
+  font-size: 14px;
+}
