@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular'; // Import ModalController
+import { ModalController, ToastController } from '@ionic/angular'; // Import ToastController
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AuthService } from '../services/auth.service'; // Adjust the path as necessary
 
@@ -18,7 +18,8 @@ export class MakeAnnouncementComponent implements OnInit {
   constructor(
     private modalController: ModalController, // Inject ModalController
     private firestore: AngularFirestore,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastController: ToastController // Inject ToastController
   ) {}
 
   async ngOnInit() {
@@ -38,6 +39,16 @@ export class MakeAnnouncementComponent implements OnInit {
         console.error('Error fetching module details:', error);
       }
     }
+  }
+
+  // Method to show a toast notification
+  async presentToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000, // Duration the toast will be visible (2 seconds)
+      position: 'bottom' // You can change to 'top', 'middle' as per your design needs
+    });
+    await toast.present();
   }
 
   async submitAnnouncement() {
@@ -65,14 +76,21 @@ export class MakeAnnouncementComponent implements OnInit {
           // Reset the form fields
           this.title = '';
           this.content = '';
+
+          // Show success message via toast
+          this.presentToast('Announcement added successfully!');
         } else {
           console.error('User email is not available!');
         }
       } catch (error) {
         console.error('Error submitting announcement:', error);
+        // Show error message via toast
+        this.presentToast('Failed to add the announcement. Please try again.');
       }
     } else {
       console.error('Title, content, and module code are required!');
+      // Show error message via toast
+      this.presentToast('All fields are required!');
     }
   }
 
