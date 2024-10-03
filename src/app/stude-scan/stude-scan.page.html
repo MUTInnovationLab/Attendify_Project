@@ -1,5 +1,3 @@
-<!-- stude-scan.page.html -->
-
 <ion-header>
   <ion-toolbar>
     <ion-title>Student Scanner</ion-title>
@@ -8,9 +6,11 @@
 
 <ion-content>
   <div class="scanner-container">
+ 
     <div class="scanner-frame">
-      <video #scannerPreview></video>
-      <div class="scan-line"></div>
+      <div *ngIf="isScanning">
+      <video #scannerPreview *ngIf="isWeb"></video></div>
+      <div class="scan-line" *ngIf="!isWeb"></div>
     </div>
     <div class="button-container">
       <ion-button expand="block" (click)="startScan()">Start Scan</ion-button>
@@ -21,7 +21,7 @@
       <p>{{ scanResult }}</p>
     </ion-text>
   </div>
-  
+
   <ion-fab vertical="bottom" horizontal="end">
     <ion-fab-button class="color-primary">
       <ion-icon name="chevron-up-circle-outline"></ion-icon>
