@@ -10,7 +10,7 @@ import { ToastController } from '@ionic/angular';
 })
 export class ManageTimetablePage implements OnInit {
 
-  // Define constants for faculties, departments, an`d courses
+  // ... (keep your existing FACULTIES, DEPARTMENTS, and COURSES constants)
   FACULTIES = {
     ENGINEERING: 'Faculty of Engineering',
     MANAGEMENT_SCIENCES: 'Faculty of Management Sciences',
@@ -83,21 +83,29 @@ export class ManageTimetablePage implements OnInit {
     ]
   };
 
+  DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  TIME_SLOTS = ['07:45', '09:15', '11:00', '13:00', '14:30'];
+
   faculties = Object.values(this.FACULTIES);
   departments = [...this.DEPARTMENTS.ENGINEERING, ...this.DEPARTMENTS.MANAGEMENT_SCIENCES, ...this.DEPARTMENTS.NATURAL_SCIENCES];
   years = [1, 2, 3, 4];
+  courses: string[] = [];
+
+  modules: string[] = [];
 
   // Define the type for an event
   eventType: { 
-    course: string; 
-    startTime: string; 
-    endTime: string; 
-    lecturer: string; 
+    day: string;
+    timeSlot: string;
+    module: string; 
+    lectureVenue: string; 
+    course: string;
   } = {
-    course: '',
-    startTime: '',
-    endTime: '',
-    lecturer: ''
+    day: '',
+    timeSlot: '',
+    module: '',
+    lectureVenue: '',
+    course: ''
   };
 
   // Define the type for the timetable
@@ -105,16 +113,19 @@ export class ManageTimetablePage implements OnInit {
     faculty: string;
     department: string;
     year: string;
+    course: string;
     events: { 
-      course: string; 
-      startTime: string; 
-      endTime: string; 
-      lecturer: string; 
+      day: string;
+      timeSlot: string;
+      module: string; 
+      lectureVenue: string; 
+      course: string;
     }[];
   } = {
     faculty: '',
     department: '',
     year: '',
+    course: '',
     events: []
   };
 
@@ -123,81 +134,124 @@ export class ManageTimetablePage implements OnInit {
     faculty: '',
     department: '',
     year: '',
+    course: '',
     events: []
   };
 
   // Temporary object for each event (course)
   event: typeof this.eventType = {
-    course: '',
-    startTime: '',
-    endTime: '',
-    lecturer: ''
+    day: '',
+    timeSlot: '',
+    module: '',
+    lectureVenue: '',
+    course: ''
   };
 
-  courses = [...this.COURSES.ENGINEERING, ...this.COURSES.MANAGEMENT_SCIENCES, ...this.COURSES.NATURAL_SCIENCES];
+  //courses = [...this.COURSES.ENGINEERING, ...this.COURSES.MANAGEMENT_SCIENCES, ...this.COURSES.NATURAL_SCIENCES];
 
-  constructor(private firestore: AngularFirestore) { }
+  constructor(private firestore: AngularFirestore, private toastController: ToastController) { }
 
   ngOnInit() {
+    this.fetchModules();
   }
+
+  updateDepartments() {
+    const selectedFaculty = this.newTimetable.faculty;
+    if (selectedFaculty === this.FACULTIES.ENGINEERING) {
+      this.departments = this.DEPARTMENTS.ENGINEERING;
+    } else if (selectedFaculty === this.FACULTIES.MANAGEMENT_SCIENCES) {
+      this.departments = this.DEPARTMENTS.MANAGEMENT_SCIENCES;
+    } else if (selectedFaculty === this.FACULTIES.NATURAL_SCIENCES) {
+      this.departments = this.DEPARTMENTS.NATURAL_SCIENCES;
+    } else {
+      this.departments = [];
+    }
+    this.newTimetable.department = '';
+    this.updateCourses();
+  }
+
+  // Update courses based on selected faculty
+  updateCourses() {
+    const selectedFaculty = this.newTimetable.faculty;
+    if (selectedFaculty === this.FACULTIES.ENGINEERING) {
+      this.courses = this.COURSES.ENGINEERING;
+    } else if (selectedFaculty === this.FACULTIES.MANAGEMENT_SCIENCES) {
+      this.courses = this.COURSES.MANAGEMENT_SCIENCES;
+    } else if (selectedFaculty === this.FACULTIES.NATURAL_SCIENCES) {
+      this.courses = this.COURSES.NATURAL_SCIENCES;
+    } else {
+      this.courses = [];
+    }
+    this.newTimetable.course = '';
+  }
+
+    // Fetch modules from Firestore
+    fetchModules() {
+      this.firestore.collection('modules').valueChanges()
+        .subscribe((data: any[]) => {
+          this.modules = data.map(module => module.moduleCode); // Assuming each module document has a 'name' field
+        }, error => {
+          console.error('Error fetching modules:', error);
+          this.presentToast('Failed to fetch modules.', 'danger');
+        });
+    }
 
   // Add the event to the timetable
   addEvent() {
-    if (this.event.course && this.event.startTime && this.event.endTime && this.event.lecturer) {
-      this.newTimetable.events.push({ ...this.event });
+    if (this.event.day && this.event.timeSlot && this.event.module && this.event.lectureVenue && this.event.course) {
+      // Check if an event already exists for this day and time slot
+      const existingEventIndex = this.newTimetable.events.findIndex(
+        e => e.day === this.event.day && e.timeSlot === this.event.timeSlot && e.course === this.event.course
+      );
+
+      if (existingEventIndex !== -1) {
+        // Replace the existing event
+        this.newTimetable.events[existingEventIndex] = { ...this.event };
+      } else {
+        // Add a new event
+        this.newTimetable.events.push({ ...this.event });
+      }
+
       this.resetEvent();  // Reset event input fields
+      this.presentToast('Event added to timetable');
     } else {
-      alert('Please fill all event fields');
+      this.presentToast('Please fill all event fields', 'warning');
     }
   }
 
   // Reset event after adding
   resetEvent() {
     this.event = {
-      course: '',
-      startTime: '',
-      endTime: '',
-      lecturer: ''
+      day: '',
+      timeSlot: '',
+      module: '',
+      lectureVenue: '',
+      course: ''
     };
   }
 
   // Save the timetable to the database
   async addTimetable() {
     if (!this.newTimetable.faculty || !this.newTimetable.department || !this.newTimetable.year || !this.newTimetable.events.length) {
-      console.error('Please complete all fields before submitting the timetable.');
-      alert('Please complete all fields.');
+      this.presentToast('Please complete all fields before submitting the timetable.', 'warning');
       return;
     }
 
-    for (const event of this.newTimetable.events) {
-      const timetableEntry = {
-        faculty: this.newTimetable.faculty,
-        department: this.newTimetable.department,
-        year: this.newTimetable.year,
-        course: event.course,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        lecturer: event.lecturer
-      };
-
-      try {
-        await this.firestore.collection('timetables').add(timetableEntry);
-      } catch (error) {
-        console.error('Error adding timetable entry: ', error);
-        alert('Failed to add timetable entry.');
-        return;
-      }
+    try {
+      await this.firestore.collection('timetables').add(this.newTimetable);
+      this.presentToast('Timetable added successfully!');
+      this.resetTimetable();
+    } catch (error) {
+      console.error('Error adding timetable: ', error);
+      this.presentToast('Failed to add timetable.', 'danger');
     }
-
-    alert('Timetable entries added successfully!');
-    this.resetTimetable();
   }
 
   onSubmit(form: NgForm) {
     if (form.valid) {
       this.addTimetable();
     } else {
-      alert('Please fill in all the required fields.');
+      this.presentToast('Please fill in all the required fields.', 'warning');
     }
   }
 
@@ -207,8 +261,17 @@ export class ManageTimetablePage implements OnInit {
       faculty: '',
       department: '',
       year: '',
+      course: '',
       events: []
     };
   }
 
+  async presentToast(message: string, color: string = 'success') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      color: color
+    });
+    toast.present();
+  }
 }

@@ -80,7 +80,6 @@ const routes: Routes = [
     path: 'component',
     loadChildren: () => import('./component/component.module').then( m => m.ComponentPageModule)
   },
-
   {
     path: 'calender',
     loadChildren: () => import('./calender/calender.module').then( m => m.CalenderPageModule)
