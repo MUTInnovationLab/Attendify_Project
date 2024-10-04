@@ -90,10 +90,11 @@
         </div>
       </div>
       <div class="cont">
-        <div class="navigationButtons" routerLink="/view-announcements">
-          <ion-icon name="megaphone" ></ion-icon>
+        <div class="navigationButtons" (click)="openAnnouncementsModal()">
+          <ion-icon name="megaphone"></ion-icon>
           <ion-label>Announcements</ion-label>
         </div>
+      
 
         <div class="navigationButtons" routerLink="/stude-scan">
           <ion-icon name="scan" ></ion-icon>
