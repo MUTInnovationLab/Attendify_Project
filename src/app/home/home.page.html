@@ -1,71 +1,12 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Attendify</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="goToLogin()">
-        <ion-icon slot="icon-only" name="log-in-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-
-  <!-- Varsity Announcements Section -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Varsity Announcements</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list>
-        <ion-item *ngFor="let announcement of announcements">
-          <ion-label>
-            <h3>{{ announcement.title }}</h3>
-            <p>{{ announcement.description }}</p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Varsity Academic Calendar Section -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Academic Calendar</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-datetime
-        presentation="date"
-        [value]="currentDate">
-      </ion-datetime>
-      <ion-button expand="block" (click)="viewFullCalendar()">View Full Calendar</ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Departmental Timetables Section -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Department Timetables</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-select [(ngModel)]="selectedDepartment" (ionChange)="loadTimetable()">
-        <ion-select-option *ngFor="let dept of departments" [value]="dept">
-          {{ dept.name }}
-        </ion-select-option>
-      </ion-select>
-
-      <ion-list *ngIf="timetable.length > 0">
-        <ion-item *ngFor="let course of timetable">
-          <ion-label>
-            <h2>{{ course.name }}</h2>
-            <p>{{ course.time }}</p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-      <p *ngIf="timetable.length === 0">Please select a department to view its timetable.</p>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Informational Section -->
-
+<ion-content [fullscreen]="true">
+  <div class="welcome-container">
+    <div class="header">
+      <h1>Welcome to</h1>
+      <h2>Attendify</h2>
+    </div>
+    <div class="animation-container">
+      <ion-icon name="school" class="school-icon"></ion-icon>
+      
+    </div>
+  </div>
 </ion-content>

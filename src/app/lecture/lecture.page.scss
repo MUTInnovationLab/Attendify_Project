@@ -54,6 +54,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     margin: 0;
+    color: #ffffff;
   }
   
   /* Custom styles for the number in the Student Card */
@@ -131,7 +132,7 @@ th {
     color: white; /* Header text color */
     height: 40px; /* Increase the height of the table header */
     font-size: 18px; /* Increase the font size of the table header */
-    font-style: italic;
+    font-family: var(--ion-font-family);
     font-family:'Times New Roman', Times, serif;
 }
 
@@ -314,3 +315,4 @@ table tbody tr.selected {
   ion-button {
     --border-radius: 10px;
   }
+  

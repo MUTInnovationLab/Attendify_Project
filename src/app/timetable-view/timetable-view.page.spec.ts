@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FullCalendarPage } from './full-calendar.page';
+import { TimetableViewPage } from './timetable-view.page';
 
-describe('FullCalendarPage', () => {
-  let component: FullCalendarPage;
-  let fixture: ComponentFixture<FullCalendarPage>;
+describe('TimetableViewPage', () => {
+  let component: TimetableViewPage;
+  let fixture: ComponentFixture<TimetableViewPage>;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FullCalendarPage);
+    fixture = TestBed.createComponent(TimetableViewPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -55,7 +55,11 @@ export class DeptAnalyticsPage implements AfterViewInit {
         this.createLecturerAttendanceChart();
       });
   }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 28106bae6aa67650390d240b06353f0d4b0443d1
   async fetchStudents() {
     try {
       const enrolledStudentsSnapshot = await this.firestore.collection('enrolledModules').get().toPromise();

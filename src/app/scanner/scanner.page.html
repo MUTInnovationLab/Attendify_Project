@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>QR Code Scanner</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <video id="video" style="width: 100%; height: auto;" autoplay></video>
+  <ion-button (click)="startScanning()">Start Scanning</ion-button>
+  <ion-button (click)="stopScanning()">Stop Scanning</ion-button>
+</ion-content>

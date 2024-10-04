@@ -1,0 +1,11 @@
+{
+  "projects": {
+    "default": "attendoneapp",
+    "mutattendifytracker": "attendify-6202e",
+    "attendtrackerone": "mutattendifytracker",
+    "mutattendoneapp": "attendoneapp"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

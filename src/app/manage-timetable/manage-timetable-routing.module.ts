@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { FullCalendarPage } from './full-calendar.page';
+
+import { ManageTimetablePage } from './manage-timetable.page';
 
 const routes: Routes = [
   {
     path: '',
-    component: FullCalendarPage
+    component: ManageTimetablePage
   }
 ];
 
@@ -13,4 +14,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class FullCalendarPageRoutingModule {}
+export class ManageTimetablePageRoutingModule {}

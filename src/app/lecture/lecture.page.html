@@ -11,7 +11,7 @@
       <ion-card-content>
         <ion-icon name="receipt-outline" class="icon"></ion-icon>
         <ion-card-title class="card-title">Student Attendance</ion-card-title>
-        <ion-card-subtitle class="number">20</ion-card-subtitle>
+        <ion-card-subtitle class="number"></ion-card-subtitle>
       </ion-card-content>
     </ion-card>
   </div>
@@ -49,7 +49,7 @@
       <ion-button fill="outline" color="danger" (click)="deleteModule()">Delete</ion-button>
       <ion-button fill="solid" class="addbutton" (click)="showAddCard = true">Add</ion-button>
       <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" [disabled]="!selectedModuleId">Add Students</ion-button>
-      
+      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" [disabled]="!selectedModuleId">Announcement</ion-button>
       <ion-button fill="solid" color="primary" (click)="viewStudents()">View Students</ion-button> <!-- New button added -->
       
     </div>

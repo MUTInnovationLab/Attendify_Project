@@ -79,5 +79,8 @@ export class AdminPage implements OnInit {
     });
     toast.present();
   }
+  dismiss() {
+    this.router.navigate(['/lecture']); // Navigate to LecturePage
+  }
 
 }
