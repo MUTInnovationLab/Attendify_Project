@@ -1,16 +1,13 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'
 import { DataService } from '../services/data.service';
-import { AuthService } from '../services/auth.service';
-
-Chart.register(...registerables);
+import { AuthService } from '../services/auth.service'; 
 
 Chart.register(...registerables, ChartDataLabels);
-
 
 interface Student {
   attendance: number;
@@ -33,14 +30,12 @@ interface AttendanceData {
 }
 
 
-
-
 @Component({
   selector: 'app-dept-analytics',
   templateUrl: './dept-analytics.page.html',
   styleUrls: ['./dept-analytics.page.scss'],
 })
-export class DeptAnalyticsPage implements OnInit {
+export class DeptAnalyticsPage implements AfterViewInit {
   students: Student[] = [];
   studentCount: number = 0;
   lecturerCount: number = 0;
@@ -49,9 +44,6 @@ export class DeptAnalyticsPage implements OnInit {
   currentUserDepartment: string = '';
 
   constructor(private firestore: AngularFirestore, private dataService: DataService, private authService: AuthService) {}
-  ngOnInit(): void {
-    throw new Error('Method not implemented.');
-  }
 
   ngAfterViewInit() {
     // this.fetchCurrentUserDepartment().then(() => {
@@ -62,9 +54,12 @@ export class DeptAnalyticsPage implements OnInit {
       this.fetchLecturers().then(() => {
         this.createLecturerAttendanceChart();
       });
-    // });
   }
+<<<<<<< HEAD
+
+=======
  
+>>>>>>> 28106bae6aa67650390d240b06353f0d4b0443d1
   async fetchStudents() {
     try {
       const enrolledStudentsSnapshot = await this.firestore.collection('enrolledModules').get().toPromise();
@@ -271,9 +266,9 @@ export class DeptAnalyticsPage implements OnInit {
     }
   }
 
-  getProgress(email: string): number {
-    const maxSessions = 10; // Example total sessions
-    const student = this.students.find(s => s.email === email);
-    return student ? Math.min(student.attendance / maxSessions, 1) : 0;
-  }
+  // getProgress(email: string): number {
+  //   const maxSessions = 10; 
+  //   const student = this.students.find(s => s.email === email);
+  //   return student ? Math.min(student.attendance / maxSessions, 1) : 0;
+  // }
 }
