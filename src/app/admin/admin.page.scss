@@ -1,5 +1,11 @@
+ion-toolbar {
+  --background: #ff9800; /* Toolbar background color */
+}
+.close-icon {
+  color: #ffffff; /* Close icon color */
+}
 ion-content {
-    --ion-background-color: #f4f5f8;
+    --ion-background-color: #f4ede1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,7 +19,7 @@ ion-content {
       padding: 30px;
       border-radius: 20px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin: auto; /* Add this line to center the form */
+      margin: 100px auto; /* Add this line to center the form */
   
       .title {
         font-size: 24px;

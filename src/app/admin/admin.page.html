@@ -1,3 +1,13 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="custom-title"></ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" class="close-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
 <ion-content [fullscreen]="true">
   <form (ngSubmit)="submitForm()" class="form">
