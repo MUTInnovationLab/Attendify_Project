@@ -16,9 +16,9 @@
       <h2>Track My Attendance</h2>
       
       <!-- Toggle Button to Show/Hide Progress -->
-      <button (click)="toggleProgressBar()">
-        {{ showProgressBar ? 'Hide Progress' : 'Show Progress' }}
-      </button>
+      <ion-button (click)="toggleProgressBar()" expand="block" fill="clear">
+        <ion-icon [name]="showProgressBar ? 'eye-off' : 'eye'"></ion-icon>
+      </ion-button>
       
       <!-- Display the Progress Bar Only if showProgressBar is True -->
       <div *ngIf="showProgressBar" class="progress-container">
@@ -31,3 +31,5 @@
     
   </div>
 </ion-content>
+
+

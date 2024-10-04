@@ -5,7 +5,7 @@
       <ion-icon name="arrow-back"></ion-icon>
     </ion-button>
   </ion-toolbar>
-</ion-header>
+</ion-header> 
 
 <ion-content>
   <!-- Card to display counts -->
@@ -40,9 +40,8 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Table for Student Attendance Progress -->
 <!-- Table for Student Attendance Progress -->
-<ion-card>
+<!-- <ion-card>
   <ion-card-header>
     <ion-title>Students Attendance Progress</ion-title>
   </ion-card-header>
@@ -67,5 +66,72 @@
       </tbody>
     </table>
   </ion-card-content>
-</ion-card>
+</ion-card> -->
 </ion-content>
+
+<!-- <ion-header>
+  <ion-toolbar>
+    <ion-title>Dept-Analytics</ion-title>
+    <ion-button [routerLink]="['/dept-an']">
+      <ion-icon name="arrow-back"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>-->
+  <!-- Card to display counts
+  <ion-card>
+    <ion-card-header>
+      <ion-title>Counts</ion-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Number of Students:</ion-label>
+        <ion-badge color="primary">{{ studentCount }}</ion-badge>
+      </ion-item>
+      <ion-item>
+        <ion-label>Number of Lecturers:</ion-label>
+        <ion-badge color="primary">{{ lecturerCount }}</ion-badge>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>-->
+
+  <!-- Analytics charts  -->
+  <!-- <ion-card>
+    <ion-card-header>
+      <ion-title>Analytics</ion-title>
+    </ion-card-header>
+    <ion-card-content>
+      <canvas id="lecturerAttendanceChart" width="400" height="200"></canvas>
+      <canvas id="studentAttendanceChart" width="300" height="300"></canvas>
+    </ion-card-content>
+  </ion-card> -->
+
+  <!-- Table for Student Attendance Progress -->
+  <!-- <ion-card>
+    <ion-card-header>
+      <ion-title>Students Attendance Progress</ion-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Attendance Progress</ion-label>
+      </ion-item>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students">
+            <td>{{ student.name }} {{ student.surname }}</td>
+            <td>
+              <ion-progress-bar [value]="getProgress(student.email)" color="primary"></ion-progress-bar>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ion-card-content>
+  </ion-card>
+</ion-content> --> 
