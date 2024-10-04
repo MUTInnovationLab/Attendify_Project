@@ -43,7 +43,12 @@ export class ProfilePage implements OnInit {
     
   } 
 
-    
+  async openAnnouncementsModal() {
+    const modal = await this.modalController.create({
+      component: ViewAnnouncementsComponent
+    });
+    return await modal.present();
+  }
 
 
   getCurrentUser() {

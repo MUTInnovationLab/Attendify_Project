@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonModal } from '@ionic/angular';
-import { AlertController, ToastController } from '@ionic/angular';
+import { AlertController, ToastController,  NavController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -51,6 +51,7 @@ export class DashboardPage {
   ];
 
   constructor(
+    private navCtrl: NavController,
     private alertController: AlertController,
     private firestore: AngularFirestore,
     private toastController: ToastController,
@@ -223,7 +224,9 @@ export class DashboardPage {
   }
 
 
-
+  navigateToDeptAnalytics() {
+    this.navCtrl.navigateForward('/dept-analytics'); // The path should match your routing setup
+  }
 
   departmentsAnalytics = [
     { name: 'IT', adminCount: 3, activeUsers: 50 },
