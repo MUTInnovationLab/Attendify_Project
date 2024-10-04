@@ -108,9 +108,7 @@ const routes: Routes = [
   {
     path: 'manage-timetable',
     loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
-  },
-
-
+  }
 ];
 
 @NgModule({
