@@ -2,76 +2,133 @@
 
 /* Table styling */
 .attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  .attendance-table th,
-  .attendance-table td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-  }
-  
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
 
-  .attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .attendance-table th, .attendance-table td {
-    border: 1px solid #ddd;
+.attendance-table th,
+.attendance-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table th, .attendance-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.attendance-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #f2f2f2;
+}
+
+
+
+
+
+
+
+.attend-table th {
+  background-color: #854836; /* Green color for table headers */
+  color: white; /* White text color for table headers */
+  font-weight: bold;
+}
+
+/* Row hover effect */
+.attend-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Alternating row colors */
+.attend-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2; /* Light gray for even rows */
+}
+
+/* Media query for responsiveness */
+@media screen and (max-width: 600px) {
+  .attend-table th,
+  .attend-table td {
     padding: 8px;
   }
-  
-  .attendance-table th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #f2f2f2;
-  }
-  
-
-
-
-
-
-
-  .attendance-table th {
-    background-color: #854836; /* Green color for table headers */
-    color: white; /* White text color for table headers */
-    font-weight: bold;
-  }
-  
-  /* Row hover effect */
-  .attendance-table tbody tr:hover {
-    background-color: #f5f5f5;
-  }
-  
-  /* Alternating row colors */
-  .attendance-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2; /* Light gray for even rows */
-  }
-  
-  /* Media query for responsiveness */
-  @media screen and (max-width: 600px) {
-    .attendance-table th,
-    .attendance-table td {
-      padding: 8px;
-    }
-  }
+}
 /* Example CSS */
 ion-back-button {
-    color: white; /* Example color to make the button visible */
-  }
-    
+  color: white; /* Example color to make the button visible */
+}
+  
 
-  ion-toolbar{
-    --background: #ff9800;
-    color:white;
+ion-toolbar{
+  --background: #ff9800;
+  color:white;
+}
+ion-icon{
+  font-size: 25px;
+  font-weight: bold;
+}
+
+
+
+.attend-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+.attend-table th,
+.attend-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.attend-table thead {
+  background-color: #f4f4f4;
+}
+
+@media (max-width: 768px) {
+  .attend-table,
+  .attend-table thead,
+  .attend-table tbody,
+  .attend-table th,
+  .attend-table td,
+  .attend-table tr {
+    display: block;
   }
-  ion-icon{
-    font-size: 25px;
+
+  .attend-table thead tr {
+    display: none;
+  }
+
+  .attend-table td {
+    position: relative;
+    padding-left: 50%;
+    white-space: nowrap;
+  }
+
+  .attend-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 45%;
+    padding-left: 10px;
     font-weight: bold;
+    white-space: nowrap;
+    background-color: #f4f4f4;
+    border-right: 1px solid #ddd;
   }
+
+  .attend-table td:last-child {
+    border-bottom: 0;
+  }
+}

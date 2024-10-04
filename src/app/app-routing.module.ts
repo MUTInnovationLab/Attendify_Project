@@ -98,11 +98,17 @@ const routes: Routes = [
     loadChildren: () => import('./student-records/student-records.module').then( m => m.StudentRecordsPageModule)
   },
   {
+    path: 'scan',
+    loadChildren: () => import('./scan/scan.module').then( m => m.ScanPageModule)
+  },
+  {
+    path: 'scanner',
+    loadChildren: () => import('./scanner/scanner.module').then( m => m.ScannerPageModule)
+  },
+  {
     path: 'manage-timetable',
     loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
-  },
-
-
+  }
 ];
 
 @NgModule({

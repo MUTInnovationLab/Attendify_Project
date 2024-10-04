@@ -1,124 +1,4 @@
-// //CARDS
-// ion-card {
-//     max-width: 600px;
-//     margin: auto;
-//     margin-top: 80px;
-//     border-radius: 10px;
-//     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-   
-//     ion-card-content {
-//       background-color: #ff9800;
-//       color: #000000;;
-//       border-top-left-radius: 10px;
-//       border-top-right-radius: 10px;
-//       font-size: 20px;
-//       text-align: center;
-//       font-weight: bold;
-//       font-style: italic;
-//     }
 
-    
-//   }
-
-//   a {
-//     transition: opacity 0.3s ease-in-out;
-//   }
-  
-//   a:hover {
-//     opacity: 0.7;
-//   }
-
-//   @media (max-width: 768px) {
-//     ion-card {
-//         width: 250px;
-//       margin: 80px auto;
-//     }
-  
-//     ion-card-content {
-//       background-color: #ff9800;
-//       color: #000000;
-//       border-top-left-radius: 10px;
-//       border-top-right-radius: 10px;
-//       font-size: 80px;
-//       text-align: center;
-//       font-weight: bold;
-//       font-style: italic;
-//     }
-  
-//     a {
-//       transition: opacity 0.3s ease-in-out;
-//     }
-  
-//     a:hover {
-//       opacity: 0.7;
-//     }
-//   }
-  
-  
-
-//   ion-content {
-//     --background:#cebfa6;
-//   }
-
-
-//   .BUTTON{
-//     margin-top: 150px;
-//     --background:#ff9800;
-//     font-weight: bold;
-//     color: #000000;
-//   }
-// /* styles.scss */
-
-// /* Styling the main FAB button */
-// ion-fab-button {
-//     width: 56px; /* Adjust size as needed */
-//     height: 56px; /* Adjust size as needed */
-//     border-radius: 50%; /* Rounded shape */
-//     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Box shadow for depth */
-//   }
-  
-//   /* Styling the icon inside the main FAB button */
-//   ion-fab-button ion-icon {
-//     font-size: 32px; /* Adjust icon size */
-//   }
-  
-//   /* Styling the FAB list */
-//   ion-fab-list {
-//     --background: transparent; /* Transparent background */
-//   }
-  
-//   /* Styling each FAB button inside the FAB list */
-//   ion-fab-list ion-fab-button {
-//     width: 44px; /* Adjust size as needed */
-//     height: 44px; /* Adjust size as needed */
-//     margin-top: 8px; /* Adjust spacing */
-//     border-radius: 50%; /* Rounded shape */
-//   }
-  
-//   /* Styling the icon inside each FAB button */
-//   ion-fab-list ion-fab-button ion-icon {
-//     font-size: 24px; /* Adjust icon size */
-//   }
-  
-//   /* Custom colors for each FAB button */
-//   ion-fab-button.color-primary {
-//     --background: #ff9800; /* Primary color */
-//   }
-  
-//   ion-fab-button.color-secondary {
-//     --background: #4c8bf5; /* Secondary color */
-//   }
-  
-//   ion-fab-button.color-danger {
-//     --background: #f04141; /* Danger color */
-//   }
-  
-//   /* Hover effect for FAB buttons */
-//   ion-fab-button:hover {
-//     transform: scale(1.1); /* Scale up on hover */
-//     transition: transform 0.2s ease-in-out; /* Smooth transition */
-//   }
-  
 ion-content{
     background-color: rgb(253, 250, 217);
   }
@@ -165,15 +45,7 @@ ion-content{
       50% { top: 50%; }
       100% { top: 100%; }
     }
-  //   .paying-passenger {
-  //     width: 100%;
-  //     position: fixed;
-  //     bottom: 0;
-  //     margin: 0;
-  //     padding: 0;
-  //     place-content: end; 
-  //     color:white;
-  // }
+ 
   
        .fixed-container{
         width: 100%;
@@ -243,34 +115,34 @@ ion-content{
   
   /* Styling the main FAB button */
   ion-fab-button {
-    width: 56px; /* Adjust size as needed */
-    height: 56px; /* Adjust size as needed */
-    border-radius: 50%; /* Rounded shape */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Box shadow for depth */
+    width: 56px;
+    height: 56px; 
+    border-radius: 50%; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
   }
   
   /* Styling the icon inside the main FAB button */
   ion-fab-button ion-icon {
-    font-size: 32px; /* Adjust icon size */
+    font-size: 32px; 
   }
   
   /* Styling the FAB list */
   ion-fab-list {
-    --background: transparent; /* Transparent background */
+    --background: transparent; 
   }
   
   /* Styling each FAB button inside the FAB list */
   ion-fab-list ion-fab-button {
-    width: 44px; /* Adjust size as needed */
-    height: 44px; /* Adjust size as needed */
-    margin-top: 8px; /* Adjust spacing */
-    border-radius: 50%; /* Rounded shape */
+    width: 44px; 
+    height: 44px; 
+    margin-top: 8px; 
+    border-radius: 50%;
     display:absolute;
   }
   
   /* Styling the icon inside each FAB button */
   ion-fab-list ion-fab-button ion-icon {
-    font-size: 24px; /* Adjust icon size */
+    font-size: 24px; 
   }
   
   /* Custom colors for each FAB button */
@@ -283,15 +155,15 @@ ion-content{
   }
   
   ion-fab-button.color-secondary {
-    --background: #4c8bf5; /* Secondary color */
+    --background: #4c8bf5; 
   }
   
   ion-fab-button.color-danger {
-    --background: #f04141; /* Danger color */
+    --background: #f04141; 
   }
   
   /* Hover effect for FAB buttons */
   ion-fab-button:hover {
-    transform: scale(1.1); /* Scale up on hover */
-    transition: transform 0.2s ease-in-out; /* Smooth transition */
+    transform: scale(1.1); 
+    transition: transform 0.2s ease-in-out; 
   }
