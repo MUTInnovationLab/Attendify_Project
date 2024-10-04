@@ -64,33 +64,7 @@ export class DeptAnalyticsPage implements OnInit {
       });
     // });
   }
-
-  // async fetchCurrentUserDepartment() {
-  //   try {
-  //     const currentUser = await this.dataService.getCurrentUser().toPromise();
-  //     if (currentUser) {
-  //       this.currentUserDepartment = currentUser.department || 'Unknown'; // Handle case where department might be missing
-  //     } else {
-  //       console.error('No current user found');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching current user department:', error);
-  //   }
-  // }
-
-  // async fetchCurrentUserDepartment() {
-  //   try {
-  //     const currentUser = await this.dataService.getCurrentUser().toPromise();
-  //     if (currentUser) {
-  //       this.currentUserDepartment = currentUser.department; // Assuming 'department' field exists
-  //     } else {
-  //       console.error('No current user found');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching current user department:', error);
-  //   }
-  // }
-
+ 
   async fetchStudents() {
     try {
       const enrolledStudentsSnapshot = await this.firestore.collection('enrolledModules').get().toPromise();

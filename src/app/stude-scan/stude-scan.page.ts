@@ -180,58 +180,62 @@ export class StudeScanPage implements OnInit {
 
 
 
+  // Ensure Firebase and Firestore are properly configured in your project
+// This is a working version of your function to store attendance details
 
-
-
-
-  
-  async CaptureAttendiesDetails(moduleCode: string = "") {
-    if (!this.student) {
-      console.error('Student information not available.');
-      this.showToast('Student information not available.');
-      return;
-    }
-
-    if (!moduleCode) {
-      console.error('Module code not provided.');
-      this.showToast('Module code not provided.');
-      return;
-    }
-
-    const date = new Date();
-    const dateString = date.toDateString();
-
-    const attendanceDetails = {
-      email: this.student.email,
-      name: this.student.name,
-      surname: this.student.surname,
-      studentNumber: this.student.studentNumber,
-      scanDate: dateString,
-      module: moduleCode
-    };
-
-    try {
-      await this.firestore.collection('AttendedStudents')
-        .doc(moduleCode)
-        .collection(attendanceDetails.scanDate)
-        .doc(this.student.email)
-        .set(attendanceDetails);
-      console.log('Attendance stored successfully:', attendanceDetails);
-    } catch (error) {
-      console.error('Error storing attendance details:', error);
-    }
+async CaptureAttendiesDetails(moduleCode: string = "") {
+  // Check if student information is available
+  if (!this.student) {
+    console.error('Student information not available.');
+    this.showToast('Student information not available.');
+    return;
   }
 
-  // Method to show a toast notification
-  async showToast(message: string) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 3000,
-      position: 'bottom'
-    });
-    toast.present();
+  // Check if the module code is provided
+  if (!moduleCode) {
+    console.error('Module code not provided.');
+    this.showToast('Module code not provided.');
+    return;
   }
 
+  // Capture current date and format it
+  const date = new Date();
+  const dateString = date.toDateString(); // Example: "Mon Oct 04 2024"
+
+  // Prepare the attendance details object
+  const attendanceDetails = {
+    email: this.student.email,
+    name: this.student.name,
+    surname: this.student.surname,
+    studentNumber: this.student.studentNumber,
+    scanDate: dateString,
+    module: moduleCode
+  };
+
+  try {
+    // Store attendance details in Firestore
+    await this.firestore.collection('AttendedStudents')
+      .doc(moduleCode)  // Module as top-level doc
+      .collection(attendanceDetails.scanDate)  // Date as subcollection
+      .doc(this.student.email)  // Student's email as document ID
+      .set(attendanceDetails);  // Store the attendance details
+
+    console.log('Attendance stored successfully:', attendanceDetails);
+    this.showToast('Attendance recorded successfully.');
+
+  } catch (error) {
+    console.error('Error storing attendance details:', error);
+    this.showToast('Error storing attendance. Please try again.');
+  }
 }
 
-
+// Method to show a toast notification
+async showToast(message: string) {
+  const toast = await this.toastController.create({
+    message: message,
+    duration: 3000,  
+    position: 'bottom'  
+  });
+  toast.present();  // Display the toast
+}
+}
