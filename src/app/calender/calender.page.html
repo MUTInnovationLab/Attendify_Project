@@ -1,26 +1,26 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Academic Calendar</ion-title>
-  </ion-toolbar>
+<ion-header class="header">
+  <h4>Academic Calendar</h4>
 </ion-header>
 
-<ion-content>
+<ion-content class="calendar-content">
   <!-- Date picker for selecting the date -->
-  <ion-card>
+  <ion-card class="date-picker-card">
     <ion-card-header>
       <ion-card-title>Select Date</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-datetime
-        presentation="date"
-        [value]="currentDate"
-        (ionChange)="onDateChange($event)">
-      </ion-datetime>
+      <div class="datetime-container">
+        <ion-datetime
+          presentation="date"
+          [value]="currentDate"
+          (ionChange)="onDateChange($event)">
+        </ion-datetime>
+      </div>
     </ion-card-content>
   </ion-card>
 
   <!-- Display events for the selected date -->
-  <ion-card *ngIf="eventsForTheDay.length > 0">
+  <ion-card *ngIf="eventsForTheDay.length > 0" class="events-card">
     <ion-card-header>
       <ion-card-title>Events for {{ selectedDate }}</ion-card-title>
     </ion-card-header>
@@ -36,12 +36,40 @@
   </ion-card>
 
   <!-- Show message if no events are available -->
-  <ion-card *ngIf="eventsForTheDay.length === 0">
+  <ion-card *ngIf="eventsForTheDay.length === 0" class="no-events-card">
     <ion-card-content>
       <p>No events available for the selected date.</p>
     </ion-card-content>
   </ion-card>
 
   <!-- Button to view the full calendar -->
-  <ion-button expand="full" (click)="viewFullCalendar()">View Full Calendar</ion-button>
+  <ion-button expand="full" (click)="toggleCalendarView()" class="view-calendar-button">
+    {{ showFullCalendar ? 'Hide Full Calendar' : 'View Full Calendar' }}
+  </ion-button>
+
+  <!-- Display full calendar events card -->
+  <ion-card *ngIf="showFullCalendar" class="all-events-card">
+    <ion-card-header>
+      <ion-card-title>Full Calendar Events</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ng-container *ngFor="let month of monthNames">
+          <ion-item *ngIf="allEventsGroupedByMonth[month] && allEventsGroupedByMonth[month].length > 0">
+            <ion-label>
+              <h3>{{ month }}</h3>
+              <ion-list>
+                <ion-item *ngFor="let dayEvent of allEventsGroupedByMonth[month]">
+                  <ion-label>
+                    <p>{{ dayEvent.date | date: 'dd' }} - {{ dayEvent.description }}</p>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-label>
+          </ion-item>
+        </ng-container>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>

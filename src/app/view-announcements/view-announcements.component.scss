@@ -1,24 +1,26 @@
-ion-list {
-    --background: #ff9800;
+ion-header {
+  --background: #ff9800; /* Header background color */
+  --color: white; /* Header text color */
+}
+
+ion-toolbar {
+  --background: #ff9800; /* Toolbar background color */
+}
+
+ion-title {
+  color: white; /* Title text color */
+}
+
+
+ion-content {
+  --background: #56231F; /* Content background color */
+  ion-list {
+    ion-item {
+      --background: #56231F; /* Item background color, set to transparent if not needed */
+      ion-label {
+        color: white; /* Label text color */
+      }
+    }
   }
-  
-  ion-item {
-    --background: white;
-    --color: black;
-    margin-bottom: 10px;
-    border-radius: 8px;
-  }
-  
-  ion-label h2 {
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-  
-  ion-label p {
-    margin: 5px 0;
-  }
-  
-  ion-label small {
-    color: gray;
-  }
-  
+}
+

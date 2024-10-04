@@ -1,28 +1,26 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>
-      <ion-icon name="people-outline" style="color: white;"></ion-icon>
-      <span style="color: white;">Make Announcement</span>
+      <ion-icon name="people-outline" class="header-icon"></ion-icon>
+      <span class="header-title">Make Announcement</span>
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
-        <ion-icon name="close-outline" style="color: white;"></ion-icon>
+        <ion-icon name="close-outline" class="close-icon"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" style="background-color: #ff9800;">
+<ion-content class="ion-padding announcement-content">
   <form class="announcement-form">
-    <ion-label position="floating" style="color: white;">Title</ion-label>
+    <ion-label position="floating" class="label">Title</ion-label>
     <ion-input [(ngModel)]="title" name="title" required></ion-input>
     
-    <ion-label position="floating" style="color: white;">Content</ion-label>
+    <ion-label position="floating" class="label">Content</ion-label>
     <ion-textarea [(ngModel)]="content" name="content" required></ion-textarea>
    
-    <ion-button expand="block" (click)="submitAnnouncement()" style="--background: blue; --color: white;">Submit</ion-button>
-    
-    
+    <ion-button expand="block" (click)="submitAnnouncement()" class="submit-button">Submit</ion-button>
   </form>
 </ion-content>
 

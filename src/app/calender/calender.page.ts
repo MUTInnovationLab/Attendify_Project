@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
-import { Router } from '@angular/router'; // Import Router
 
 @Component({
   selector: 'app-calender',
@@ -9,41 +8,65 @@ import { Router } from '@angular/router'; // Import Router
   styleUrls: ['./calender.page.scss'],
 })
 export class CalenderPage implements OnInit {
+  currentDate: string = new Date().toISOString();
+  selectedDate: string = '';
+  eventsForTheDay: any[] = [];
+  allEventsGroupedByMonth: { [key: string]: any[] } = {};
+  events$!: Observable<any[]>;
+  showFullCalendar: boolean = false;
 
-  currentDate: string = new Date().toISOString(); // Current date in ISO string format
-  selectedDate: string = ''; // To store the selected date
-  eventsForTheDay: any[] = []; // To store filtered events for the selected date
-  events$!: Observable<any[]>; // Use definite assignment assertion
+  monthNames: string[] = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
-  constructor(private firestore: AngularFirestore, private router: Router) {} // Inject Router
+  constructor(private firestore: AngularFirestore) {}
 
   ngOnInit() {
-    this.selectedDate = this.currentDate.substring(0, 10); // Set initial selected date to today
-    this.events$ = this.firestore.collection('events').valueChanges({ idField: 'id' });
-    this.filterEventsForDate(); // Load today's events
+    this.selectedDate = this.currentDate.substring(0, 10);
+    this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
+    this.loadEvents();
   }
 
-  // Filter the events based on the selected date
-  filterEventsForDate() {
+  loadEvents() {
     this.events$.subscribe(events => {
-      console.log('Selected Date:', this.selectedDate);
-      console.log('Events:', events);
-      this.eventsForTheDay = events.filter(event => {
-        const eventDate = event.date.substring(0, 10);
-        console.log('Event Date:', eventDate);
-        return eventDate === this.selectedDate;
+      // Filter events for the selected day
+      this.eventsForTheDay = events.filter(event =>
+        event.date.substring(0, 10) === this.selectedDate
+      );
+
+      // Group events by month
+      const groupedEvents: { [key: string]: any[] } = {};
+      this.monthNames.forEach(month => {
+        groupedEvents[month] = [];
       });
+
+      events.forEach(event => {
+        const eventDate = new Date(event.date);
+        const eventMonth = this.monthNames[eventDate.getMonth()];
+        groupedEvents[eventMonth].push(event);
+      });
+
+      // Sort events by date within each month in ascending order
+      Object.keys(groupedEvents).forEach(month => {
+        groupedEvents[month].sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA.getDate() - dateB.getDate(); // Compare day of the month
+        });
+      });
+
+      // Assign the sorted and grouped events to allEventsGroupedByMonth
+      this.allEventsGroupedByMonth = groupedEvents;
     });
   }
-  
-  // Handle date change from ion-datetime
+
   onDateChange(event: any) {
-    this.selectedDate = event.detail.value.substring(0, 10); // Format the date to YYYY-MM-DD
-    this.filterEventsForDate(); // Reload events for the new date
+    this.selectedDate = event.detail.value.substring(0, 10);
+    this.loadEvents();
   }
 
-  // Method to navigate to the full calendar page
-  viewFullCalendar() {
-    this.router.navigate(['/full-calendar']); // Adjust route path if necessary
+  toggleCalendarView() {
+    this.showFullCalendar = !this.showFullCalendar;
   }
 }

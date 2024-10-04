@@ -36,12 +36,16 @@
           type="submit"
           [disabled]="!eventForm.form.valid"
         >
-          Add Event
+          {{ eventIdToUpdate ? 'Update Event' : 'Add Event' }}
         </ion-button>
         <ion-note color="danger" *ngIf="eventForm.form.invalid">
           Please fill out all required fields.
         </ion-note>
       </form>
+
+      <ion-button expand="full" color="danger" (click)="deleteAllEventsForYear(selectedYear)">
+        Delete All Events for {{ selectedYear }} 
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

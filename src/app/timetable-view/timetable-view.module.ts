@@ -1,17 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { IonicModule } from '@ionic/angular';
-import { FullCalendarPageRoutingModule } from './full-calendar-routing.module';
-import { FullCalendarPage } from './full-calendar.page';
+
+import { TimetableViewPageRoutingModule } from './timetable-view-routing.module';
+
+import { TimetableViewPage } from './timetable-view.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    FullCalendarPageRoutingModule
+    TimetableViewPageRoutingModule
   ],
-  declarations: [FullCalendarPage]
+  declarations: [TimetableViewPage]
 })
-export class FullCalendarPageModule {}
+export class TimetableViewPageModule {}

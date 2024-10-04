@@ -81,10 +81,6 @@ const routes: Routes = [
     loadChildren: () => import('./component/component.module').then( m => m.ComponentPageModule)
   },
   {
-    path: 'manage-announcements',
-    loadChildren: () => import('./manage-announcements/manage-announcements.module').then( m => m.ManageAnnouncementsPageModule)
-  },
-  {
     path: 'calender',
     loadChildren: () => import('./calender/calender.module').then( m => m.CalenderPageModule)
   },
@@ -92,10 +88,8 @@ const routes: Routes = [
     path: 'event',
     loadChildren: () => import('./event/event.module').then( m => m.EventPageModule)
   },
+ 
   {
-    path: 'full-calendar',
-    loadChildren: () => import('./full-calendar/full-calendar.module').then( m => m.FullCalendarPageModule)
-  },  {
     path: 'dept-analytics',
     loadChildren: () => import('./dept-analytics/dept-analytics.module').then( m => m.DeptAnalyticsPageModule)
   },
@@ -110,6 +104,10 @@ const routes: Routes = [
   {
     path: 'scanner',
     loadChildren: () => import('./scanner/scanner.module').then( m => m.ScannerPageModule)
+  },
+  {
+    path: 'manage-timetable',
+    loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
   },
 
 

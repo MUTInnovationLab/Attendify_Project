@@ -235,4 +235,3 @@ export class StudeScanPage implements OnInit {
 }
 
 
-
