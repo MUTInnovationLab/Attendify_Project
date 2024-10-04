@@ -1,212 +1,213 @@
 // dashboard.scss
 
 ion-content {
-    --background: linear-gradient(135deg, #56231F, #a77a20);
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: var(--ion-color-secondary);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  
-    ion-icon {
-      color: var(--ion-color-primary);
-      font-size: 24px;
-      cursor: pointer;
-    }
-  
-    h4 {
-      margin: 0;
-      font-weight: bold;
-      color: #ffffff;
-    }
-  }
-  
-  h2 {
-    text-align: center;
-    margin: 20px 0;
+  --background: #e6d7bf; // Beige background
+  color: #000000; // Black text for better contrast on light background
+  font-family: 'Poppins', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffa500; // Orange header
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  ion-icon {
+    color: #ffffff; // White icon
     font-size: 24px;
-    color: var(--ion-color-primary-tint);
+    cursor: pointer;
   }
-  
-  // Card Grid
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
-    padding: 16px;
-  
-    ion-card-content {
-      background-color: var(--ion-color-secondary-tint);
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  
-      ion-icon {
-        font-size: 36px;
-        color: var(--ion-color-primary);
-        margin-bottom: 10px;
-      }
-  
-      h3 {
-        font-size: 18px;
-        margin: 0;
-        color: #ffffff;
-      }
-  
-      .number {
-        font-size: 24px;
-        font-weight: bold;
-        color: var(--ion-color-primary-contrast);
-      }
-    }
-  }
-  
-  // Admin Details
-  #admin-container {
-    padding: 16px;
-  
-    .admin-details {
-      background-color: var(--ion-color-secondary-shade);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  
-      h3 {
-        font-size: 18px;
-        margin: 0 0 4px 0;
-        color: var(--ion-color-primary);
-      }
-  
-      p {
-        margin: 0;
-        color: #ffffff;
-      }
-  
-      ion-note {
-        font-size: 14px;
-        color: var(--ion-color-primary-tint);
-      }
-  
-      ion-icon {
-        font-size: 20px;
-        color: var(--ion-color-primary);
-        cursor: pointer;
-        margin-left: 8px;
-      }
-    }
-  }
-  
-  // Modal Styling
-  .add-admin-modal {
-    --background: var(--ion-color-secondary);
-  
-    .add-admin-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      background-color: var(--ion-color-secondary);
-      border-radius: 12px;
-      margin-bottom: 16px;
-  
-      h3 {
-        margin: 0;
-        color: #ffffff;
-      }
-  
-      ion-icon {
-        font-size: 24px;
-        color: var(--ion-color-primary);
-        cursor: pointer;
-      }
-    }
-  
-    ion-item {
-      margin-bottom: 16px;
-  
-      ion-label {
-        color: var(--ion-color-primary-tint);
-      }
-  
-      ion-input {
-        --color: #0f0e0e;
-      }
-  
-      select {
-        background-color: var(--ion-color-secondary-shade);
-        color: #ffffff;
-      }
-    }
-  
-    ion-button {
-      --background: var(--ion-color-primary);
-      --background-activated: var(--ion-color-primary-shade);
-    }
-  }
-  
-  // Additional Styling
-  .display-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: var(--ion-color-secondary);
-    border-radius: 12px;
-    margin: 16px;
-  
-    ion-label {
-      font-size: 18px;
-      color: var(--ion-color-primary);
-    }
-  
-    ion-icon {
-      font-size: 24px;
-      color: var(--ion-color-primary);
-      cursor: pointer;
-    }
-  }
-  .departments-analytics-modal .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: #ffc409;
-    color: white;
-  }
-  
-  .departments-analytics-modal .modal-header h3 {
+
+  h4 {
     margin: 0;
+    font-weight: bold;
+    color: #ffffff; // White text
   }
-  
-  .departments-analytics-modal .analytics-container {
-    padding: 16px;
+}
+
+h2 {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 24px;
+  color: #000000; // Black text
+}
+
+// Card Grid
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 16px;
+
+  ion-card-content {
+    background-color: #ffa500; // Orange cards
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    ion-icon {
+      font-size: 36px;
+      color: #ffffff; // White icon
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin: 0;
+      color: #ffffff; // White text
+    }
+
+    .number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff; // White text
+    }
   }
-  
-  .departments-analytics-modal .analytics-item {
-    background-color: white;
-    border-radius: 8px;
+}
+
+// Admin Details
+#admin-container {
+  padding: 16px;
+
+  .admin-details {
+    background-color: #ffa500; // Orange background
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h3 {
+      font-size: 18px;
+      margin: 0 0 4px 0;
+      color: #ffffff; // White text
+    }
+
+    p {
+      margin: 0;
+      color: #ffffff; // White text
+    }
+
+    ion-note {
+      font-size: 14px;
+      color: #e6d7bf; // Light beige text
+    }
+
+    ion-icon {
+      font-size: 20px;
+      color: #ffffff; // White icon
+      cursor: pointer;
+      margin-left: 8px;
+    }
   }
-  
-  .departments-analytics-modal .analytics-item h4 {
-    margin: 0 0 8px 0;
-    color: #333;
+}
+
+// Modal Styling
+.add-admin-modal {
+  --background: #e6d7bf; // Beige background
+
+  .add-admin-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #ffa500; // Orange background
+    border-radius: 12px;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      color: #ffffff; // White text
+    }
+
+    ion-icon {
+      font-size: 24px;
+      color: #ffffff; // White icon
+      cursor: pointer;
+    }
   }
-  
-  .departments-analytics-modal .analytics-item p {
-    margin: 4px 0;
-    color: #666;
+
+  ion-item {
+    margin-bottom: 16px;
+
+    ion-label {
+      color: #000000; // Black text
+    }
+
+    ion-input {
+      --color: #000000; // Black text
+    }
+
+    select {
+      background-color: #ffa500; // Orange background
+      color: #ffffff; // White text
+    }
   }
+
+  ion-button {
+    --background: #ffa500; // Orange button
+    --background-activated: #e69500; // Darker orange when activated
+  }
+}
+
+// Additional Styling
+.display-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffa500; // Orange background
+  border-radius: 12px;
+  margin: 16px;
+
+  ion-label {
+    font-size: 18px;
+    color: #ffffff; // White text
+  }
+
+  ion-icon {
+    font-size: 24px;
+    color: #ffffff; // White icon
+    cursor: pointer;
+  }
+}
+
+.departments-analytics-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffa500; // Orange header
+  color: #ffffff; // White text
+}
+
+.departments-analytics-modal .modal-header h3 {
+  margin: 0;
+}
+
+.departments-analytics-modal .analytics-container {
+  padding: 16px;
+}
+
+.departments-analytics-modal .analytics-item {
+  background-color: #ffa500; // Orange background
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.departments-analytics-modal .analytics-item h4 {
+  margin: 0 0 8px 0;
+  color: #ffffff; // White text
+}
+
+.departments-analytics-modal .analytics-item p {
+  margin: 4px 0;
+  color: #ffffff; // White text
+}

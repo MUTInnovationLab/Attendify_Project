@@ -180,8 +180,7 @@ export class StudeScanPage implements OnInit {
 
 
 
-  // Ensure Firebase and Firestore are properly configured in your project
-// This is a working version of your function to store attendance details
+
 
 async CaptureAttendiesDetails(moduleCode: string = "") {
   // Check if student information is available
@@ -204,29 +203,31 @@ async CaptureAttendiesDetails(moduleCode: string = "") {
 
   // Prepare the attendance details object
   const attendanceDetails = {
+    module: moduleCode,
     email: this.student.email,
     name: this.student.name,
     surname: this.student.surname,
     studentNumber: this.student.studentNumber,
     scanDate: dateString,
-    module: moduleCode
+   
   };
 
   try {
-    // Store attendance details in Firestore
-    await this.firestore.collection('AttendedStudents')
-      .doc(moduleCode)  // Module as top-level doc
-      .collection(attendanceDetails.scanDate)  // Date as subcollection
-      .doc(this.student.email)  // Student's email as document ID
-      .set(attendanceDetails);  // Store the attendance details
+    
+    await this.firestore.collection('Attended') 
+      .doc(moduleCode)  // Student's email as document ID
+      .set({
+        scanDate: attendanceDetails.scanDate,
+        details: attendanceDetails
+      }, { merge: true });  // Use merge to avoid overwriting existing data
 
     console.log('Attendance stored successfully:', attendanceDetails);
     this.showToast('Attendance recorded successfully.');
 
-  } catch (error) {
+} catch (error) {
     console.error('Error storing attendance details:', error);
     this.showToast('Error storing attendance. Please try again.');
-  }
+}
 }
 
 // Method to show a toast notification
