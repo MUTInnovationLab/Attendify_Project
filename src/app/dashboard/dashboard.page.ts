@@ -242,4 +242,11 @@ export class DashboardPage {
   dismissDepartmentsAnalyticsModal() {
     this.departmentsAnalyticsModal.dismiss();
   }
+
+  logout() {
+    // Clear session or authentication data here (if any)
+    
+    // Navigate to the login page
+    this.navCtrl.navigateRoot('/login');
+  }
 }

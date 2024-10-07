@@ -117,7 +117,7 @@ export class LoginPage implements OnInit {
   navigateBasedOnUserType(userType: string) {
     switch (userType) {
       case 'student':
-        this.navController.navigateForward('/stude-scan');
+        this.navController.navigateForward('/profile');
         break;
       case 'lecturer':
         this.navController.navigateForward('/lecture');

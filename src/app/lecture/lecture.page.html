@@ -1,11 +1,13 @@
 <ion-content [fullscreen]="true" class="custom-background">
   <div class="text">
-    <ion-card class="profile-card" routerLink="/profile">
+    <ion-card class="profile-card">
       <ion-card-content>
         <ion-icon name="person-circle-outline" class="icon"></ion-icon>
-        <ion-card-title class="card-title">My PROFILE</ion-card-title>
+        <ion-card-title class="card-title"></ion-card-title>
+        <p> {{ userName }}</p> <!-- Display the user's name here -->
       </ion-card-content>
     </ion-card>
+    
 
     <ion-card class="student-card" routerLink="/attendies">
       <ion-card-content>
