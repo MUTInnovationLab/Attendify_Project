@@ -36,7 +36,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
   constructor(private firestore: AngularFirestore) {}
 
   ngAfterViewInit() {
-<<<<<<< HEAD
     this.fetchLecturers().then(() => {
       this.createLecturerAttendanceChart(); // Create lecturer bar chart
     });
@@ -44,58 +43,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
     this.fetchAttendedStudents().then(() => {
       this.createStudentAttendanceChart(); // Create student pie chart
     });
-=======
-    // this.fetchCurrentUserDepartment().then(() => {
-      this.fetchStudents().then(() => {
-        this.createStudentAttendanceChart();
-      });
-      
-      this.fetchLecturers().then(() => {
-        this.createLecturerAttendanceChart();
-      });
-  }
- 
-  async fetchStudents() {
-    try {
-      const enrolledStudentsSnapshot = await this.firestore.collection('enrolledModules').get().toPromise();
-      const enrolledStudentsMap = new Map<string, Student>();
-  
-      if (enrolledStudentsSnapshot && !enrolledStudentsSnapshot.empty) {
-        enrolledStudentsSnapshot.docs.forEach(doc => {
-          const studentData = doc.data() as Student;
-          enrolledStudentsMap.set(studentData.email, studentData);
-        });
-      }
-  
-      const attendingStudentsMap = new Map<string, number>();
-  
-      const attendedSnapshot = await this.firestore.collection('Attended').get().toPromise();
-  
-      if (attendedSnapshot && !attendedSnapshot.empty) {
-        attendedSnapshot.docs.forEach(doc => {
-          const dates = doc.data() as { [key: string]: string[] };
-  
-          Object.values(dates).forEach(emailArray => {
-            emailArray.forEach(email => {
-              if (email) {
-                attendingStudentsMap.set(email, (attendingStudentsMap.get(email) || 0) + 1);
-              }
-            });
-          });
-        });
-      }
-  
-      this.students = Array.from(enrolledStudentsMap.values()).map(student => ({
-        ...student,
-        attendance: attendingStudentsMap.get(student.email) || 0
-      }));
-  
-      this.studentCount = this.students.length;
-      this.nonAttendingCount = this.studentCount - this.students.filter(student => student.attendance > 0).length;
-    } catch (error) {
-      console.error('Error fetching students:', error);
-    }
->>>>>>> 9df18a4070cf1d5d873953e930d86daac857a9ed
   }
 
   async fetchLecturers() {
