@@ -68,6 +68,12 @@ export class QrScanPage implements OnInit {
     }
   }
 
+
+
+
+  
+
+
   // Firestore function to increment the scanner open count
 incrementScannerOpenCount() {
   // Query Firestore to find the module document by moduleCode
