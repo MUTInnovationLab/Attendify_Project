@@ -51,6 +51,8 @@ export class ProfilePage implements OnInit {
   }
 
 
+  
+
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
