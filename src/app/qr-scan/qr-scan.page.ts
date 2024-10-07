@@ -19,7 +19,11 @@ interface Module {
 })
 export class QrScanPage implements OnInit {
 
+<<<<<<< HEAD
+  qrCodeDataUrl: string = '';
+=======
   qrCodeDataUrl: string = 'IE200'; // Default module code
+>>>>>>> 9df18a4070cf1d5d873953e930d86daac857a9ed
   qrCodeText: string = '';
   qrCodeSize: number = 200;
   scannedResult: any;
