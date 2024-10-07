@@ -17,7 +17,8 @@ import { MakeAnnouncementComponent } from '../make-announcement/make-announcemen
 export class LecturePage implements OnInit {
 
   showAddCard: boolean = false;
-
+  userName: string = ''; // Store the user's name
+  userEmail: string = ''; // Store the user's email
   contact_nom: string = '';
   contact_email: string = '';
   contact_sujet: string = '';
@@ -58,20 +59,34 @@ export class LecturePage implements OnInit {
     });
   }
 
-  /*async openAddStudentsModal() {
-    console.log('Button clicked, openAddStudentsModal called');
-    if (!this.selectedModuleId) {
-      alert('Please select a module first.');
-      return;
-    }
-    
-    this.showAddStudentsModal = true;
-    this.selectedModule = this.tableData.find(module => module.id === this.selectedModuleId);
-    await this.fetchExistingStudents();
-    await this.fetchRegisteredStudents();
+
+  ngOnInit() {
+    this.auth.onAuthStateChanged((user) => {
+      if (user && user.email) {
+        this.userEmail = user.email;
+        this.getUserData(user.email);
+        this.getData(user.email);
+      } else {
+        console.log('User not logged in or email is null.');
+        this.userName = 'Guest'; // Set a default name for non-logged in users
+      }
+    });
   }
-  */
-  
+
+
+  getUserData(userEmail: string) {
+    this.db
+      .collection('registered staff', (ref) => ref.where('email', '==', userEmail))
+      .snapshotChanges()
+      .subscribe((data) => {
+        if (data.length > 0) {
+          const userData = data[0].payload.doc.data() as any;
+          this.userName = userData.fullName || 'Staff Member'; // Use fullName if available, otherwise use 'Staff Member'
+        } else {
+          this.userName = 'Staff Member'; // Set to 'Staff Member' if no data found
+        }
+      });
+  }
 
   async openAnnouncementModal() {
     if (!this.selectedModuleId) {
@@ -232,19 +247,7 @@ export class LecturePage implements OnInit {
     }
   }
   
-
-
-  ngOnInit() {
-    this.auth.onAuthStateChanged((user) => {
-      if (user && user.email) {
-        this.getData(user.email);
-      } else {
-        console.log('User not logged in or email is null.');
-      }
-    });
-    this.showAddStudentsModal = true; 
-  }
-
+  
   async presentConfirmationAlert() {
     const alert = await this.alertController.create({
       header: 'Confirmation',

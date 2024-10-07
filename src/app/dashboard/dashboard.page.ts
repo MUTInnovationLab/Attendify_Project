@@ -225,7 +225,7 @@ export class DashboardPage {
 
 
   navigateToDeptAnalytics() {
-    this.navCtrl.navigateForward('/login'); // The path should match your routing setup
+    this.navCtrl.navigateForward('/dept-analytics'); // The path should match your routing setup
   }
 
   departmentsAnalytics = [
