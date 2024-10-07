@@ -7,6 +7,28 @@ import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { DataService } from '../services/data.service';
 import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
 
+interface AttendanceDetail {
+  module: string;
+  email: string;
+  name: string;
+  surname: string;
+  studentNumber: string;
+  scanDate: string;
+  count: number;
+  scanDates: string[];
+}
+
+interface AttendanceRecord {
+  details: AttendanceDetail[];
+}
+
+interface EnrolledModules {
+  moduleCode: string[];
+  // Add any other fields that you expect in this document
+}
+
+
+
 @Component({
   selector: 'app-stude-scan',
   templateUrl: './stude-scan.page.html',
@@ -182,6 +204,76 @@ export class StudeScanPage implements OnInit {
 
 
 
+// async CaptureAttendiesDetails(moduleCode: string = "") {
+//   // Check if student information is available
+//   if (!this.student) {
+//     console.error('Student information not available.');
+//     this.showToast('Student information not available.');
+//     return;
+//   }
+
+//   // Check if the module code is provided
+//   if (!moduleCode) {
+//     console.error('Module code not provided.');
+//     this.showToast('Module code not provided.');
+//     return;
+//   }
+
+//   // Capture current date and format it
+//   const date = new Date();
+//   const dateString = date.toDateString(); // Example: "Mon Oct 04 2024"
+
+//   // Prepare the attendance details object
+//   const attendanceDetails: AttendanceDetail = {
+//     module: moduleCode,
+//     email: this.student.email,
+//     name: this.student.name,
+//     surname: this.student.surname,
+//     studentNumber: this.student.studentNumber,
+//     scanDate: dateString,
+//     count: 1, // Default count for new attendance
+//     scanDates: [dateString], // Initialize scanDates with current date
+//   };
+
+//   try {
+//     const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
+//     const doc = await attendanceRef.get().toPromise();
+
+//     // Check if the document exists
+//     if (doc && doc.exists) { // Ensure doc is defined before checking exists
+//       const existingData = doc.data() as AttendanceRecord; // Cast to AttendanceRecord
+//       const existingDetails: AttendanceDetail[] = existingData?.details || [];
+
+//       // Check if the student already exists in the attendance records
+//       const studentIndex = existingDetails.findIndex(detail => detail.email === this.student.email);
+
+//       if (studentIndex > -1) {
+//         // If the student exists, increment the count and add the new scan date
+//         existingDetails[studentIndex].count += 1;
+//         existingDetails[studentIndex].scanDates.push(dateString);
+//       } else {
+//         // If the student does not exist, add new entry
+//         existingDetails.push(attendanceDetails);
+//       }
+
+//       // Update the document with the new details
+//       await attendanceRef.set({ details: existingDetails }, { merge: true });
+//     } else {
+//       // If the document does not exist, create it with the current attendance details
+//       await attendanceRef.set({
+//         details: [attendanceDetails],
+//       });
+//     }
+
+//     console.log('Attendance stored successfully:', attendanceDetails);
+//     this.showToast('Attendance recorded successfully.');
+//   } catch (error) {
+//     console.error('Error storing attendance details:', error);
+//     this.showToast('Error storing attendance. Please try again.');
+//   }
+// }
+
+
 async CaptureAttendiesDetails(moduleCode: string = "") {
   // Check if student information is available
   if (!this.student) {
@@ -197,38 +289,82 @@ async CaptureAttendiesDetails(moduleCode: string = "") {
     return;
   }
 
+  // Check if the student is enrolled in the module
+  const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(this.student.studentNumber.toString());
+  const enrolledDoc = await enrolledModulesRef.get().toPromise();
+
+  // Ensure enrolledDoc is defined before proceeding
+  if (!enrolledDoc || !enrolledDoc.exists) {
+    console.error('Student is not enrolled in any modules.');
+    this.showToast('You are not enrolled in this module.');
+    return;
+  }
+
+  // Cast to EnrolledModules type
+  const enrolledData = enrolledDoc.data() as EnrolledModules;
+  const existingModuleCodes = enrolledData?.moduleCode || [];
+
+  if (!existingModuleCodes.includes(moduleCode)) {
+    console.error('Student is not enrolled in the specified module.');
+    this.showToast('You are not enrolled in this module.');
+    return;
+  }
+
   // Capture current date and format it
   const date = new Date();
   const dateString = date.toDateString(); // Example: "Mon Oct 04 2024"
 
   // Prepare the attendance details object
-  const attendanceDetails = {
+  const attendanceDetails: AttendanceDetail = {
     module: moduleCode,
     email: this.student.email,
     name: this.student.name,
     surname: this.student.surname,
     studentNumber: this.student.studentNumber,
     scanDate: dateString,
-   
+    count: 1, // Default count for new attendance
+    scanDates: [dateString], // Initialize scanDates with current date
   };
 
   try {
-    
-    await this.firestore.collection('Attended') 
-      .doc(moduleCode)  // Student's email as document ID
-      .set({
-        scanDate: attendanceDetails.scanDate,
-        details: attendanceDetails
-      }, { merge: true });  // Use merge to avoid overwriting existing data
+    const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
+    const doc = await attendanceRef.get().toPromise();
+
+    // Check if the document exists
+    if (doc && doc.exists) {
+      const existingData = doc.data() as AttendanceRecord;
+      const existingDetails: AttendanceDetail[] = existingData?.details || [];
+
+      // Check if the student already exists in the attendance records
+      const studentIndex = existingDetails.findIndex(detail => detail.email === this.student.email);
+
+      if (studentIndex > -1) {
+        // If the student exists, increment the count and add the new scan date
+        existingDetails[studentIndex].count += 1;
+        existingDetails[studentIndex].scanDates.push(dateString);
+      } else {
+        // If the student does not exist, add new entry
+        existingDetails.push(attendanceDetails);
+      }
+
+      // Update the document with the new details
+      await attendanceRef.set({ details: existingDetails }, { merge: true });
+    } else {
+      // If the document does not exist, create it with the current attendance details
+      await attendanceRef.set({
+        details: [attendanceDetails],
+      });
+    }
 
     console.log('Attendance stored successfully:', attendanceDetails);
     this.showToast('Attendance recorded successfully.');
-
-} catch (error) {
+  } catch (error) {
     console.error('Error storing attendance details:', error);
     this.showToast('Error storing attendance. Please try again.');
+  }
 }
-}
+
+
 
 // Method to show a toast notification
 async showToast(message: string) {
@@ -240,3 +376,6 @@ async showToast(message: string) {
   toast.present();  // Display the toast
 }
 }
+
+
+

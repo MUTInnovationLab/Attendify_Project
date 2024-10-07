@@ -189,35 +189,51 @@ export class AttendiesPage implements OnInit, OnDestroy {
       console.warn('Module code or module name is missing.');
       return;
     }
-
+  
     try {
       console.log(`Fetching pending requests for module: ${moduleCode}, module name: ${moduleName}`);
-      
+  
       // Correct subcollection name
       const correctModuleName = this.moduleName || moduleName;
-      
+  
       const requestsSnapshot = await this.firestore.collection('allModules')
         .doc(moduleCode)
         .collection(correctModuleName, ref => ref.where('status', '==', 'pending'))
         .get()
         .toPromise();
-
+  
       if (requestsSnapshot && !requestsSnapshot.empty) {
-        this.requestedInvites.push(...requestsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
+        requestsSnapshot.docs.forEach(async (doc: any) => {
+          const data = doc.data();
+          const studentNumber = data['studentNumber']; // Accessing using bracket notation
+          const studentEmail = data['email'];
+          const id = doc.id;
+  
+          this.requestedInvites.push({ id, ...data });
+  
+          // Update enrolledModules collection
+          await this.firestore.collection('enrolledModules').doc(studentNumber).set({
+            moduleCode: moduleCode,
+            moduleName: correctModuleName,
+            email: studentEmail, // Add the student's email here
+            status: 'active',
+          }, { merge: true }); // Use merge to update or create the document
+        });
+  
         console.log('Pending requests data:', this.requestedInvites);
       } else {
         console.log(`No pending requests data found for module ${moduleCode}.`);
       }
-
+  
       this.showRequestsTable = this.requestedInvites.length > 0;
-
+  
     } catch (error) {
       console.error('Error fetching pending requests data:', error);
       this.requestedInvites = [];
       this.showRequestsTable = false; 
     }
   }
-
+  
   // Toggle visibility of the attendance table
   toggleTable() {
     this.showTable = !this.showTable;
