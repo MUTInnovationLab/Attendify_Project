@@ -2,11 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import firebase from 'firebase/compat/app';
-import { NavController } from '@ionic/angular';
-import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular'; 
-
-
 
 // Define interfaces for data models
 interface Announcement {
@@ -37,10 +33,11 @@ export class ViewAnnouncementsComponent implements OnInit {
   announcements: Announcement[] = [];
   studentEmail: string | null = null;
 
-  constructor(private firestore: AngularFirestore, 
+  constructor(
+    private firestore: AngularFirestore, 
     private modalController: ModalController,
-    private afAuth: AngularFireAuth,
-    private navCtrl: NavController, private router: Router) {}
+    private afAuth: AngularFireAuth
+  ) {}
 
   async ngOnInit() {
     try {
@@ -52,6 +49,7 @@ export class ViewAnnouncementsComponent implements OnInit {
         if (this.studentEmail) {
           // Fetch the module codes for the student
           const moduleCodes = await this.getStudentModuleCodes(this.studentEmail);
+          console.log('Module codes for student:', moduleCodes); // Log fetched module codes
 
           if (moduleCodes.length > 0) {
             // Fetch announcements related to the student's module codes
@@ -61,17 +59,25 @@ export class ViewAnnouncementsComponent implements OnInit {
             ).get().toPromise();
 
             if (announcementsSnapshot && !announcementsSnapshot.empty) {
-              const announcements = announcementsSnapshot.docs.map(doc => doc.data() as Announcement);
+              const announcements = announcementsSnapshot.docs.map(doc => {
+                const data = doc.data() as Announcement;
+                return {
+                  ...data,
+                  userEmail: data.userEmail,
+                };
+              });
+
               // Fetch full names for each announcement's userEmail
-              for (const announcement of announcements) {
+              await Promise.all(announcements.map(async (announcement) => {
                 announcement.userEmail = await this.getFullNameByEmail(announcement.userEmail);
-              }
+              }));
+
               this.announcements = announcements;
             } else {
-              console.log('No announcements found.');
+              console.log('No announcements found for the given module codes:', moduleCodes);
             }
           } else {
-            console.log('No modules found for the student.');
+            console.log('No modules found for the student with email:', this.studentEmail);
           }
         } else {
           console.log('No email found for the logged-in user.');
@@ -94,10 +100,17 @@ export class ViewAnnouncementsComponent implements OnInit {
 
       if (studentSnapshot && !studentSnapshot.empty) {
         console.log('Number of student documents found:', studentSnapshot.size);
-
-        const moduleCodes = studentSnapshot.docs.flatMap(doc => (doc.data() as StudentRegistration).moduleCode || []);
+        
+        const moduleCodes: string[] = [];
+        studentSnapshot.docs.forEach(doc => {
+          const data = doc.data() as StudentRegistration;
+          console.log('Document data:', data);  // Log each document's data
+          if (data.moduleCode) {
+            moduleCodes.push(...data.moduleCode); // Collect all module codes
+          }
+        });
+        
         console.log('Module codes:', moduleCodes);
-
         return moduleCodes;
       } else {
         console.log('No student found with email:', email);
@@ -111,7 +124,7 @@ export class ViewAnnouncementsComponent implements OnInit {
 
   async getFullNameByEmail(email: string): Promise<string> {
     try {
-      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('registered staff', ref => 
+      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('registeredStaff', ref => 
         ref.where('email', '==', email)
       ).get().toPromise();
       
@@ -133,5 +146,4 @@ export class ViewAnnouncementsComponent implements OnInit {
       console.error('Error dismissing modal:', err);
     });
   }
-  
 }
