@@ -5,6 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 Chart.register(...registerables);
 
 interface Student {
+  attendance: number;
   email: string;
   name: string;
   surname: string;
@@ -36,7 +37,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
   constructor(private firestore: AngularFirestore) {}
 
   ngAfterViewInit() {
-<<<<<<< HEAD
     this.fetchLecturers().then(() => {
       this.createLecturerAttendanceChart(); // Create lecturer bar chart
     });
@@ -44,7 +44,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
     this.fetchAttendedStudents().then(() => {
       this.createStudentAttendanceChart(); // Create student pie chart
     });
-=======
     // this.fetchCurrentUserDepartment().then(() => {
       this.fetchStudents().then(() => {
         this.createStudentAttendanceChart();
@@ -95,7 +94,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
     } catch (error) {
       console.error('Error fetching students:', error);
     }
->>>>>>> 9df18a4070cf1d5d873953e930d86daac857a9ed
   }
 
   async fetchLecturers() {

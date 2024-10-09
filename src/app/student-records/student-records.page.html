@@ -3,33 +3,51 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/profile"></ion-back-button>
     </ion-buttons>
+    <ion-title>Student Records</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div style="flex: 1; max-width: 65%;">
-      <canvas id="modulesChart" width="400" height="200"></canvas>
-    </div>
-    <div style="flex: 1; max-width: 30%; text-align: center;">
-      <h2>Track My Attendance</h2>
-      
-      <!-- Toggle Button to Show/Hide Progress -->
-      <ion-button (click)="toggleProgressBar()" expand="block" fill="clear">
-        <ion-icon [name]="showProgressBar ? 'eye-off' : 'eye'"></ion-icon>
-      </ion-button>
-      
-      <!-- Display the Progress Bar Only if showProgressBar is True -->
-      <div *ngIf="showProgressBar" class="progress-container">
-        <div id="attendanceProgressBar" class="progress-bar">
-          <!-- The text will be updated with the calculated percentage -->
-          {{ progressPercentage }}%
-        </div>
-      </div>
-    </div>  
-    
-  </div>
+<ion-content class="ion-padding">
+  <ion-grid>
+    <ion-row>
+      <!-- Left Column: Chart -->
+      <ion-col size="12" size-md="8">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Module Attendance</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <canvas #modulesChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Right Column: Progress Bar and Button -->
+      <ion-col size="12" size-md="4">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Track Attendance</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <!-- Toggle Button to Show/Hide Progress -->
+            <ion-button (click)="toggleProgressBar()" expand="block" fill="outline">
+              {{ showProgressBar ? 'Hide' : 'Show' }} Progress
+              <ion-icon slot="end" [name]="showProgressBar ? 'eye-off' : 'eye'"></ion-icon>
+            </ion-button>
+            
+            <div *ngIf="showProgressBar" class="progress-container">
+              <div id="attendanceProgressBar" class="progress-bar">
+                <div class="progress-fill"></div>
+                <span class="progress-text">{{ progressPercentage }}%</span>
+              </div>
+            </div>
+
+            <p *ngIf="showProgressBar">
+              Total Attendance: {{ totalAttendance }} / {{ totalRequiredAttendance }}
+            </p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
-
-

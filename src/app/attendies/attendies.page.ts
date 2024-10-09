@@ -1,8 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import 'firebase/compat/firestore';
+import firebase from 'firebase/compat/app';
+
 
 interface Module {
   id: string;
@@ -14,14 +17,53 @@ interface Module {
   selected?: boolean;
 }
 
+interface AttendanceData {
+  [key: string]: string[]; // scanDate as key and array of emails as value
+}
+
 interface AttendedStudent {
   email: string;
   module: string;
   scanDate: string;
+  name: string;
+  surname: string;
+  studentNumber: string;
+  count: number;
 }
 
-interface AttendanceData {
-  [key: string]: string[]; // scanDate as key and array of emails as value
+interface GroupedStudent {
+  module: string;
+  dates: {
+    date: string;
+    students: Array<{
+      email: string;
+      name: string;
+      surname: string;
+      studentNumber: string;
+      count: number;
+    }>;
+  }[];
+}
+
+interface Student {
+  email: string;
+  name: string;
+  studentNumber: string;
+  surname: string;
+}
+
+interface GroupedByDate {
+  date: string;
+  modules: {
+    moduleCode: string;
+    students: {
+      email: string;
+      name: string;
+      surname: string;
+      studentNumber: string;
+      count: number;
+    }[];
+  }[];
 }
 
 @Component({
@@ -31,9 +73,12 @@ interface AttendanceData {
 })
 export class AttendiesPage implements OnInit, OnDestroy {
   attendedStudents: any[] = []; 
+  // groupedStudents: any[] = [];
   showAttendedTable: boolean = false; 
-  students: any[] = []; 
-  showTable: boolean = false; 
+  students: AttendedStudent[] = [];
+  groupedStudents: GroupedStudent[] = [];
+  showTable = true;
+  expandedGroups: { [key: string]: boolean } = {};
   requestedInvites: any[] = [];
   showRequestsTable = false;
   modules: any[] = []; 
@@ -43,6 +88,14 @@ export class AttendiesPage implements OnInit, OnDestroy {
   studentsInModule: any;
   selectedModule: Module | null = null; 
   currentLecturerEmail: string | null = null;
+  // expandedGroups: { [key: string]: boolean } = {};
+expandedModuleGroups: { [key: string]: boolean } = {};
+// students: AttendedStudent[] = [];
+groupedByDate: GroupedByDate[] = [];
+expandedDateGroups: { [key: string]: boolean } = {};
+// expandedModuleGroups: { [key: string]: boolean } = {};
+// showTable = true;
+
 
   constructor(
     private firestore: AngularFirestore,
@@ -108,15 +161,18 @@ export class AttendiesPage implements OnInit, OnDestroy {
     }
   }
 
+
+  
   async fetchAttendedStudents() {
     try {
-      const modulesSnapshot = await this.firestore.collection('modules', ref =>
+      const modulesSnapshot = await this.firestore.collection('modules', ref => 
         ref.where('userEmail', '==', this.currentLecturerEmail)
       ).get().toPromise();
 
       if (!modulesSnapshot || modulesSnapshot.empty) {
         console.log('No modules found for the lecturer.');
         this.students = [];
+        this.groupedStudents = []; // Add this line
         return;
       }
 
@@ -124,99 +180,174 @@ export class AttendiesPage implements OnInit, OnDestroy {
         const moduleData = doc.data() as Module;
         return moduleData.moduleCode;
       });
+
       console.log('Module codes:', moduleCodes);
 
       const attendedData: AttendedStudent[] = [];
 
       for (const moduleCode of moduleCodes) {
         console.log(`Fetching attendance data for module code: ${moduleCode}`);
-
         const attendedDoc = await this.firestore.collection('Attended')
           .doc(moduleCode)
           .get().toPromise();
 
         if (attendedDoc && attendedDoc.exists) {
-          const dates = attendedDoc.data() as AttendanceData;
-          console.log('Attendance data for module code:', moduleCode, dates);
+          const data = attendedDoc.data() as { details: any[] };
+          console.log('Attendance data for module code:', moduleCode, data);
 
-          Object.keys(dates).forEach(scanDate => {
-            const emailArray = dates[scanDate];
-            emailArray.forEach(email => {
-              if (email) {
-                attendedData.push({
-                  email,
-                  module: moduleCode,
-                  scanDate: scanDate
-                });
-              }
+          if (data && data.details) {
+            data.details.forEach(detail => {
+              attendedData.push({
+                email: detail.email,
+                module: detail.module,
+                scanDate: detail.scanDate,
+                name: detail.name,
+                surname: detail.surname,
+                studentNumber: detail.studentNumber,
+                count: detail.count
+              });
             });
-          });
+          }
         } else {
           console.log(`No attendance data found for module ${moduleCode}.`);
         }
       }
 
       this.students = attendedData;
-      console.log('Attended students data:', this.students);
+      this.groupByDateAndModule(this.students);
+      console.log('Grouped students data:', this.groupedByDate);
     } catch (error) {
       console.error('Error fetching attended students data:', error);
       this.students = [];
+      this.groupedByDate = [];
     }
   }
 
-  groupByModuleAndDate(students: any[]): any[] {
-    const groupedData: { module: string; scanDate: string; emails: string[] }[] = [];
-  
+  groupByDateAndModule(students: AttendedStudent[]) {
+    const groupedData: { [key: string]: GroupedByDate } = {};
+
     students.forEach(student => {
-      const existingGroup = groupedData.find(group => group.module === student.module && group.scanDate === student.scanDate);
-  
-      if (existingGroup) {
-        existingGroup.emails.push(student.email);
-      } else {
-        groupedData.push({
-          module: student.module,
-          scanDate: student.scanDate,
-          emails: [student.email]
-        });
+      if (!groupedData[student.scanDate]) {
+        groupedData[student.scanDate] = { date: student.scanDate, modules: [] };
       }
+
+      let moduleGroup = groupedData[student.scanDate].modules.find(m => m.moduleCode === student.module);
+      if (!moduleGroup) {
+        moduleGroup = { moduleCode: student.module, students: [] };
+        groupedData[student.scanDate].modules.push(moduleGroup);
+      }
+
+      moduleGroup.students.push({
+        email: student.email,
+        name: student.name,
+        surname: student.surname,
+        studentNumber: student.studentNumber,
+        count: student.count
+      });
     });
-  
-    return groupedData;
+
+    this.groupedByDate = Object.values(groupedData).sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    this.groupedByDate.forEach(dateGroup => {
+      dateGroup.modules.sort((a, b) => a.moduleCode.localeCompare(b.moduleCode));
+      dateGroup.modules.forEach(moduleGroup => {
+        moduleGroup.students.sort((a, b) => a.email.localeCompare(b.email));
+      });
+    });
   }
+
+  // toggleTable() {
+  //   this.showTable = !this.showTable;
+  // }
+
+  toggleDateGroup(date: string) {
+    this.expandedDateGroups[date] = !this.expandedDateGroups[date];
+    // When collapsing a date group, collapse all its module groups
+    if (!this.expandedDateGroups[date]) {
+      this.groupedByDate.find(group => group.date === date)?.modules.forEach(module => {
+        this.expandedModuleGroups[`${date}-${module.moduleCode}`] = false;
+      });
+    }
+  }
+
+  isDateGroupExpanded(date: string): boolean {
+    return this.expandedDateGroups[date] || false;
+  }
+
+  toggleModuleGroup(date: string, moduleCode: string) {
+    const key = `${date}-${moduleCode}`;
+    this.expandedModuleGroups[key] = !this.expandedModuleGroups[key];
+  }
+
+  isModuleGroupExpanded(date: string, moduleCode: string): boolean {
+    const key = `${date}-${moduleCode}`;
+    return this.expandedModuleGroups[key] || false;
+  }
+    
+  
 
   async fetchPendingRequests(moduleCode: string, moduleName: string) {
     if (!moduleCode || !moduleName) {
       console.warn('Module code or module name is missing.');
       return;
     }
-
+  
     try {
       console.log(`Fetching pending requests for module: ${moduleCode}, module name: ${moduleName}`);
-      
-      // Correct subcollection name
+  
       const correctModuleName = this.moduleName || moduleName;
-      
+  
       const requestsSnapshot = await this.firestore.collection('allModules')
         .doc(moduleCode)
         .collection(correctModuleName, ref => ref.where('status', '==', 'pending'))
         .get()
         .toPromise();
-
+  
       if (requestsSnapshot && !requestsSnapshot.empty) {
-        this.requestedInvites.push(...requestsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
+        const batch = this.firestore.firestore.batch();
+  
+        for (const doc of requestsSnapshot.docs) {
+          const data = doc.data();
+          const studentNumber = data['studentNumber'];
+          const studentEmail = data['email'];
+          const studentName = data['name'];
+          const studentSurname = data['surname'];
+          const id = doc.id;
+  
+          this.requestedInvites.push({ id, ...data });
+  
+          // Reference to the student's document in enrolledModules
+          const studentRef = this.firestore.collection('enrolledModules').doc(studentEmail).ref;
+  
+          // Update enrolledModules collection
+          batch.set(studentRef, {
+            email: studentEmail,
+            name: studentName,
+            surname: studentSurname,
+            studentNumber: studentNumber,
+            moduleCode: firebase.firestore.FieldValue.arrayUnion(moduleCode)
+          }, { merge: true });
+        }
+  
+        // Commit the batch
+        await batch.commit();
+  
         console.log('Pending requests data:', this.requestedInvites);
       } else {
         console.log(`No pending requests data found for module ${moduleCode}.`);
       }
-
+  
       this.showRequestsTable = this.requestedInvites.length > 0;
-
+  
     } catch (error) {
       console.error('Error fetching pending requests data:', error);
       this.requestedInvites = [];
       this.showRequestsTable = false; 
     }
   }
+  
 
   // Toggle visibility of the attendance table
   toggleTable() {
@@ -293,3 +424,4 @@ export class AttendiesPage implements OnInit, OnDestroy {
     toast.present();
   }
 }
+

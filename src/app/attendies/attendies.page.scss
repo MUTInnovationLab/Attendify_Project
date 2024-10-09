@@ -32,7 +32,15 @@
   background-color: #f2f2f2;
 }
 
+.table-responsive {
+  overflow-x: auto;
+}
 
+@media (max-width: 600px) {
+  .attendance-table {
+    font-size: 0.8em; /* Adjust font size for smaller screens */
+  }
+}
 
 
 
