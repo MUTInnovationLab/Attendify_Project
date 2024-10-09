@@ -1,6 +1,13 @@
 ion-card {
     margin: 20px;
   }
+
+  ion-toolbar {
+    --background: #EECC8C;
+    --min-height: 56px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+  }
   
   :host {
     background-color:  #dabf98; /* Change page background color */

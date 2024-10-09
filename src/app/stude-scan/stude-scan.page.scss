@@ -2,6 +2,13 @@
 ion-content{
     background-color: rgb(253, 250, 217);
   }
+
+  ion-toolbar {
+    --background: #EECC8C;
+    --min-height: 56px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+  }
   
   .scanner-container {
       display: flex;
