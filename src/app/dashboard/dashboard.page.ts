@@ -25,6 +25,8 @@ export class DashboardPage {
   @ViewChild('addAdminModal') addAdminModal!: IonModal;
   @ViewChild('departmentsAnalyticsModal') departmentsAnalyticsModal!: IonModal;
 
+  currentUser: { name: string; email: string } | null = null;
+  
   deptAdminFullName = '';
   deptAdminEmail = '';
   deptAdminStaffNumber = '';
@@ -72,7 +74,9 @@ export class DashboardPage {
       );
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    
+  }
 
   openAddAdminModal() {
     this.addAdminModal.present();

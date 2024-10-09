@@ -19,10 +19,14 @@ export class RegisterPage implements OnInit {
   studentNumber: string="";
   password: string="";
 
-  // constructor(private afAuth: AngularFireAuth, private firestore: AngularFirestore,private navCtrl: NavController) {}
-  constructor(private alertController: AlertController, private loadingController: LoadingController,
-    private router: Router, private auth: AngularFireAuth, private toastController: ToastController,
-    private navCtrl: NavController, private firestore: AngularFirestore){}
+  
+  constructor(private alertController: AlertController, 
+    private loadingController: LoadingController,
+    private router: Router, 
+    private auth: AngularFireAuth, 
+    private toastController: ToastController,
+    private navCtrl: NavController, 
+    private firestore: AngularFirestore){}
 
   ngOnInit() {
   }
@@ -33,68 +37,62 @@ export class RegisterPage implements OnInit {
 
 
   async register() {
-
-    if(this.email==""){
-      alert("enter email");
-      return
+    if (this.email === "") {
+      alert("Please enter your email.");
+      return;
     }
-    if(this.password==""){
-      alert("enter password");
-      return
+    if (this.password === "") {
+      alert("Please enter your password.");
+      return;
     }
-     
-    
-     
+  
+    // Simple regex for email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(this.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+  
     const loader = await this.loadingController.create({
       message: 'Signing up',
       cssClass: 'custom-loader-class'
     });
     await loader.present();
-
-
-
-
-
+  
     this.auth.createUserWithEmailAndPassword(this.email, this.password)
       .then(userCredential => {
-         this.firestore.collection('registeredStudents').add({
+        this.firestore.collection('registeredStudents').add({
           email: this.email,
-          name : this.name,
+          name: this.name,
           surname: this.surname,
           studentNumber: this.studentNumber,
-
         });
         loader.dismiss();
-
-      
-
-
         this.router.navigateByUrl("/login");
-        this.presentToast()
-        
-        // ...
+        this.presentToast();
       })
       .catch((error) => {
         loader.dismiss();
-        const errorCode = error.code;
         const errorMessage = error.message;
-
-        if(errorMessage=="Firebase: Error (auth/missing-email)."){
-
-        }else if(errorMessage=="Firebase: The email address is badly formatted. (auth/invalid-email)."){
-          alert("badly formatted e email");
-        }else if(errorMessage=="Firebase: The email address is already in use by another account. (auth/email-already-in-use)."){
-          alert("invalid email or password");
-        }
-        else if(errorMessage=="Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found)."){
-          alert("invalid email");
-        }else{
+  
+        if (errorMessage === "Firebase: Error (auth/missing-email).") {
+          alert("Email is missing.");
+        } else if (errorMessage === "Firebase: The email address is badly formatted. (auth/invalid-email).") {
+          alert("The email address is badly formatted.");
+        } else if (errorMessage === "Firebase: The email address is already in use by another account. (auth/email-already-in-use).") {
+          alert("This email is already in use.");
+        } else if (errorMessage === "Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found).") {
+          alert("Invalid email.");
+        } else {
           alert(errorMessage);
         }
-
       });
-
   }
+  
+
+
+
+
   async presentToast() {
     const toast = await this.toastController.create({
       message: 'successfully registered!',

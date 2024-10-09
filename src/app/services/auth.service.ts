@@ -27,7 +27,10 @@ export class AuthService {
   getCurrentUser(): Promise<firebase.User | null> {
     return this.afAuth.currentUser;
   }
-
+   
+  
+ 
+  
 
   async getCurrentUserEmail(): Promise<string | null> {
     const user = await this.getCurrentUser();
