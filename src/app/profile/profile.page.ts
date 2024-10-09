@@ -90,6 +90,9 @@ export class ProfilePage implements OnInit {
     });
   }
 
+
+  
+
   async editUserInfo() {
     const alert = await this.alertController.create({
       header: 'Edit User Info',

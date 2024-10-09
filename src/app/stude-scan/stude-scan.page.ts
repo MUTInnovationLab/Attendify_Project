@@ -5,6 +5,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { NavController, ModalController, AlertController, ToastController, Platform } from '@ionic/angular';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { DataService } from '../services/data.service';
+import { Router } from '@angular/router';
 import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
 
 @Component({
@@ -27,6 +28,7 @@ export class StudeScanPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController,
     private modalController: ModalController,
+    private router: Router,
     private data: DataService,
     private platform: Platform
   ) {
@@ -40,12 +42,37 @@ export class StudeScanPage implements OnInit {
       this.searchStudent();
     }
   }
-
-  async presentViewModal() {
-    const modal = await this.modalController.create({
-      component: ViewModalComponent
+  
+  async logout() {
+    const alert = await this.alertController.create({
+      header: 'Logout',
+      message: 'Are you sure you want to log out?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Logout canceled');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: async () => {
+            try {
+              await this.auth.signOut();  // Firebase sign-out method
+              console.log('User logged out successfully');
+              this.showToast('You have been logged out.');
+              this.router.navigate(['/login']);  // Navigate to login page after logout
+            } catch (error) {
+              console.error('Error during logout:', error);
+              this.showToast('Error during logout. Please try again.');
+            }
+          }
+        }
+      ]
     });
-    return await modal.present();
+
+    await alert.present();  // Display the alert dialog
   }
 
   searchStudent() {
