@@ -287,7 +287,6 @@ expandedDateGroups: { [key: string]: boolean } = {};
   }
     
   
-
   async fetchPendingRequests(moduleCode: string, moduleName: string) {
     if (!moduleCode || !moduleName) {
       console.warn('Module code or module name is missing.');
@@ -347,19 +346,15 @@ expandedDateGroups: { [key: string]: boolean } = {};
       this.showRequestsTable = false; 
     }
   }
-  
 
-  // Toggle visibility of the attendance table
   toggleTable() {
     this.showTable = !this.showTable;
   }
 
-  // Toggle visibility of the requested invites table
   toggleRequestsTable() {
     this.showRequestsTable = !this.showRequestsTable;
   }
 
-  // Update student status to either 'active' or 'declined'
   async updateStudentStatus(request: any, status: string) {
     console.log('Module Name:', this.moduleName);
     console.log('Module Code:', request.moduleCode);
@@ -371,17 +366,28 @@ expandedDateGroups: { [key: string]: boolean } = {};
       return;
     }
   
-    const updatedStudent = { status };
-  
     try {
       const documentPath = `allModules/${request.moduleCode}/${this.moduleName}/${request.studentNumber}`;
       console.log('Updating document at path:', documentPath);
   
-      await this.firestore.collection('allModules')
+      const docRef = this.firestore.collection('allModules')
         .doc(request.moduleCode)
         .collection(this.moduleName) 
-        .doc(request.studentNumber)
-        .update(updatedStudent);
+        .doc(request.studentNumber);
+  
+      // Check if the document exists
+      const docSnapshot = await docRef.get().toPromise();
+  
+      if (docSnapshot && docSnapshot.exists) {
+        // Document exists, update it
+        await docRef.update({ status });
+      } else {
+        // Document doesn't exist, create it
+        await docRef.set({
+          ...request,
+          status: status
+        });
+      }
   
       const requestIndex = this.requestedInvites.findIndex(req => req.id === request.id);
       if (requestIndex > -1) {
@@ -392,14 +398,12 @@ expandedDateGroups: { [key: string]: boolean } = {};
       console.error(`Error updating student status to ${status}:`, error);
       await this.presentToast('Error updating student status. Please try again.', 'danger');
     }
-  }   
-  
-  // Approve a student request
+  }
+
   approveStudent(request: any) {
     this.updateStudentStatus(request, 'active');
   }
 
-  // Decline a student request
   declineStudent(request: any) {
     this.updateStudentStatus(request, 'declined');
   }
