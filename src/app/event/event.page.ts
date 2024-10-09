@@ -57,16 +57,7 @@ export class EventPage {
     this.newEvent = { ...eventData };
   }
 
-  deleteAllEventsForYear(year: number) {
-    if (confirm(`Are you sure you want to delete all events for ${year}?`)) {
-      this.academicCalendarService.deleteAllEventsForYear(year).then(() => {
-        this.presentToast(`All events for ${year} deleted successfully`);
-        this.loadEventsForYear();
-      }).catch(error => {
-        console.error('Error deleting events: ', error);
-      });
-    }
-  }
+  
 
   loadEventsForYear() {
     this.academicCalendarService.getEventsForYear(this.selectedYear).subscribe(

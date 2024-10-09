@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 export class CalenderPage implements OnInit {
   currentDate: string = new Date().toISOString();
   selectedDate: string = '';
+  selectedYear: number = new Date().getFullYear();
   eventsForTheDay: any[] = [];
   allEventsGroupedByMonth: { [key: string]: any[] } = {};
   events$!: Observable<any[]>;
@@ -20,12 +21,24 @@ export class CalenderPage implements OnInit {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  yearOptions: number[] = [];
+  
   constructor(private firestore: AngularFirestore) {}
 
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
+    this.selectedYear = new Date().getFullYear();
+    this.generateYearOptions();
     this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
     this.loadEvents();
+  }
+
+  // Generate year options for the year selector
+  generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+      this.yearOptions.push(i);
+    }
   }
 
   loadEvents() {
@@ -43,8 +56,11 @@ export class CalenderPage implements OnInit {
 
       events.forEach(event => {
         const eventDate = new Date(event.date);
-        const eventMonth = this.monthNames[eventDate.getMonth()];
-        groupedEvents[eventMonth].push(event);
+        const eventYear = eventDate.getFullYear();
+        if (eventYear === this.selectedYear) {
+          const eventMonth = this.monthNames[eventDate.getMonth()];
+          groupedEvents[eventMonth].push(event);
+        }
       });
 
       // Sort events by date within each month in ascending order

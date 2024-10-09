@@ -1,5 +1,10 @@
 <ion-header class="header">
-  <h4>Academic Calendar</h4>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile"></ion-back-button>
+    </ion-buttons>
+    <h4>Academic Calendar</h4>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="calendar-content">
@@ -16,6 +21,18 @@
           (ionChange)="onDateChange($event)">
         </ion-datetime>
       </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Year selector -->
+  <ion-card class="year-picker-card">
+    <ion-card-header>
+      <ion-card-title>Select Year</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-select [(ngModel)]="selectedYear" (ionChange)="loadEvents()">
+        <ion-select-option *ngFor="let year of yearOptions" [value]="year">{{ year }}</ion-select-option>
+      </ion-select>
     </ion-card-content>
   </ion-card>
 
@@ -50,7 +67,7 @@
   <!-- Display full calendar events card -->
   <ion-card *ngIf="showFullCalendar" class="all-events-card">
     <ion-card-header>
-      <ion-card-title>Full Calendar Events</ion-card-title>
+      <ion-card-title>Full Calendar Events for {{ selectedYear }}</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-list>
@@ -71,5 +88,4 @@
       </ion-list>
     </ion-card-content>
   </ion-card>
-
 </ion-content>
