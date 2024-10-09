@@ -288,17 +288,22 @@ export class LecturePage implements OnInit {
     });
     await toast.present();
   }
-
   async addModule() {
+    // Validate fields
+    if (!this.moduleName || !this.moduleCode || !this.moduleLevel) {
+      alert('Please fill in all fields before submitting.');
+      return; // Exit the function if any field is empty
+    }
+  
     const loader = await this.loadingController.create({
       message: 'Submitting...',
       cssClass: 'custom-loader-class',
     });
     await loader.present();
-
+  
     try {
       const user = firebase.auth().currentUser;
-
+  
       if (user && user.email) {
         await this.db.collection('modules').add({
           moduleName: this.moduleName,
@@ -306,11 +311,12 @@ export class LecturePage implements OnInit {
           moduleLevel: this.moduleLevel,
           userEmail: user.email,
         });
-
+  
+        // Clear the form fields after successful submission
         this.moduleName = '';
         this.moduleCode = '';
         this.moduleLevel = '';
-
+  
         loader.dismiss();
         alert('Module successfully saved');
         this.getData(user.email); // Refresh the module list
@@ -324,6 +330,7 @@ export class LecturePage implements OnInit {
       alert('An error occurred while saving the module.');
     }
   }
+  
 
   async deleteModule() {
     if (!this.selectedModuleId) {
