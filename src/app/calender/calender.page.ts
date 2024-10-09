@@ -1,6 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+
+interface StudentData {
+  email: string;
+  name: string;
+  studentNumber: string;
+  surname: string;
+  moduleCode:string;
+}
 
 @Component({
   selector: 'app-calender',
@@ -8,6 +18,9 @@ import { Observable } from 'rxjs';
   styleUrls: ['./calender.page.scss'],
 })
 export class CalenderPage implements OnInit {
+  showUserInfo = false;
+  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+
   currentDate: string = new Date().toISOString();
   selectedDate: string = '';
   eventsForTheDay: any[] = [];
@@ -20,14 +33,55 @@ export class CalenderPage implements OnInit {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  constructor(private firestore: AngularFirestore) {}
+  constructor(private firestore: AngularFirestore,
+    private auth: AngularFireAuth,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
     this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
     this.loadEvents();
+    this.getCurrentUser();
   }
 
+  toggleUserInfo() {
+    this.showUserInfo = !this.showUserInfo;
+  }
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
+
+  getCurrentUser() {
+    this.auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('User signed in:', user.email);
+        this.firestore
+          .collection('enrolledModules', (ref) =>
+            ref.where('email', '==', user.email)
+          )
+          .get()
+          .subscribe(
+            (querySnapshot) => {
+              if (querySnapshot.empty) {
+                console.log('No user found with this email');
+              } else {
+                querySnapshot.forEach((doc) => {
+                  this.currentUser = doc.data() as StudentData;
+                  console.log('Current User:', this.currentUser);
+                });
+              }
+            },
+            (error) => {
+              console.error('Error fetching user data:', error);
+            }
+          );
+      } else {
+        console.log('No user is signed in');
+      }
+    });
+  }
   loadEvents() {
     this.events$.subscribe(events => {
       // Filter events for the selected day
