@@ -8,12 +8,24 @@ import { DataService } from '../services/data.service';
 import { Router } from '@angular/router';
 import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
 
+interface StudentData {
+  email: string;
+  name: string;
+  studentNumber: string;
+  surname: string;
+  moduleCode:string;
+}
+
 @Component({
   selector: 'app-stude-scan',
   templateUrl: './stude-scan.page.html',
   styleUrls: ['./stude-scan.page.scss'],
 })
 export class StudeScanPage implements OnInit {
+
+  showUserInfo = false;
+  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+
   email: string = "";
   student: any;
   scanResult: string = '';
@@ -41,6 +53,44 @@ export class StudeScanPage implements OnInit {
       this.email = user.email || '';
       this.searchStudent();
     }
+  }
+
+  toggleUserInfo() {
+    this.showUserInfo = !this.showUserInfo;
+  }
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
+
+  getCurrentUser() {
+    this.auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('User signed in:', user.email);
+        this.firestore
+          .collection('enrolledModules', (ref) =>
+            ref.where('email', '==', user.email)
+          )
+          .get()
+          .subscribe(
+            (querySnapshot) => {
+              if (querySnapshot.empty) {
+                console.log('No user found with this email');
+              } else {
+                querySnapshot.forEach((doc) => {
+                  this.currentUser = doc.data() as StudentData;
+                  console.log('Current User:', this.currentUser);
+                });
+              }
+            },
+            (error) => {
+              console.error('Error fetching user data:', error);
+            }
+          );
+      } else {
+        console.log('No user is signed in');
+      }
+    });
   }
   
   async logout() {

@@ -24,7 +24,7 @@ interface StudentData {
 export class ProfilePage implements OnInit {
   showUserInfo = false;
   currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
-  navCtrl: any;
+  // navCtrl: any;
 
   constructor(
     private auth: AngularFireAuth,
