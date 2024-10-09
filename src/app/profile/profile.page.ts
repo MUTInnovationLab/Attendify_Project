@@ -4,6 +4,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ModalController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
+import { ViewModalComponent } from '../view-modal/view-modal.component';
 // Adjust the path according to the actual location of the fil
 
 
@@ -51,6 +52,12 @@ export class ProfilePage implements OnInit {
   }
 
 
+  async presentViewModal() {
+    const modal = await this.modalController.create({
+      component: ViewModalComponent
+    });
+    return await modal.present();
+  }
   
 
   getCurrentUser() {
