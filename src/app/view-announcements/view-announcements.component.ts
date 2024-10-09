@@ -2,13 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import firebase from 'firebase/compat/app';
-import { NavController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { ModalController } from '@ionic/angular'; 
+import { ModalController } from '@ionic/angular';
 
-
-
-// Define interfaces for data models
 interface Announcement {
   moduleCode: string;
   timestamp: firebase.firestore.Timestamp;
@@ -20,7 +15,7 @@ interface Announcement {
 
 interface StudentRegistration {
   email: string;
-  moduleCode: string[]; // Assuming moduleCode is an array
+  moduleCode: string[];
 }
 
 interface RegisteredStaff {
@@ -37,95 +32,92 @@ export class ViewAnnouncementsComponent implements OnInit {
   announcements: Announcement[] = [];
   studentEmail: string | null = null;
 
-  constructor(private firestore: AngularFirestore, 
+  constructor(
+    private firestore: AngularFirestore,
     private modalController: ModalController,
-    private afAuth: AngularFireAuth,
-    private navCtrl: NavController, private router: Router) {}
+    private afAuth: AngularFireAuth
+  ) {}
 
   async ngOnInit() {
     try {
-      // Get the currently logged-in user's email
       const user = await this.afAuth.currentUser;
-      if (user) {
+      if (user && user.email) {
         this.studentEmail = user.email;
-
-        if (this.studentEmail) {
-          // Fetch the module codes for the student
-          const moduleCodes = await this.getStudentModuleCodes(this.studentEmail);
-
-          if (moduleCodes.length > 0) {
-            // Fetch announcements related to the student's module codes
-            const announcementsSnapshot = await this.firestore.collection<Announcement>('announcements', ref => 
-              ref.where('moduleCode', 'in', moduleCodes)
-                 .orderBy('timestamp', 'desc')
-            ).get().toPromise();
-
-            if (announcementsSnapshot && !announcementsSnapshot.empty) {
-              const announcements = announcementsSnapshot.docs.map(doc => doc.data() as Announcement);
-              // Fetch full names for each announcement's userEmail
-              for (const announcement of announcements) {
-                announcement.userEmail = await this.getFullNameByEmail(announcement.userEmail);
-              }
-              this.announcements = announcements;
-            } else {
-              console.log('No announcements found.');
-            }
-          } else {
-            console.log('No modules found for the student.');
-          }
+        const moduleCodes = await this.getStudentModuleCodes(this.studentEmail);
+        
+        if (moduleCodes.length > 0) {
+          await this.fetchAnnouncements(moduleCodes);
         } else {
-          console.log('No email found for the logged-in user.');
+          console.log('No modules found for the student with email:', this.studentEmail);
         }
       } else {
-        console.log('No user is logged in.');
+        console.log('No user is logged in or email is missing.');
       }
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error('Error in ngOnInit:', error);
     }
   }
 
   async getStudentModuleCodes(email: string): Promise<string[]> {
     try {
-      console.log('Fetching module codes for email:', email);
+      const studentSnapshot = await this.firestore.collection<StudentRegistration>('enrolledModules')
+        .ref.where('email', '==', email).get();
 
-      const studentSnapshot = await this.firestore.collection<StudentRegistration>('enrolledModules', ref => 
-        ref.where('email', '==', email)
-      ).get().toPromise();
-
-      if (studentSnapshot && !studentSnapshot.empty) {
-        console.log('Number of student documents found:', studentSnapshot.size);
-
-        const moduleCodes = studentSnapshot.docs.flatMap(doc => (doc.data() as StudentRegistration).moduleCode || []);
-        console.log('Module codes:', moduleCodes);
-
+      if (!studentSnapshot.empty) {
+        const moduleCodes: string[] = [];
+        studentSnapshot.docs.forEach(doc => {
+          const data = doc.data() as StudentRegistration;
+          if (Array.isArray(data.moduleCode)) {
+            moduleCodes.push(...data.moduleCode);
+          }
+        });
         return moduleCodes;
-      } else {
-        console.log('No student found with email:', email);
-        return [];
       }
+      return [];
     } catch (error) {
       console.error('Error fetching student module codes:', error);
       return [];
     }
   }
 
-  async getFullNameByEmail(email: string): Promise<string> {
+  async fetchAnnouncements(moduleCodes: string[]) {
     try {
-      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('registered staff', ref => 
-        ref.where('email', '==', email)
-      ).get().toPromise();
-      
-      if (staffSnapshot && !staffSnapshot.empty) {
-        const staffDoc = staffSnapshot.docs[0].data();
-        return staffDoc.fullName || 'Unknown';
-      } else {
-        console.log('No staff found with email:', email);
-        return 'Unknown';
+      const announcementsSnapshot = await this.firestore.collection<Announcement>('announcements')
+        .ref.where('moduleCode', 'in', moduleCodes).orderBy('timestamp', 'desc').get();
+
+      if (!announcementsSnapshot.empty) {
+        this.announcements = await Promise.all(announcementsSnapshot.docs.map(async doc => {
+          const data = doc.data() as Announcement;
+          const fullName = await this.getFullNameByEmail(data.userEmail);
+          return {
+            ...data,
+            userEmail: fullName,
+            formattedDate: this.formatDate(data.timestamp)
+          };
+        }));
       }
     } catch (error) {
-      console.error('Error fetching full name:', error);
-      return 'Unknown';
+      console.error('Error fetching announcements:', error);
     }
+  }
+
+  async getFullNameByEmail(email: string): Promise<string> {
+    try {
+      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('registeredStaff')
+        .ref.where('email', '==', email).limit(1).get();
+
+      if (!staffSnapshot.empty) {
+        return staffSnapshot.docs[0].data().fullName || email;
+      }
+      return email;
+    } catch (error) {
+      console.error('Error fetching full name:', error);
+      return email;
+    }
+  }
+
+  formatDate(timestamp: firebase.firestore.Timestamp): string {
+    return timestamp.toDate().toLocaleString();
   }
 
   dismiss() {
@@ -133,5 +125,4 @@ export class ViewAnnouncementsComponent implements OnInit {
       console.error('Error dismissing modal:', err);
     });
   }
-  
 }

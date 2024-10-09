@@ -119,7 +119,7 @@ export class DeptAnPage implements OnInit {
   }
 
   navigateToDeptAnalysis() {
-    this.router.navigate(['/dept-analytics']);
+    this.router.navigate(['/dashboard']);
   }
 
   searchLecturers() {

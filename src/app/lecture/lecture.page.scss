@@ -316,3 +316,11 @@ table tbody tr.selected {
     --border-radius: 10px;
   }
   
+  .student-card *, .profile-card * {
+    color: #ffffff !important;
+}
+
+.student-card p, .profile-card p {
+  font-size: 1.3rem; /* Add this new rule for larger paragraph text */
+  margin: 5px 0;
+}
