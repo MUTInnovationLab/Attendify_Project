@@ -1,29 +1,31 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      <ion-icon name="people-outline"></ion-icon>
       <span>Announcements</span>
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
         <ion-icon name="close-outline"></ion-icon>
+        Close
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="announcements-content">
   <ion-list>
-    <ion-item *ngFor="let announcement of announcements">
+    <ion-item *ngFor="let announcement of announcements" class="announcement-item">
       <ion-label>
-        <h2>{{ announcement.moduleCode }}</h2>
-        <h3>{{ announcement.title }}</h3>
-        <p>{{ announcement.content }}</p>
-        <p><small>By: {{ announcement.userEmail }} on {{ announcement.formattedDate }}</small></p>
+        <h2 class="module-code">{{ announcement.moduleCode }}</h2>
+        <h3 class="announcement-title">{{ announcement.title }}</h3>
+        <p class="announcement-content">{{ announcement.content }}</p>
+        <p class="announcement-meta">
+          <small>By: {{ announcement.userEmail }} on {{ announcement.formattedDate }}</small>
+        </p>
       </ion-label>
     </ion-item>
   </ion-list>
-  <ion-text *ngIf="announcements.length === 0">
+  <ion-text *ngIf="announcements.length === 0" class="no-announcements">
     <p>No announcements available.</p>
   </ion-text>
 </ion-content>

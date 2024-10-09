@@ -5,6 +5,9 @@ import { ModalController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
+import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
+
 // Adjust the path according to the actual location of the fil
 
 
@@ -29,7 +32,10 @@ export class ProfilePage implements OnInit {
     private auth: AngularFireAuth,
     private firestore: AngularFirestore,
     private modalController: ModalController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router: Router,
+    private navCtrl: NavController
+
   ) {}
 
   toggleUserInfo() {
@@ -42,7 +48,12 @@ export class ProfilePage implements OnInit {
 
   viewCalendar() {
     
-  } 
+  }
+  
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
 
   async openAnnouncementsModal() {
     const modal = await this.modalController.create({
