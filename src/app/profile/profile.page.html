@@ -76,19 +76,13 @@
           <ion-label>Attendance Records</ion-label>
         </div>
 
-        <div class="navigationButtons"  (click)="viewCalendar()">
-
-
-          
-          <ion-icon name="calendar" ></ion-icon>
-         
-           
-          <a href="assets/2024-University-Almanac.pdf" download="2024-University-Almanac.pdf" class="download-link">
-            Download Calendar
-          </a>
-         
+        <div class="navigationButtons" [routerLink]="['/calender']">
+          <ion-icon name="calendar"></ion-icon>
+          <ion-label>Calendar</ion-label>
         </div>
+        
       </div>
+
       <div class="cont">
         <div class="navigationButtons" (click)="openAnnouncementsModal()">
           <ion-icon name="megaphone"></ion-icon>
