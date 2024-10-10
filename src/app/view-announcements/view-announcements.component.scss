@@ -1,36 +1,76 @@
-ion-header {
+/* Header styling */
+ion-header ion-toolbar {
   --background: #EECC8C;
-  --color: white; 
 }
 
-ion-toolbar {
-  --background: #EECC8C; 
+ion-list{
+  background:  #fff5e6;;
 }
 
 ion-title {
-  color: white; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4A3500; /* Dark brown for contrast */
 }
 
-ion-content {
-  --background: #ff9800; 
+/* Content styling */
+.announcements-content {
+  --background: #fff5e6; /* Light orange background */
 }
 
-ion-content ion-list ion-item {
-  --background: #ff9800;
+.announcement-item {
+  --background: #FFFFFF;
+  margin: 8px;
+  border-radius: 8px;
+  border-left: 4px solid #FF9800;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
 }
 
-ion-content ion-list ion-item ion-label {
-  color: white; 
+/* Typography */
+.module-code {
+  color: #FF6F00; /* Darker orange for emphasis */
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
 }
 
-ion-content ion-list ion-item ion-label h2 {
-  font-weight: bold; 
+.announcement-title {
+  color: #4A3500; /* Dark brown for readability */
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
 }
 
-ion-content ion-list ion-item ion-label p {
-  color: white; 
+.announcement-content {
+  color: #5D4037; /* Brown-grey for main content */
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
 }
 
-ion-content ion-list ion-item ion-label p small {
-  color: white; 
+.announcement-meta {
+  color: #8D6E63; /* Lighter brown for secondary information */
+  font-size: 0.8rem;
+}
+
+/* Empty state */
+.no-announcements {
+  text-align: center;
+  color: #8D6E63;
+  padding: 24px;
+  font-style: italic;
+}
+
+/* Hover effects */
+.announcement-item:hover {
+  background-color: #FFF8E1;
+  transition: background-color 0.2s ease;
+}
+
+/* Active state */
+.announcement-item:active {
+  background-color: #FFE0B2;
 }

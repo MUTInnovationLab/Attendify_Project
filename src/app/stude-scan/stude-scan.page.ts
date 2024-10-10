@@ -5,6 +5,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { NavController, ModalController, AlertController, ToastController, Platform } from '@ionic/angular';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { DataService } from '../services/data.service';
+import { Router } from '@angular/router';
 import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
 
 interface StudentAttendance {
@@ -23,12 +24,24 @@ interface EnrolledModules {
 
 
 
+interface StudentData {
+  email: string;
+  name: string;
+  studentNumber: string;
+  surname: string;
+  moduleCode:string;
+}
+
 @Component({
   selector: 'app-stude-scan',
   templateUrl: './stude-scan.page.html',
   styleUrls: ['./stude-scan.page.scss'],
 })
 export class StudeScanPage implements OnInit {
+
+  showUserInfo = false;
+  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+
   email: string = "";
   student: any;
   scanResult: string = '';
@@ -43,6 +56,7 @@ export class StudeScanPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController,
     private modalController: ModalController,
+    private router: Router,
     private data: DataService,
     private platform: Platform
   ) {
@@ -57,11 +71,74 @@ export class StudeScanPage implements OnInit {
     }
   }
 
-  async presentViewModal() {
-    const modal = await this.modalController.create({
-      component: ViewModalComponent
+  toggleUserInfo() {
+    this.showUserInfo = !this.showUserInfo;
+  }
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
+
+  getCurrentUser() {
+    this.auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('User signed in:', user.email);
+        this.firestore
+          .collection('enrolledModules', (ref) =>
+            ref.where('email', '==', user.email)
+          )
+          .get()
+          .subscribe(
+            (querySnapshot) => {
+              if (querySnapshot.empty) {
+                console.log('No user found with this email');
+              } else {
+                querySnapshot.forEach((doc) => {
+                  this.currentUser = doc.data() as StudentData;
+                  console.log('Current User:', this.currentUser);
+                });
+              }
+            },
+            (error) => {
+              console.error('Error fetching user data:', error);
+            }
+          );
+      } else {
+        console.log('No user is signed in');
+      }
     });
-    return await modal.present();
+  }
+  
+  async logout() {
+    const alert = await this.alertController.create({
+      header: 'Logout',
+      message: 'Are you sure you want to log out?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Logout canceled');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: async () => {
+            try {
+              await this.auth.signOut();  // Firebase sign-out method
+              console.log('User logged out successfully');
+              this.showToast('You have been logged out.');
+              this.router.navigate(['/login']);  // Navigate to login page after logout
+            } catch (error) {
+              console.error('Error during logout:', error);
+              this.showToast('Error during logout. Please try again.');
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();  // Display the alert dialog
   }
 
   searchStudent() {

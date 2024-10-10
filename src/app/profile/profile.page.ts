@@ -4,6 +4,10 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ModalController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
+import { ViewModalComponent } from '../view-modal/view-modal.component';
+import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
+
 // Adjust the path according to the actual location of the fil
 
 
@@ -23,12 +27,16 @@ interface StudentData {
 export class ProfilePage implements OnInit {
   showUserInfo = false;
   currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+  // navCtrl: any;
 
   constructor(
     private auth: AngularFireAuth,
     private firestore: AngularFirestore,
     private modalController: ModalController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router: Router,
+    private navCtrl: NavController
+
   ) {}
 
   toggleUserInfo() {
@@ -41,7 +49,12 @@ export class ProfilePage implements OnInit {
 
   viewCalendar() {
     
-  } 
+  }
+  
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
 
   async openAnnouncementsModal() {
     const modal = await this.modalController.create({
@@ -51,6 +64,12 @@ export class ProfilePage implements OnInit {
   }
 
 
+  async presentViewModal() {
+    const modal = await this.modalController.create({
+      component: ViewModalComponent
+    });
+    return await modal.present();
+  }
   
 
   getCurrentUser() {
@@ -82,6 +101,9 @@ export class ProfilePage implements OnInit {
       }
     });
   }
+
+
+  
 
   async editUserInfo() {
     const alert = await this.alertController.create({

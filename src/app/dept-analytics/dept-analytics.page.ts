@@ -5,6 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 Chart.register(...registerables);
 
 interface Student {
+  attendance: number;
   email: string;
   name: string;
   surname: string;

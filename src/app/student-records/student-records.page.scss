@@ -1,6 +1,13 @@
 ion-card {
     margin: 20px;
   }
+
+  ion-toolbar {
+    --background: #EECC8C;
+    --min-height: 56px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+  }
   
   :host {
     background-color:  #dabf98; /* Change page background color */
@@ -17,19 +24,44 @@ ion-card {
   
   .progress-container {
     width: 100%;
-    background-color: #ddd; /* Grey background for the progress bar container */
-    height: 30px;
-    position: relative;
-    border-radius: 15px; /* Rounded corners */
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
   }
   
   .progress-bar {
-    height: 100%;
-    background-color: #4caf50; /* Green for the filled portion */
-    width: 0; /* Start at 0 and then animate it */
-    color: white;
-    text-align: center;
-    line-height: 30px; /* Center the text vertically */
-    border-radius: 15px;
-    transition: width 1s ease-in-out; /* Smooth animation */
+    width: 100%;
+    height: 20px;
+    position: relative;
   }
+  
+  .progress-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.5s ease-out;
+  }
+  
+  .progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+  }
+  
+  /* Additional Responsive Design Styles */
+  @media (min-width: 768px) {
+    .progress-container {
+      width: 80%; /* Adjust width on larger screens */
+      margin: auto; /* Center it */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .progress-container {
+      width: 60%; /* Narrower on larger screens */
+    }
+  }
+  

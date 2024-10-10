@@ -1,6 +1,17 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Student Scanner</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile">
+        <ion-label>Back</ion-label>
+      </ion-back-button>
+    </ion-buttons>
+    
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleUserInfo()" class="user-button">
+        <ion-label>{{ currentUser.name }}</ion-label>
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -32,9 +43,10 @@
         <ion-icon name="person-circle-outline"></ion-icon>
       </ion-fab-button>
 
-      <ion-fab-button class="color-secondary" (click)="presentViewModal()">
-        <ion-icon name="eye-outline"></ion-icon>
+      <ion-fab-button class="color-secondary" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
       </ion-fab-button>
+      
     </ion-fab-list>
   </ion-fab>
 </ion-content>
