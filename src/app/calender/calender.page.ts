@@ -34,26 +34,17 @@ export class CalenderPage implements OnInit {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  constructor(private firestore: AngularFirestore,
-    private auth: AngularFireAuth,
-    private router: Router
-  ) {}
+  yearOptions: number[] = [];
+  
+  constructor(private firestore: AngularFirestore,  private auth: AngularFireAuth) {}
 
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
     this.selectedYear = new Date().getFullYear();
-   // this.generateYearOptions();
+    this.generateYearOptions();
     this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
     this.loadEvents();
     this.getCurrentUser();
-  }
-
-  toggleUserInfo() {
-    this.showUserInfo = !this.showUserInfo;
-  }
-
-  dismiss() {
-    this.router.navigate(['/login']); // Navigate to LecturePage
   }
 
   getCurrentUser() {
@@ -85,6 +76,15 @@ export class CalenderPage implements OnInit {
       }
     });
   }
+
+  // Generate year options for the year selector
+  generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+      this.yearOptions.push(i);
+    }
+  }
+
   loadEvents() {
     this.events$.subscribe(events => {
       // Filter events for the selected day
@@ -129,4 +129,6 @@ export class CalenderPage implements OnInit {
   toggleCalendarView() {
     this.showFullCalendar = !this.showFullCalendar;
   }
+
+  toggleUserInfo(){}
 }

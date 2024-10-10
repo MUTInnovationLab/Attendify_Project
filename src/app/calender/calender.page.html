@@ -31,18 +31,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Year selector -->
-  <ion-card class="year-picker-card">
-    <ion-card-header>
-      <ion-card-title>Select Year</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-select [(ngModel)]="selectedYear" (ionChange)="loadEvents()">
-        <ion-select-option *ngFor="let year of yearOptions" [value]="year">{{ year }}</ion-select-option>
-      </ion-select>
-    </ion-card-content>
-  </ion-card>
-
   <ion-card *ngIf="eventsForTheDay.length > 0" class="events-card">
     <ion-card-header>
       <ion-card-title>Events for {{ selectedDate }}</ion-card-title>
@@ -64,6 +52,18 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- Year selector -->
+  <ion-card class="year-picker-card">
+    <ion-card-header>
+      <ion-card-title>Select Year</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-select [(ngModel)]="selectedYear" (ionChange)="loadEvents()">
+        <ion-select-option *ngFor="let year of yearOptions" [value]="year">{{ year }}</ion-select-option>
+      </ion-select>
+    </ion-card-content>
+  </ion-card>
+  
   <ion-button expand="full" 
               (click)="toggleCalendarView()" 
               class="view-calendar-button">
@@ -72,7 +72,7 @@
 
   <ion-card *ngIf="showFullCalendar" class="all-events-card">
     <ion-card-header>
-      <ion-card-title>Full Calendar Events for {{ selectedYear }}</ion-card-title>
+      <ion-card-title>Full Calendar Events</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-list>
