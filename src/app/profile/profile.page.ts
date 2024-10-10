@@ -5,6 +5,7 @@ import { ModalController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
+import { Router } from '@angular/router';
 // Adjust the path according to the actual location of the fil
 
 
@@ -24,13 +25,15 @@ interface StudentData {
 export class ProfilePage implements OnInit {
   showUserInfo = false;
   currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+ 
   // navCtrl: any;
 
   constructor(
     private auth: AngularFireAuth,
     private firestore: AngularFirestore,
     private modalController: ModalController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router: Router
   ) {}
 
   toggleUserInfo() {
@@ -42,7 +45,9 @@ export class ProfilePage implements OnInit {
   }
 
  
-  
+  dismiss(){
+    this.router.navigate(['/login']);
+  }
 
 
   async openAnnouncementsModal() {

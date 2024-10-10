@@ -42,7 +42,7 @@ export class CalenderPage implements OnInit {
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
     this.selectedYear = new Date().getFullYear();
-    this.generateYearOptions();
+   // this.generateYearOptions();
     this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
     this.loadEvents();
     this.getCurrentUser();
