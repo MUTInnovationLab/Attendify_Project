@@ -49,6 +49,7 @@ export class StudentRecordsPage implements OnInit {
   }
 
   ngOnInit() {
+    this.getCurrentUser();
     this.afAuth.currentUser
       .then(user => {
         if (user) {
