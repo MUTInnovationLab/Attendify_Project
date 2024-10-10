@@ -1,42 +1,95 @@
-<ion-header>
+<ion-header class="analytics-header">
   <ion-toolbar>
-    <ion-title>Dept-Analytics</ion-title>
-    <ion-button [routerLink]="['/dept-an']">
+    <ion-button slot="start" [routerLink]="['/dashboard']" class="back-button">
       <ion-icon name="arrow-back"></ion-icon>
     </ion-button>
+    <ion-title>
+      <ion-icon name="analytics-outline"></ion-icon>
+      Department Analytics
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <!-- Card to display counts -->
-  <ion-card>
-    <ion-card-header>
-      <ion-title>Counts</ion-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-label>Number of Students:</ion-label>
-        <ion-badge color="primary">{{ studentCount }}</ion-badge>
-      </ion-item>
-      <ion-item>
-        <ion-label>Number of Lecturers:</ion-label>
-        <ion-badge color="primary">{{ lecturerCount }}</ion-badge>
-      </ion-item>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="analytics-content">
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <ion-card class="count-card">
+      <ion-card-content>
+        <div class="count-item">
+          <div class="count-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <div class="count-details">
+            <h3>Students</h3>
+            <div class="count-value">
+              <ng-container *ngIf="studentCount !== undefined; else loadingState">
+                {{ studentCount }}
+              </ng-container>
+              <ng-template #loadingState>
+                <ion-spinner name="dots"></ion-spinner>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
 
-  <!-- Existing analytics cards -->
-  <ion-card>
+    <ion-card class="count-card">
+      <ion-card-content>
+        <div class="count-item">
+          <div class="count-icon">
+            <ion-icon name="school-outline"></ion-icon>
+          </div>
+          <div class="count-details">
+            <h3>Lecturers</h3>
+            <div class="count-value">
+              <ng-container *ngIf="lecturerCount !== undefined; else loadingState">
+                {{ lecturerCount }}
+              </ng-container>
+              <ng-template #loadingState>
+                <ion-spinner name="dots"></ion-spinner>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Analytics Section -->
+  <ion-card class="analytics-section">
     <ion-card-header>
-      <ion-title>Analytics</ion-title>
+      <ion-title class="section-title">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        Analytics Overview
+      </ion-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-card class="analytics-card">
-        <canvas id="lecturerAttendanceChart" width="400" height="200"></canvas>
-      </ion-card>
-      <ion-card class="analytics-card">
-        <canvas id="studentAttendanceChart" width="300" height="300"></canvas>
-      </ion-card>
+      <div class="chart-container">
+        <!-- Lecturer Attendance Chart -->
+        <div class="chart-card">
+          <h4>Lecturer Attendance Trends</h4>
+          <div class="chart-wrapper">
+            <canvas id="lecturerAttendanceChart"></canvas>
+            <div *ngIf="!lecturers.length" class="chart-loading">
+              <ion-spinner name="circles"></ion-spinner>
+              <p>Loading lecturer data...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Attendance Chart -->
+        <div class="chart-card">
+          <h4>Student Attendance Distribution</h4>
+          <div class="chart-wrapper">
+            <canvas id="studentAttendanceChart"></canvas>
+            <div *ngIf="!students.length" class="chart-loading">
+              <ion-spinner name="circles"></ion-spinner>
+              <p>Loading student data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </ion-card-content>
   </ion-card>
 </ion-content>

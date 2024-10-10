@@ -1,123 +1,158 @@
-// .header {
-//   background-color: #a77a20;
-//   padding: 10px;
+/* Header styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
+
+ion-toolbar ion-back-button,
+.user-button {
+  --color: #4A3500;
+}
+
+.user-button ion-label {
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+/* Content styling */
+.calendar-content {
+  --background: #FFF5E6;
+  padding: 16px;
+}
+
+/* Card styling - common */
+ion-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  margin: 16px 0;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
+  border-left: 4px solid #FF9800;
+}
+
+ion-card-header {
+  background: #FFF8E1;
+}
+
+ion-card-title {
+  color: #FF6F00;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Date picker specific styling */
+.date-picker-card {
+  margin-top: 0;
+}
+
+.datetime-container {
+  display: flex;
+  justify-content: center;
+}
+
+ion-datetime {
+  --background: #FFFFFF;
+  --background-rgb: 255, 255, 255;
   
-//   h4 {
-//     font-size: 1.8em;
-//     text-align: center;
-//     margin: 0;
-//   }
-// }
+  /* Calendar styling */
+  --ion-color-primary: #FF9800;
+  --ion-color-primary-contrast: #FFFFFF;
+  
+  /* Selected date */
+  --ion-color-secondary: #FFE0B2;
+  --ion-color-secondary-contrast: #4A3500;
+  
+  /* Calendar text */
+  --ion-text-color: #4A3500;
+  --ion-text-color-rgb: 74, 53, 0;
+  
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.1);
+}
 
-// .calendar-content {
-//   background-color: #56231F;
-//   --ion-background-color: #56231F;
-//   padding: 20px;
-// }
+/* Events card styling */
+.events-card ion-item,
+.no-events-card ion-item,
+.month-event-item {
+  --background: transparent;
+  --border-color: #FFE0B2;
+  --padding-start: 0;
+}
 
-// .date-picker-card,
-// .events-card,
-// .all-events-card {
-//   margin-bottom: 20px;
-//   border-radius: 12px;
-//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-//   background-color: #56231F;
-//   color: white;
-// }
+.event-item {
+  margin-bottom: 8px;
+}
 
-// .date-picker-card {
-//   padding: 10px;
-// }
+.event-item ion-label p {
+  color: #5D4037;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
 
-// .calendar-grid-card {
-//   margin-top: 20px;
-//   border-radius: 12px;
-//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-//   background-color: #56231F;
-// }
+/* No events card */
+.no-events-card ion-card-content p {
+  color: #8D6E63;
+  text-align: center;
+  font-style: italic;
+}
 
-// .calendar-grid {
-//   display: grid;
-//   grid-template-columns: repeat(7, 1fr);
-//   gap: 10px;
-// }
+/* View calendar button */
+.view-calendar-button {
+  --background: #FF9800;
+  --background-activated: #F57C00;
+  --color: #FFFFFF;
+  margin: 16px 0;
+  font-weight: 600;
+  height: 48px;
+}
 
-// .calendar-day {
-//   position: relative;
-//   padding: 10px;
-//   text-align: center;
-//   background-color: #56231F;
-//   border-radius: 50%;
-//   min-height: 40px;
-//   min-width: 40px;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   color: white;
-//   transition: background-color 0.3s ease;
-// }
+/* Full calendar view */
+.all-events-card .month-group {
+  margin-bottom: 24px;
+}
 
-// .calendar-day:hover {
-//   background-color: #7a3330;
-// }
+.month-title {
+  color: #FF6F00;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  padding-left: 8px;
+  border-left: 3px solid #FF9800;
+}
 
-// .event-day {
-//   background-color: #FFD700;
-//   color: #000;
-//   font-weight: bold;
-//   border: 2px solid #a77a20;
-// }
+.month-event-item {
+  margin: 4px 0;
+}
 
-// .event-marker {
-//   position: absolute;
-//   bottom: 2px;
-//   left: 50%;
-//   transform: translateX(-50%);
-//   font-size: 18px;
-//   color: #FF0000;
-// }
+.month-event-item ion-label p {
+  color: #5D4037;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
 
-// .no-events-card {
-//   padding: 10px;
-//   text-align: center;
-//   color: white;
-// }
+.event-date {
+  color: #FF6F00;
+  font-weight: 600;
+  margin-right: 4px;
+}
 
-// .view-calendar-button {
-//   margin-top: 20px;
-//   background-color: #a77a20;
-//   color: white;
-//   font-weight: bold;
-//   font-size: 1.2em;
-//   padding: 10px;
-//   border-radius: 8px;
-//   transition: background-color 0.3s ease;
-// }
+/* Hover effects */
+ion-card:hover {
+  box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
+  transition: box-shadow 0.2s ease;
+}
 
-// .view-calendar-button:hover {
-//   background-color: #c99125;
-// }
+.event-item:hover,
+.month-event-item:hover {
+  --background: #FFF8E1;
+  transition: --background 0.2s ease;
+}
 
-// // Additional styles to ensure white text on dark backgrounds
-// ion-card-title,
-// ion-card-content,
-// ion-item,
-// ion-label,
-// p {
-//   color: white;
-// }
-
-// // Style for the date picker to ensure visibility
-// ion-datetime {
-//   background-color: white;
-//   color: #000;
-//   border-radius: 8px;
-//   padding: 10px;
-// }
-
-// ion-toolbar {
-//   --background: #EECC8C;
-//   --min-height: 56px;
-//   --padding-top: 4px;
-//   --padding-bottom: 4px;
-// }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .calendar-content {
+    padding: 12px;
+  }
+  
+  ion-card {
+    margin: 12px 0;
+  }
+}

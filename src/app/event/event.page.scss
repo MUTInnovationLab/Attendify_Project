@@ -1,0 +1,140 @@
+/* Header styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
+
+ion-toolbar ion-title {
+  color: #4A3500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Content styling */
+.event-form-content {
+  --background: #FFF5E6;
+  padding: 16px;
+}
+
+.event-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.1);
+  margin: 16px auto;
+  max-width: 600px;
+}
+
+/* Card Header */
+ion-card-header {
+  background: #FFF8E1;
+  border-bottom: 2px solid #EECC8C;
+  margin-bottom: 10px;
+}
+
+ion-card-title {
+  color: #FF6F00;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-field {
+  --background: #FFFFFF;
+  --border-color: #EECC8C;
+  --border-radius: 8px;
+  --border-style: solid;
+  --border-width: 1px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 8px;
+}
+
+ion-item.form-field {
+  --highlight-color: #FF9800;
+}
+
+ion-label {
+  color: #4A3500 !important;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-datetime, ion-textarea {
+  --background: #FFFFFF;
+  --color: #5D4037;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+/* Button styling */
+.button-container {
+  margin-top: 24px;
+}
+
+ion-button.submit-button {
+  --background: #FF9800;
+  --background-hover: #F57C00;
+  --background-activated: #FF9800;
+  --border-radius: 8px;
+  --color: #FFFFFF;
+  font-weight: 600;
+  height: 48px;
+  margin: 0;
+}
+
+ion-button.submit-button[disabled] {
+  --background: #FFE0B2;
+  --color: #8D6E63;
+  opacity: 0.7;
+}
+
+/* Error message styling */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #D32F2F;
+  font-size: 0.9rem;
+  margin-top: 16px;
+  padding: 8px;
+  background: #FFEBEE;
+  border-radius: 4px;
+}
+
+/* Icons in labels */
+ion-icon {
+  font-size: 1.2rem;
+}
+
+/* Animations */
+.form-field {
+  transition: transform 0.2s ease;
+}
+
+.form-field:focus-within {
+  transform: translateX(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-card {
+    margin: 8px;
+  }
+  
+  ion-card-title {
+    font-size: 1.1rem;
+  }
+}

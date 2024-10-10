@@ -23,6 +23,7 @@ export class CalenderPage implements OnInit {
 
   currentDate: string = new Date().toISOString();
   selectedDate: string = '';
+  selectedYear: number = new Date().getFullYear();
   eventsForTheDay: any[] = [];
   allEventsGroupedByMonth: { [key: string]: any[] } = {};
   events$!: Observable<any[]>;
@@ -33,6 +34,8 @@ export class CalenderPage implements OnInit {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  yearOptions: number[] = [];
+
   constructor(private firestore: AngularFirestore,
     private auth: AngularFireAuth,
     private router: Router
@@ -40,6 +43,8 @@ export class CalenderPage implements OnInit {
 
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
+    this.selectedYear = new Date().getFullYear();
+    this.generateYearOptions();
     this.events$ = this.firestore.collection('academic-events').valueChanges({ idField: 'id' });
     this.loadEvents();
     this.getCurrentUser();
@@ -113,6 +118,13 @@ export class CalenderPage implements OnInit {
       // Assign the sorted and grouped events to allEventsGroupedByMonth
       this.allEventsGroupedByMonth = groupedEvents;
     });
+  }
+
+  generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+      this.yearOptions.push(i);
+    }
   }
 
   onDateChange(event: any) {

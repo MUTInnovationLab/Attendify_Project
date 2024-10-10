@@ -1,37 +1,49 @@
 <ion-content [fullscreen]="true" class="custom-background">
-  <div class="text">
+  <div class="profile-section">
     <ion-card class="profile-card">
       <ion-card-content>
-        <ion-icon name="person-circle-outline" class="icon"></ion-icon>
+        <ion-icon name="person-circle-outline" class="profile-icon"></ion-icon>
         <ion-card-title class="card-title"></ion-card-title>
-        <p> {{ userName }}</p> <!-- Display the user's name here -->
+        <p class="username">{{ userName }}</p>
       </ion-card-content>
     </ion-card>
-    
 
     <ion-card class="student-card" routerLink="/attendies">
       <ion-card-content>
-        <ion-icon name="receipt-outline" class="icon"></ion-icon>
+        <ion-icon name="receipt-outline" class="feature-icon"></ion-icon>
         <ion-card-title class="card-title">Student Attendance</ion-card-title>
         <ion-card-subtitle class="number"></ion-card-subtitle>
       </ion-card-content>
     </ion-card>
   </div>
 
-  <section id="contact" *ngIf="showAddCard">
-    <div class="sectionheader"><h1>Add Modules</h1></div>
+  <section id="contact" *ngIf="showAddCard" class="add-module-section">
+    <div class="section-header">
+      <h1>Add Modules</h1>
+    </div>
     <article>
-      <form action="" method="post" class="contactform">
-        <p class="input_wrapper"><input type="text" name="contact_nom" [(ngModel)]="moduleName" id="contact_nom"><label for="contact_nom">MODULE</label></p>
-        <p class="input_wrapper"><input type="text" name="contact_email" [(ngModel)]="moduleCode" id="contact_email"><label for="contact_email">CODE</label></p>
-        <p class="input_wrapper"><input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet"><label for="contact_sujet">LEVEL</label></p>
-        <p class="submit_wrapper"><input type="submit" (click)="addModule()" value="SUBMIT"></p>
+      <form action="" method="post" class="module-form">
+        <div class="input-wrapper">
+          <input type="text" name="contact_nom" [(ngModel)]="moduleName" id="contact_nom">
+          <label for="contact_nom">MODULE</label>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" name="contact_email" [(ngModel)]="moduleCode" id="contact_email">
+          <label for="contact_email">CODE</label>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet">
+          <label for="contact_sujet">LEVEL</label>
+        </div>
+        <div class="submit-wrapper">
+          <button type="submit" (click)="addModule()">SUBMIT</button>
+        </div>
       </form>
     </article>
   </section>
 
-  <ion-card class="tablecard">
-    <table>
+  <ion-card class="modules-card">
+    <table class="modules-table">
       <thead>
         <tr>
           <th>Classes</th>
@@ -39,29 +51,51 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let module of tableData" (click)="selectModule(module.id)" [attr.data-id]="module.id">
+        <tr *ngFor="let module of tableData" (click)="selectModule(module.id)" [attr.data-id]="module.id" 
+            [class.selected]="module.id === selectedModuleId">
           <td>{{ module.moduleCode }}</td>
-          <td (click)="gotoQRscan(module.moduleCode)">View</td>
+          <td class="view-cell" (click)="gotoQRscan(module.moduleCode)">
+            <span class="view-button">View</span>
+          </td>
         </tr>
       </tbody>
     </table>
 
-    <div class="ion-text-center">
-      <ion-button fill="clear" color="warning" (click)="presentConfirmationAlert()">Logout</ion-button>
-      <ion-button fill="outline" color="danger" (click)="deleteModule()">Delete</ion-button>
-      <ion-button fill="solid" class="addbutton" (click)="showAddCard = true">Add</ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" [disabled]="!selectedModuleId">Add Students</ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" [disabled]="!selectedModuleId">Announcement</ion-button>
-      <ion-button fill="solid" color="primary" (click)="viewStudents()">View Students</ion-button> <!-- New button added -->
-      
+    <div class="action-buttons">
+      <ion-button fill="clear" color="warning" (click)="presentConfirmationAlert()" class="logout-btn">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Logout
+      </ion-button>
+      <ion-button fill="outline" color="danger" (click)="deleteModule()" class="delete-btn">
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        Delete
+      </ion-button>
+      <ion-button fill="solid" (click)="showAddCard = true" class="add-btn">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add
+      </ion-button>
+      <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" 
+                  [disabled]="!selectedModuleId" class="add-students-btn">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Add Students
+      </ion-button>
+      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" 
+                  [disabled]="!selectedModuleId" class="announcement-btn">
+        <ion-icon name="megaphone-outline" slot="start"></ion-icon>
+        Announcement
+      </ion-button>
+      <ion-button fill="solid" color="primary" (click)="viewStudents()" class="view-students-btn">
+        <ion-icon name="people-circle-outline" slot="start"></ion-icon>
+        View Students
+      </ion-button>
     </div>
   </ion-card>
 
-  <!-- New modal for adding students -->
+  <!-- Modal styling -->
   <ion-modal [isOpen]="showAddStudentsModal">
     <ng-template>
       <ion-header>
-        <ion-toolbar color="primary">
+        <ion-toolbar>
           <ion-title>
             <ion-icon name="people-outline"></ion-icon>
             Add Students to Module
@@ -73,44 +107,46 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      
+      <ion-content class="modal-content">
         <ion-searchbar 
           [(ngModel)]="searchTerm" 
           (ionInput)="onSearchInput($event)"
           placeholder="Search by name or student number"
+          class="custom-searchbar"
           animated="true"
           debounce="300"
         ></ion-searchbar>
         
         <ng-container *ngIf="filteredStudents.length > 0; else noStudents">
-          <ion-list>
+          <ion-list class="student-list">
             <ion-item *ngFor="let student of filteredStudents" class="student-item">
               <ion-avatar slot="start">
                 <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
               </ion-avatar>
               <ion-label>
                 <h2>{{ student.name }} {{ student.surname }}</h2>
-                <p>
+                <p class="student-email">
                   <ion-icon name="mail-outline"></ion-icon>
                   {{ student.email }}
                 </p>
-                <p>
+                <p class="student-number">
                   <ion-icon name="id-card-outline"></ion-icon>
                   Student Number: {{ student.studentNumber }}
                 </p>
               </ion-label>
-              <ion-checkbox slot="end" [(ngModel)]="student.selected"></ion-checkbox>
+              <ion-checkbox slot="end" [(ngModel)]="student.selected" class="custom-checkbox"></ion-checkbox>
             </ion-item>
           </ion-list>
           
-          <ion-button expand="block" (click)="confirmAddStudents()" class="ion-margin-top">
+          <ion-button expand="block" (click)="confirmAddStudents()" class="confirm-button">
             <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
             Confirm Add
           </ion-button>
         </ng-container>
         
         <ng-template #noStudents>
-          <ion-card>
+          <ion-card class="no-students-card">
             <ion-card-header>
               <ion-card-title>No New Students Available</ion-card-title>
             </ion-card-header>
@@ -119,9 +155,221 @@
             </ion-card-content>
           </ion-card>
         </ng-template>
-        
-     
       </ion-content>
     </ng-template>
   </ion-modal>
-</ion-content>   
+</ion-content>
+
+<style>
+/* Base styles */
+.custom-background {
+  --background: #FFF5E6;
+}
+
+/* Profile Section */
+.profile-section {
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.profile-card, .student-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #EECC8C;
+  transition: transform 0.2s ease;
+}
+
+.profile-card:hover, .student-card:hover {
+  transform: translateY(-2px);
+}
+
+.profile-icon, .feature-icon {
+  font-size: 48px;
+  color: #FF9800;
+  margin-bottom: 12px;
+}
+
+.username {
+  color: #4A3500;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* Add Module Form */
+.add-module-section {
+  background: #FFFFFF;
+  border-radius: 12px;
+  margin: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-header h1 {
+  color: #FF9800;
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+.module-form .input-wrapper {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.module-form input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #EECC8C;
+  border-radius: 6px;
+  background: #FFF5E6;
+  transition: border-color 0.3s ease;
+}
+
+.module-form input:focus {
+  border-color: #FF9800;
+  outline: none;
+}
+
+.module-form label {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  color: #FF9800;
+  font-size: 0.8rem;
+}
+
+.submit-wrapper button {
+  background: #FF9800;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-wrapper button:hover {
+  background: #F57C00;
+}
+
+/* Modules Table */
+.modules-card {
+  margin: 16px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modules-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modules-table th {
+  background: #EECC8C;
+  color: #4A3500;
+  padding: 12px;
+  text-align: left;
+}
+
+.modules-table td {
+  padding: 12px;
+  border-bottom: 1px solid #FFE0B2;
+  color: #5D4037;
+}
+
+.modules-table tr:hover {
+  background: #FFF8E1;
+}
+
+.modules-table tr.selected {
+  background: #FFE0B2;
+}
+
+.view-cell {
+  cursor: pointer;
+}
+
+.view-button {
+  color: #FF9800;
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.action-buttons {
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+ion-button {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+/* Modal Styling */
+ion-modal ion-toolbar {
+  --background: #EECC8C;
+  --color: #4A3500;
+}
+
+.modal-content {
+  --background: #FFF5E6;
+}
+
+.custom-searchbar {
+  --background: #FFFFFF;
+  --color: #4A3500;
+  --placeholder-color: #8D6E63;
+  margin-bottom: 16px;
+}
+
+.student-list {
+  background: transparent;
+}
+
+.student-item {
+  --background: #FFFFFF;
+  margin: 8px;
+  border-radius: 8px;
+  --border-color: #FFE0B2;
+}
+
+.avatar-icon {
+  font-size: 40px;
+  color: #FF9800;
+}
+
+.student-email, .student-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8D6E63;
+}
+
+.custom-checkbox {
+  --checkbox-background: #FFFFFF;
+  --checkbox-background-checked: #FF9800;
+  --border-color: #EECC8C;
+  --border-color-checked: #FF9800;
+  --checkmark-color: #FFFFFF;
+}
+
+.confirm-button {
+  margin: 16px;
+  --background: #FF9800;
+  --background-activated: #F57C00;
+}
+
+.no-students-card {
+  margin: 16px;
+  border-left: 4px solid #FF9800;
+}
+</style>
