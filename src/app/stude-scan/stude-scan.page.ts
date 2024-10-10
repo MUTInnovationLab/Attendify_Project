@@ -64,6 +64,7 @@ export class StudeScanPage implements OnInit {
   }
 
   async ngOnInit() {
+    this.getCurrentUser();
     const user = await this.auth.currentUser;
     if (user) {
       this.email = user.email || '';
