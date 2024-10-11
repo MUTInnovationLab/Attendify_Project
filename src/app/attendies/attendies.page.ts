@@ -346,7 +346,6 @@ expandedDateGroups: { [key: string]: boolean } = {};
       this.showRequestsTable = false; 
     }
   }
-
   toggleTable() {
     this.showTable = !this.showTable;
   }

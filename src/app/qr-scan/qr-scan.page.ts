@@ -22,6 +22,7 @@ export class QrScanPage implements OnInit {
   qrCodeDataUrl: string = '';
 
   qrCodeText: string = '';
+  qrCodeTextNew : string = '';
   qrCodeSize: number = 200;
   scannedResult: any;
   content_visibility = '';
@@ -54,13 +55,14 @@ export class QrScanPage implements OnInit {
       this.cdr.detectChanges(); 
     }, 5000);
   }
-  
+ 
   async generateQRCode() {
     try {
       // Create a unique QR code text
       this.qrCodeText = this.moduleCode + '-' + Date.now().toString();
+      this.qrCodeTextNew = this.moduleCode;
       // Generate QR code data URL
-      this.qrCodeDataUrl = await QRCode.toDataURL(this.qrCodeText, {
+      this.qrCodeDataUrl = await QRCode.toDataURL(this.qrCodeTextNew, {
         width: this.qrCodeSize,
         margin: 1,
       });
@@ -72,7 +74,7 @@ export class QrScanPage implements OnInit {
 
 
 
-  
+
 
 
   // Firestore function to increment the scanner open count

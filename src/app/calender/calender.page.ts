@@ -50,14 +50,6 @@ export class CalenderPage implements OnInit {
     this.getCurrentUser();
   }
 
-  toggleUserInfo() {
-    this.showUserInfo = !this.showUserInfo;
-  }
-
-  dismiss() {
-    this.router.navigate(['/login']); // Navigate to LecturePage
-  }
-
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
@@ -87,6 +79,15 @@ export class CalenderPage implements OnInit {
       }
     });
   }
+
+  // Generate year options for the year selector
+  generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+      this.yearOptions.push(i);
+    }
+  }
+
   loadEvents() {
     this.events$.subscribe(events => {
       // Filter events for the selected day
@@ -102,8 +103,11 @@ export class CalenderPage implements OnInit {
 
       events.forEach(event => {
         const eventDate = new Date(event.date);
-        const eventMonth = this.monthNames[eventDate.getMonth()];
-        groupedEvents[eventMonth].push(event);
+        const eventYear = eventDate.getFullYear();
+        if (eventYear === this.selectedYear) {
+          const eventMonth = this.monthNames[eventDate.getMonth()];
+          groupedEvents[eventMonth].push(event);
+        }
       });
 
       // Sort events by date within each month in ascending order
@@ -135,4 +139,6 @@ export class CalenderPage implements OnInit {
   toggleCalendarView() {
     this.showFullCalendar = !this.showFullCalendar;
   }
+
+  toggleUserInfo(){}
 }

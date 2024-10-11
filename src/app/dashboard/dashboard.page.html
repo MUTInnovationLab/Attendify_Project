@@ -1,10 +1,12 @@
 <ion-content>
 
   <div class="header">
-    <ion-icon name="log-out-outline" (click)="logout()"></ion-icon>
-    <h4></h4>
+    <ion-icon name="log-out-outline" (click)="presentConfirmationAlert()"></ion-icon>
+    <h4>Dashboard</h4>
     <ion-icon name="person-circle-outline"></ion-icon>
+    
   </div>
+  
 
 
   <h2>Welcome, Admin</h2>
@@ -22,7 +24,7 @@
       <ion-card-content>
         <ion-icon name="analytics-outline" (click)="navigateToDeptAnalytics()"></ion-icon>
         <h3>Departments Analytics</h3>
-        <p class="number">8</p>
+        <p class="number"></p>
       </ion-card-content>
     </div>
     

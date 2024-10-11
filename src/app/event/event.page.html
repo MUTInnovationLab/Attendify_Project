@@ -1,74 +1,56 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>
-      <ion-icon name="calendar-outline"></ion-icon>
-      <span>Add Event</span>
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ eventIdToUpdate ? 'Edit Event' : 'Add Event' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="event-form-content">
-  <ion-card class="event-card">
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="add-circle-outline"></ion-icon>
-        Add New Event
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form (ngSubmit)="addEvent()" #eventForm="ngForm" class="event-form">
-        <div class="form-group">
-          <ion-item class="form-field">
-            <ion-label position="stacked">
-              <ion-icon name="time-outline"></ion-icon>
-              Date and Time
-            </ion-label>
-            <ion-datetime
-              [(ngModel)]="newEvent.date"
-              name="date"
-              display-format="MMM DD, YYYY HH:mm"
-              picker-format="MMM DD, YYYY HH:mm"
-              placeholder="Select Date and Time"
-              required
-              class="datetime-input"
-            ></ion-datetime>
-          </ion-item>
-        </div>
+<ion-content class="ion-padding">
+  <form (ngSubmit)="addEvent()" #eventForm="ngForm">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ eventIdToUpdate ? 'Edit Event Details' : 'New Event Details' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Date and Time</ion-label>
+          <ion-datetime
+            [(ngModel)]="newEvent.date"
+            name="date"
+            displayFormat="MMM DD, YYYY HH:mm"
+            pickerFormat="MMM DD, YYYY HH:mm"
+            placeholder="Select Date and Time"
+            required
+          ></ion-datetime>
+        </ion-item>
 
-        <div class="form-group">
-          <ion-item class="form-field">
-            <ion-label position="stacked">
-              <ion-icon name="document-text-outline"></ion-icon>
-              Description
-            </ion-label>
-            <ion-textarea
-              [(ngModel)]="newEvent.description"
-              name="description"
-              placeholder="Enter event description"
-              required
-              rows="4"
-              class="description-input"
-            ></ion-textarea>
-          </ion-item>
-        </div>
+        <ion-item>
+          <ion-label position="floating">Description</ion-label>
+          <ion-textarea
+            [(ngModel)]="newEvent.description"
+            name="description"
+            placeholder="Enter event description"
+            rows="4"
+            required
+          ></ion-textarea>
+        </ion-item>
 
-        <div class="button-container">
+        <div class="ion-padding-top">
           <ion-button
             expand="block"
             type="submit"
             [disabled]="!eventForm.form.valid"
-            class="submit-button"
           >
-            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
             {{ eventIdToUpdate ? 'Update Event' : 'Add Event' }}
           </ion-button>
         </div>
 
-        <ion-note color="danger" *ngIf="eventForm.form.invalid && eventForm.form.touched" class="error-message">
-          <ion-icon name="alert-circle-outline"></ion-icon>
-          Please fill out all required fields.
-        </ion-note>
-      </form>
-    </ion-card-content>
-  </ion-card>
+        <ion-text color="danger" *ngIf="eventForm.form.invalid && eventForm.form.touched">
+          <p class="ion-padding-top">Please fill out all required fields.</p>
+        </ion-text>
+      </ion-card-content>
+    </ion-card>
+  </form>
 </ion-content>
