@@ -2,9 +2,10 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Chart } from 'chart.js/auto';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { firstValueFrom } from 'rxjs';
 
 interface EnrolledModule {
-  email: string;
+  studentNumber: string;
   moduleCode: string[];
 }
 
@@ -17,65 +18,94 @@ export class StudentRecordsPage implements OnInit {
   @ViewChild('modulesChart', { static: false })
   chartCanvas!: ElementRef;
 
-  studentEmail: string = ''; 
+  studentNumber: string = '';
   chart: Chart | null = null;
   totalAttendance: number = 0;
   totalRequiredAttendance: number = 0;
   progressPercentage: number = 0;
-  showProgressBar: boolean = false; 
+  showProgressBar: boolean = false;
 
   constructor(
     private firestore: AngularFirestore,
     private afAuth: AngularFireAuth
   ) { }
 
-  ngOnInit() {
-    this.afAuth.currentUser
-      .then(user => {
-        if (user) {
-          this.studentEmail = user.email || '';
+  async ngOnInit() {
+    try {
+      const user = await this.afAuth.currentUser;
+      if (user && user.email) {
+        this.studentNumber = await this.getStudentNumber(user.email);
+        if (this.studentNumber) {
           this.loadChartData();
         } else {
-          console.error('No user is logged in');
+          console.error('Unable to retrieve student number');
         }
-      })
-      .catch(error => console.error('Error fetching current user: ', error));
+      } else {
+        console.error('No user is logged in or user email is missing');
+      }
+    } catch (error) {
+      console.error('Error initializing component:', error);
+    }
+  }
+
+  async getStudentNumber(email: string): Promise<string> {
+    try {
+      const registeredStudentsSnapshot = await firstValueFrom(
+        this.firestore.collection('registeredStudents', ref => ref.where('email', '==', email).limit(1)).get()
+      );
+
+      if (!registeredStudentsSnapshot.empty) {
+        const studentData = registeredStudentsSnapshot.docs[0].data() as { studentNumber?: string };
+        if (studentData && studentData.studentNumber) {
+          return studentData.studentNumber;
+        } else {
+          console.error('Student number not found in registered student data');
+          return '';
+        }
+      } else {
+        console.error('Registered student document not found');
+        return '';
+      }
+    } catch (error) {
+      console.error('Error fetching student number:', error);
+      return '';
+    }
   }
 
   async loadChartData() {
     try {
-      if (!this.studentEmail) {
-        console.error('Student email is not set');
+      if (!this.studentNumber) {
+        console.error('Student number is not set');
         return;
       }
-  
-      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules', ref => ref.where('email', '==', this.studentEmail)).get().toPromise();
-  
+
+      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules', ref => ref.where('studentNumber', '==', this.studentNumber)).get().toPromise();
+
       if (!enrolledModulesSnapshot || enrolledModulesSnapshot.empty) {
         console.error('No enrolled modules found for student');
         return;
       }
-  
+
       const modules: string[] = [];
       const attendanceCounts: number[] = [];
       let maxAttendanceCount = 0;
-  
+
       for (const moduleDoc of enrolledModulesSnapshot.docs) {
         const moduleData = moduleDoc.data() as EnrolledModule;
         const moduleCodes = moduleData.moduleCode;
-  
+
         if (moduleCodes && Array.isArray(moduleCodes)) {
           for (const moduleId of moduleCodes) {
             if (typeof moduleId === 'string' && moduleId.trim() !== '') {
               const attendanceCount = await this.getAttendanceCount(moduleId);
               const scannerOpenCount = await this.getScannerOpenCount(moduleId);
-  
+
               modules.push(moduleId);
               attendanceCounts.push(attendanceCount);
-  
+
               this.totalAttendance += attendanceCount;
               this.totalRequiredAttendance += scannerOpenCount;
-  
+
               if (attendanceCount > maxAttendanceCount) {
                 maxAttendanceCount = attendanceCount;
               }
@@ -83,12 +113,12 @@ export class StudentRecordsPage implements OnInit {
           }
         }
       }
-  
+
       console.log('Modules:', modules);
       console.log('Attendance Counts:', attendanceCounts);
       console.log('Total Attendance:', this.totalAttendance);
       console.log('Total Required Attendance:', this.totalRequiredAttendance);
-  
+
       this.calculateProgress();
       this.createChart(modules, attendanceCounts, maxAttendanceCount);
     } catch (error) {
@@ -100,11 +130,15 @@ export class StudentRecordsPage implements OnInit {
     const attendedDoc = await this.firestore.collection('Attended').doc(moduleId).get().toPromise();
     if (attendedDoc && attendedDoc.exists) {
       const attendanceData = attendedDoc.data() as any;
-      if (Array.isArray(attendanceData.details)) {
-        return attendanceData.details.reduce((total: number, attendance: any) => {
-          return attendance.email === this.studentEmail ? total + (attendance.count || 0) : total;
-        }, 0);
+      let count = 0;
+      for (const date in attendanceData) {
+        if (Array.isArray(attendanceData[date])) {
+          count += attendanceData[date].filter((attendance: any) => 
+            attendance.studentNumber === this.studentNumber
+          ).length;
+        }
       }
+      return count;
     }
     return 0;
   }
@@ -136,7 +170,7 @@ export class StudentRecordsPage implements OnInit {
       console.error('Total required attendance is zero or invalid');
     }
   }
-  
+
   updateProgressBar(percentage: number) {
     const progressBar = document.getElementById('attendanceProgressBar');
     if (!progressBar) {
@@ -145,12 +179,12 @@ export class StudentRecordsPage implements OnInit {
     }
     const progressFill = progressBar.querySelector('.progress-fill') as HTMLDivElement;
     const progressText = progressBar.querySelector('.progress-text') as HTMLSpanElement;
-  
+
     if (progressFill && progressText) {
       this.progressPercentage = Math.round(percentage);
       progressFill.style.width = `${percentage}%`;
       progressText.textContent = `${this.progressPercentage}%`;
-  
+
       let color1, color2;
       if (percentage < 30) {
         color1 = '#ff0000'; color2 = '#ff3333';
@@ -161,7 +195,7 @@ export class StudentRecordsPage implements OnInit {
       } else {
         color1 = '#00cc00'; color2 = '#33ff33';
       }
-  
+
       progressFill.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
     } else {
       console.error('Progress fill or text elements not found');
@@ -186,11 +220,11 @@ export class StudentRecordsPage implements OnInit {
     this.chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: modules, 
+        labels: modules,
         datasets: [{
           label: 'Student Attendance',
           data: attendanceCounts,
-          backgroundColor: '#ff9800', 
+          backgroundColor: '#ff9800',
           borderWidth: 1
         }]
       },

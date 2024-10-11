@@ -1,75 +1,83 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-icon name="arrow-back-outline" routerLink="/lecture"></ion-icon>
+      <ion-back-button defaultHref="/lecture"></ion-back-button>
     </ion-buttons>
-    <ion-title>Attendance Details</ion-title>
+    <ion-title slot="start">Attendance Details</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="toggleRequestsTable()">Requests</ion-button>
+     
+      <ion-button (click)="toggleRequestsTable()">
+        {{ showRequestsTable ? 'Hide' : 'Show' }} Requests
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-grid>
+
+   
+    <ion-row>
+      <ion-col size="6">
+        <ion-list>
+          <ion-list-header>
+            <ion-label>Dates</ion-label>
+          </ion-list-header>
+          <ion-item>
+            <ion-select placeholder="Select Date" (ionChange)="selectDate($event.detail.value)">
+              <ion-select-option *ngFor="let date of dates" [value]="date">
+                {{ date | date:'shortDate' }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+      <ion-col size="6">
+        <ion-list>
+          <ion-list-header>
+            <ion-label>Modules</ion-label>
+          </ion-list-header>
+          <ion-item>
+            <ion-select placeholder="Select Module" (ionChange)="selectModule($event.detail.value)">
+              <ion-select-option *ngFor="let module of modules" [value]="module">
+                {{ module.moduleCode }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+
     <!-- Attendance Table -->
     <ion-row>
       <ion-col size="12">
-        <ion-button expand="full" (click)="toggleTable()">Show/Hide Attendance Table</ion-button>
-        <div *ngIf="showTable">
-          <div class="table-responsive">
-            <table class="attendance-table" *ngIf="groupedByDate.length > 0">
-              <thead>
+        <div class="table-responsive custom-table">
+          <table *ngIf="getFilteredRecords().length > 0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Module Code</th>
+                <th>Time</th>
+                <th>Student Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let group of getGroupedRecords(); let i = index">
                 <tr>
-                  <th>Scan Date</th>
-                  <th>Module Code</th>
-                  <th>Email</th>
-                  <th>Student Number</th>
-                  <th>Name</th>
-                  <th>Surname</th>
+                  <td [attr.rowspan]="group.attendances.length">{{ group.date | date:'shortDate' }}</td>
+                  <td [attr.rowspan]="group.attendances.length">{{ group.moduleCode }}</td>
+                  <td>{{ group.attendances[0].scanTime }}</td>
+                  <td>{{ group.attendances[0].studentNumber }}</td>
                 </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let dateGroup of groupedByDate">
-                  <tr>
-                    <td>
-                      <ion-button fill="clear" (click)="toggleDateGroup(dateGroup.date)">
-                        {{ dateGroup.date | date:'shortDate' }}
-                        <ion-icon [name]="isDateGroupExpanded(dateGroup.date) ? 'chevron-up' : 'chevron-down'"></ion-icon>
-                      </ion-button>
-                    </td>
-                    <td colspan="5"></td>
-                  </tr>
-                  <ng-container *ngIf="isDateGroupExpanded(dateGroup.date)">
-                    <ng-container *ngFor="let moduleGroup of dateGroup.modules">
-                      <tr>
-                        <td></td>
-                        <td>
-                          <ion-button fill="clear" (click)="toggleModuleGroup(dateGroup.date, moduleGroup.moduleCode)">
-                            {{ moduleGroup.moduleCode }}
-                            <ion-icon [name]="isModuleGroupExpanded(dateGroup.date, moduleGroup.moduleCode) ? 'chevron-up' : 'chevron-down'"></ion-icon>
-                          </ion-button>
-                        </td>
-                        <td colspan="4"></td>
-                      </tr>
-                      <ng-container *ngIf="isModuleGroupExpanded(dateGroup.date, moduleGroup.moduleCode)">
-                        <tr *ngFor="let student of moduleGroup.students">
-                          <td></td>
-                          <td></td>
-                          <td>{{ student.email }}</td>
-                          <td>{{ student.studentNumber }}</td>
-                          <td>{{ student.name }}</td>
-                          <td>{{ student.surname }}</td>
-                        </tr>
-                      </ng-container>
-                    </ng-container>
-                  </ng-container>
-                </ng-container>
-              </tbody>
-            </table>
-          </div>
-          <p *ngIf="students.length === 0">No attendance data found.</p>
+                <tr *ngFor="let attendance of group.attendances.slice(1)">
+                  <td>{{ attendance.scanTime }}</td>
+                  <td>{{ attendance.studentNumber }}</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>>
         </div>
+        <p *ngIf="getFilteredRecords().length === 0">No attendance data found.</p>
       </ion-col>
     </ion-row>
 
@@ -78,7 +86,7 @@
       <ion-col size="12">
         <h2>Pending Requests</h2>
         <div class="table-responsive">
-          <table class="attendance-table" *ngIf="requestedInvites.length > 0"> 
+          <table class="attendance-table" *ngIf="requestedInvites.length > 0">
             <thead>
               <tr>
                 <th>Module Code</th>
@@ -111,3 +119,4 @@
     </ion-row>
   </ion-grid>
 </ion-content>
+
