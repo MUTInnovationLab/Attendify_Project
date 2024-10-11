@@ -73,7 +73,6 @@ export class LecturePage implements OnInit {
     });
   }
 
-
   getUserData(userEmail: string) {
     this.db
       .collection('registered staff', (ref) => ref.where('email', '==', userEmail))
@@ -136,7 +135,7 @@ export class LecturePage implements OnInit {
   async fetchExistingStudents() {
     try {
       const snapshot = await firebase.firestore()
-        .collection('allModules')
+        .collection('allmodules')
         .doc(this.selectedModule.moduleCode)
         .collection(this.selectedModule.moduleName)
         .get();
@@ -197,10 +196,10 @@ export class LecturePage implements OnInit {
   
     try {
       const batch = firebase.firestore().batch();
-      const moduleRef = firebase.firestore().collection('allModules').doc(this.selectedModule.moduleCode);
+      const moduleRef = firebase.firestore().collection('allmodules').doc(this.selectedModule.moduleCode);
       const studentsRef = moduleRef.collection(this.selectedModule.moduleName);
   
-      const enrolledModulesRef = firebase.firestore().collection('enrolledModules');
+      const enrolledmodulesRef = firebase.firestore().collection('enrolledmodules');
   
       for (const student of selectedStudents) {
         const studentDocRef = studentsRef.doc(student.id);
@@ -212,8 +211,8 @@ export class LecturePage implements OnInit {
           moduleCode: this.selectedModule.moduleCode
         });
   
-        // Use studentNumber as document ID in 'enrolledModules'
-        const enrolledStudentDocRef = enrolledModulesRef.doc(student.studentNumber.toString());
+        // Use studentNumber as document ID in 'enrolledmodules'
+        const enrolledStudentDocRef = enrolledmodulesRef.doc(student.studentNumber.toString());
         const enrolledStudentDoc = await enrolledStudentDocRef.get();
         
         if (enrolledStudentDoc.exists) {

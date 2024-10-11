@@ -102,7 +102,7 @@ expandedDateGroups: { [key: string]: boolean } = {};
     private toastController: ToastController,
     private afAuth: AngularFireAuth
   ) {}
-
+  
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
@@ -355,57 +355,135 @@ expandedDateGroups: { [key: string]: boolean } = {};
   }
 
   async updateStudentStatus(request: any, status: string) {
-    console.log('Module Name:', this.moduleName);
+    console.log('--- Start of updateStudentStatus ---');
     console.log('Module Code:', request.moduleCode);
     console.log('Student Number:', request.studentNumber);
   
-    if (!this.moduleName || !request.moduleCode || !request.studentNumber) {
-      console.warn('Module name, module code, or student number is missing.');
+    // Ensure we have the necessary information
+    if (!request.moduleCode || !request.studentNumber || !this.moduleName) {
+      console.warn('Module code, student number, or module name is missing.');
       await this.presentToast('Error updating student status. Required information is missing.', 'danger');
       return;
     }
+     alert(" ngifikile");
+     
+    console.log('Module Name:', this.moduleName);
   
     try {
-      const documentPath = `allModules/${request.moduleCode}/${this.moduleName}/${request.studentNumber}`;
-      console.log('Updating document at path:', documentPath);
+      console.log('Constructing Firestore references...');
+      // Reference to the specific document in the allModules collection
+      const allModulesRef = this.firestore.collection('allModules')
+          .doc(request.moduleCode)
+          .collection(this.moduleName)
+          .doc(request.studentNumber);
   
-      const docRef = this.firestore.collection('allModules')
-        .doc(request.moduleCode)
-        .collection(this.moduleName) 
-        .doc(request.studentNumber);
+      // Reference to the enrolledModules collection (where the student is enrolled)
+      const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(request.studentNumber);
   
-      // Check if the document exists
-      const docSnapshot = await docRef.get().toPromise();
+      console.log('Starting batch write...');
+      // Start a batch write
+      const batch = this.firestore.firestore.batch();
   
-      if (docSnapshot && docSnapshot.exists) {
-        // Document exists, update it
-        await docRef.update({ status });
+      console.log('Fetching student document from allModules...');
+      // Fetch the student document from allModules
+      const allModulesDoc = await allModulesRef.get().toPromise();
+  
+      console.log('Attempting to access document at path:',
+          `allModules/${request.moduleCode}/${this.moduleName}/${request.studentNumber}`
+      );
+      console.log('Document exists?', allModulesDoc?.exists);
+  
+      // Check if the moduleName already exists for the moduleCode
+      const moduleNamesSnapshot = await this.firestore.collection(`allModules/${request.moduleCode}`).get().toPromise();
+  
+      // Ensure moduleNamesSnapshot is defined before accessing its properties
+      const existingModuleNames = moduleNamesSnapshot ? moduleNamesSnapshot.docs.map(doc => doc.id) : [];
+  
+      // Update status in allModules collection
+      if (allModulesDoc && allModulesDoc.exists) {
+          console.log('Updating existing document in allModules');
+          batch.update(allModulesRef.ref, { status: status });
       } else {
-        // Document doesn't exist, create it
-        await docRef.set({
-          ...request,
-          status: status
-        });
+          // Ensure we do not create a new module name if it does not exist
+          if (!existingModuleNames.includes(this.moduleName)) {
+              console.log('Creating new document in allModules');
+              batch.set(allModulesRef.ref, {
+                  status: status,
+                  studentNumber: request.studentNumber,
+                  name: request.name,
+                  surname: request.surname,
+                  email: request.email,
+                  moduleName: this.moduleName,
+                  moduleCode: request.moduleCode
+              });
+          } else {
+              console.log('Module name already exists, not creating a new document in allModules');
+          }
       }
   
+      console.log('Checking enrolledModules collection...');
+      // Check if the student already exists in the enrolledModules collection
+      const enrolledModulesDoc = await enrolledModulesRef.get().toPromise();
+  
+      if (enrolledModulesDoc?.exists) {
+          console.log('Updating existing document in enrolledModules');
+          // Document exists, update the moduleCode array to add the moduleCode
+          batch.update(enrolledModulesRef.ref, {
+              moduleCode: firebase.firestore.FieldValue.arrayUnion(request.moduleCode)
+          });
+      } else {
+          console.log('Creating new document in enrolledModules');
+          // Document doesn't exist, create a new one with the moduleCode array and use studentNumber as the document ID
+          batch.set(enrolledModulesRef.ref, {
+              email: request.email,
+              moduleCode: [request.moduleCode],
+              name: request.name,
+              studentNumber: request.studentNumber,
+              surname: request.surname
+          });
+      }
+  
+      console.log('Committing batch...');
+      // Commit the batch
+      await batch.commit();
+      console.log('Batch committed successfully');
+  
+      console.log('Removing request from requestedInvites array...');
+      // Remove the request from requestedInvites array after approval
       const requestIndex = this.requestedInvites.findIndex(req => req.id === request.id);
       if (requestIndex > -1) {
-        this.requestedInvites.splice(requestIndex, 1);
+          this.requestedInvites.splice(requestIndex, 1);
       }
+  
+      console.log('Presenting success toast...');
+      // Notify success with a toast message
       await this.presentToast(`${status.charAt(0).toUpperCase() + status.slice(1)} student successfully.`, 'success');
-    } catch (error) {
+      
+      console.log('--- End of updateStudentStatus ---');
+  } catch (error) {
+      console.error('--- Error in updateStudentStatus ---');
       console.error(`Error updating student status to ${status}:`, error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       await this.presentToast('Error updating student status. Please try again.', 'danger');
-    }
   }
+  }  
 
+  
+  
+  // Method to approve a student's request, marking them active in allModules
   approveStudent(request: any) {
+    console.log('Approving student:', request);
     this.updateStudentStatus(request, 'active');
   }
-
+  
+  // Method to decline a student's request, marking them as declined
   declineStudent(request: any) {
+    console.log('Declining student:', request);
     this.updateStudentStatus(request, 'declined');
   }
+
+
+
 
   // Unsubscribe from observables when the component is destroyed
   ngOnDestroy() {
@@ -417,6 +495,9 @@ expandedDateGroups: { [key: string]: boolean } = {};
     }
   }
 
+  
+  
+  
   // Show a toast message
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
