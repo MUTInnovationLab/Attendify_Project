@@ -2,11 +2,23 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Chart } from 'chart.js/auto';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+<<<<<<< HEAD
 import { firstValueFrom } from 'rxjs';
+=======
+import { Router } from '@angular/router';
+>>>>>>> e16817d5c5fbf137c8a94a026a555cb00b817410
 
 interface EnrolledModule {
   studentNumber: string;
   moduleCode: string[];
+}
+
+interface StudentData {
+  email: string;
+  name: string;
+  studentNumber: string;
+  surname: string;
+  moduleCode:string;
 }
 
 @Component({
@@ -15,6 +27,10 @@ interface EnrolledModule {
   styleUrls: ['./student-records.page.scss'],
 })
 export class StudentRecordsPage implements OnInit {
+
+  showUserInfo = false;
+  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+
   @ViewChild('modulesChart', { static: false })
   chartCanvas!: ElementRef;
 
@@ -27,15 +43,30 @@ export class StudentRecordsPage implements OnInit {
 
   constructor(
     private firestore: AngularFirestore,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private auth: AngularFireAuth,
+    private router: Router
   ) { }
 
+<<<<<<< HEAD
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
       if (user && user.email) {
         this.studentNumber = await this.getStudentNumber(user.email);
         if (this.studentNumber) {
+=======
+  toggleUserInfo() {
+    this.showUserInfo = !this.showUserInfo;
+  }
+
+  ngOnInit() {
+    this.getCurrentUser();
+    this.afAuth.currentUser
+      .then(user => {
+        if (user) {
+          this.studentEmail = user.email || '';
+>>>>>>> e16817d5c5fbf137c8a94a026a555cb00b817410
           this.loadChartData();
         } else {
           console.error('Unable to retrieve student number');
@@ -70,6 +101,40 @@ export class StudentRecordsPage implements OnInit {
       console.error('Error fetching student number:', error);
       return '';
     }
+  }
+
+  dismiss() {
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
+
+  getCurrentUser() {
+    this.auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('User signed in:', user.email);
+        this.firestore
+          .collection('enrolledModules', (ref) =>
+            ref.where('email', '==', user.email)
+          )
+          .get()
+          .subscribe(
+            (querySnapshot) => {
+              if (querySnapshot.empty) {
+                console.log('No user found with this email');
+              } else {
+                querySnapshot.forEach((doc) => {
+                  this.currentUser = doc.data() as StudentData;
+                  console.log('Current User:', this.currentUser);
+                });
+              }
+            },
+            (error) => {
+              console.error('Error fetching user data:', error);
+            }
+          );
+      } else {
+        console.log('No user is signed in');
+      }
+    });
   }
 
   async loadChartData() {

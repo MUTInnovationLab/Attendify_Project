@@ -1,51 +1,56 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Add Event</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ eventIdToUpdate ? 'Edit Event' : 'Add Event' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Add New Event</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form (ngSubmit)="addEvent()" #eventForm="ngForm">
+<ion-content class="ion-padding">
+  <form (ngSubmit)="addEvent()" #eventForm="ngForm">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ eventIdToUpdate ? 'Edit Event Details' : 'New Event Details' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
         <ion-item>
-          <ion-label>Date and Time</ion-label>
+          <ion-label position="floating">Date and Time</ion-label>
           <ion-datetime
             [(ngModel)]="newEvent.date"
             name="date"
-            display-format="MMM DD, YYYY HH:mm"
-            picker-format="MMM DD, YYYY HH:mm"
+            displayFormat="MMM DD, YYYY HH:mm"
+            pickerFormat="MMM DD, YYYY HH:mm"
             placeholder="Select Date and Time"
             required
           ></ion-datetime>
         </ion-item>
+
         <ion-item>
-          <ion-label>Description</ion-label>
+          <ion-label position="floating">Description</ion-label>
           <ion-textarea
             [(ngModel)]="newEvent.description"
             name="description"
-            placeholder="Event Description"
+            placeholder="Enter event description"
+            rows="4"
             required
           ></ion-textarea>
         </ion-item>
-        <ion-button
-          expand="full"
-          type="submit"
-          [disabled]="!eventForm.form.valid"
-        >
-          {{ eventIdToUpdate ? 'Update Event' : 'Add Event' }}
-        </ion-button>
-        <ion-note color="danger" *ngIf="eventForm.form.invalid">
-          Please fill out all required fields.
-        </ion-note>
-      </form>
 
-      <ion-button expand="full" color="danger" (click)="deleteAllEventsForYear(selectedYear)">
-        Delete All Events for {{ selectedYear }} 
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+        <div class="ion-padding-top">
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="!eventForm.form.valid"
+          >
+            {{ eventIdToUpdate ? 'Update Event' : 'Add Event' }}
+          </ion-button>
+        </div>
+
+        <ion-text color="danger" *ngIf="eventForm.form.invalid && eventForm.form.touched">
+          <p class="ion-padding-top">Please fill out all required fields.</p>
+        </ion-text>
+      </ion-card-content>
+    </ion-card>
+  </form>
 </ion-content>

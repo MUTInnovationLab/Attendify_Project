@@ -1,169 +1,176 @@
 
-ion-content{
-    background-color: rgb(253, 250, 217);
-  }
-  
-  .scanner-container {
-      display: flex;
-      position: fixed;
-      flex-direction: column;
-      align-items: center;
-      // justify-content: center;
-      height: 100%;
-      width:100%;
-      padding-bottom: 0;
-      padding-top:40px;
-      background-color: antiquewhite;
-    }
-    
-    .scanner-frame {
-      position: relative;
-      width: 100%;
-      max-width: 250px;
-      aspect-ratio: 1;
-      border: 2px solid #000;
-      margin-bottom: 16px;
-    }
-    
-    video {
-      width: 100%;
-      height: 100%;
-    }
-    
-    .scan-line {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: rgb(51, 255, 0);
-      animation: scan-line-animation 2s infinite;
-    }
-    
-    @keyframes scan-line-animation {
-      0% { top: 0; }
-      50% { top: 50%; }
-      100% { top: 100%; }
-    }
- 
-  
-       .fixed-container{
-        width: 100%;
-        height:100%;
-        background-color:  #0099ff;
-        border-top-left-radius: 50px;
-        border-top-right-radius: 50px;
-        padding-top:10px;
-        color:white;
-        h1{
-          text-align: center;
-        }
-      }
-        .scroll {
-          max-height: 150px; 
-          overflow-y: auto; 
-          padding: 10px;
-        }
-      .paying-passenger .fixed-container .scroll ion-item{
-        --background: #fa898900;
-      }
-  .topic{
-    display: flex;
-    justify-content: space-around;
-    align-items:center;
-  }
-   
-  .topic ion-icon{
-    font-size: 30px;
-    color:green;
-  }
-  .topic ion-icon:hover{
-    color:greenyellow;
-    font-size:40px;
-  }
-  ion-item{
-    color:white;
-  }
-  .button-container{
-    width:100%;
-    padding:0 20px;
-    display: flex;
-    justify-content: center;
-    gap:30px;
-  }
-  .button-container ion-button{
-    --background: #ff9800;
-    color:black;
-    font-size:20px;
-  }
-  @media(min-height:700px){
-  
-    .scroll {
-      max-height: 250px; 
-    }
-  
-  }
-  @media(min-height:900px){
-  
-    .scanner-frame {
-      max-width: 350px;
-    }
-    .scroll {
-      max-height: 350px; 
-    }
-  }
-  
-  /* Styling the main FAB button */
-  ion-fab-button {
-    width: 56px;
-    height: 56px; 
-    border-radius: 50%; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  }
-  
-  /* Styling the icon inside the main FAB button */
-  ion-fab-button ion-icon {
-    font-size: 32px; 
-  }
-  
-  /* Styling the FAB list */
-  ion-fab-list {
-    --background: transparent; 
-  }
-  
-  /* Styling each FAB button inside the FAB list */
-  ion-fab-list ion-fab-button {
-    width: 44px; 
-    height: 44px; 
-    margin-top: 8px; 
-    border-radius: 50%;
-    display:absolute;
-  }
-  
-  /* Styling the icon inside each FAB button */
-  ion-fab-list ion-fab-button ion-icon {
-    font-size: 24px; 
-  }
-  
-  /* Custom colors for each FAB button */
-  ion-fab-button.color-primary {
-    --background: #ff9800;
-  // position:fixed;
-  // bottom:16px;
-  // right:16px;
-  // z-index:1000;
-  }
-  
-  ion-fab-button.color-secondary {
-    --background: #4c8bf5; 
-  }
-  
-  ion-fab-button.color-danger {
-    --background: #f04141; 
-  }
-  
-  /* Hover effect for FAB buttons */
-  ion-fab-button:hover {
-    transform: scale(1.1); 
-    transition: transform 0.2s ease-in-out; 
-  }
+/* Header styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
+
+.back-button, .user-button {
+  --color: #4A3500;
+  font-weight: 500;
+}
+
+.user-button ion-icon {
+  margin-left: 8px;
+}
+
+/* Content styling */
+.scanner-content {
+  --background: #FFF5E6;
+}
+
+.scanner-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Scanner frame styling */
+.scanner-frame {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
+}
+
+.preview-container {
+  width: 100%;
+  height: 100%;
+}
+
+.scanner-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #FF9800;
+  box-sizing: border-box;
+}
+
+.scanner-corners::before,
+.scanner-corners::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #FF9800;
+  border-style: solid;
+}
+
+.scanner-corners::before {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.scanner-corners::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.scan-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: #FF9800;
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* Button styling */
+.button-container {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scan-button {
+  --background: #FF9800;
+  --background-activated: #F57C00;
+  --color: #FFFFFF;
+  font-weight: 600;
+}
+
+.stop-button {
+  --background: #D32F2F;
+  --background-activated: #B71C1C;
+  --color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Result card styling */
+.result-card {
+  width: 100%;
+  background: #FFFFFF;
+  border-left: 4px solid #FF9800;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
+}
+
+.result-card ion-card-title {
+  color: #FF6F00;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-card ion-card-content {
+  color: #5D4037;
+}
+
+/* FAB styling */
+.custom-fab {
+  margin-bottom: 16px;
+  margin-right: 16px;
+}
+
+.fab-main {
+  --background: #FF9800;
+  --background-activated: #F57C00;
+  --color: #FFFFFF;
+}
+
+.fab-secondary {
+  --background: #EECC8C;
+  --background-activated: #E6B970;
+  --color: #4A3500;
+  margin: 8px 0;
+}
+
+/* Hover effects */
+.scan-button:hover, .stop-button:hover {
+  opacity: 0.9;
+}
+
+.fab-main:hover, .fab-secondary:hover {
+  --background: #F57C00;
+  --color: #FFFFFF;
+}
+
+/* Animation for FAB */
+ion-fab-button {
+  transition: transform 0.2s ease;
+}
+
+ion-fab-button:hover {
+  transform: scale(1.05);
+}

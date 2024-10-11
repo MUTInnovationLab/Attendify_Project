@@ -347,7 +347,6 @@ totalEnrolledStudents: number = 0;
       this.showRequestsTable = false; 
     }
   }
-
   toggleTable() {
     this.showTable = !this.showTable;
   }

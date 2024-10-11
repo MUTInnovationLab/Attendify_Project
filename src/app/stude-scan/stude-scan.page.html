@@ -1,41 +1,73 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Student Scanner</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile" class="back-button">
+        <ion-label>Back</ion-label>
+      </ion-back-button>
+    </ion-buttons>
+    
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleUserInfo()" class="user-button">
+        <ion-label>{{ currentUser.name }}</ion-label>
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="scanner-content">
   <div class="scanner-container">
- 
     <div class="scanner-frame">
-      <div *ngIf="isScanning">
-      <video #scannerPreview *ngIf="isWeb"></video></div>
+      <div *ngIf="isScanning" class="preview-container">
+        <video #scannerPreview *ngIf="isWeb" class="scanner-preview"></video>
+      </div>
       <div class="scan-line" *ngIf="!isWeb"></div>
+      <div class="scanner-overlay">
+        <div class="scanner-corners"></div>
+      </div>
     </div>
+
     <div class="button-container">
-      <ion-button expand="block" (click)="startScan()">Start Scan</ion-button>
-      <ion-button expand="block" (click)="stopScan()">Stop Scan</ion-button>
+      <ion-button expand="block" 
+                  (click)="startScan()" 
+                  class="scan-button">
+        <ion-icon name="scan-outline" slot="start"></ion-icon>
+        Start Scan
+      </ion-button>
+      <ion-button expand="block" 
+                  (click)="stopScan()" 
+                  class="stop-button">
+        <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
+        Stop Scan
+      </ion-button>
     </div>
-    <ion-text *ngIf="scanResult">
-      <h2>Scan Result:</h2>
-      <p>{{ scanResult }}</p>
-    </ion-text>
+
+    <ion-card *ngIf="scanResult" class="result-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Scan Result
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ scanResult }}</p>
+      </ion-card-content>
+    </ion-card>
   </div>
 
-  <ion-fab vertical="bottom" horizontal="end">
-    <ion-fab-button class="color-primary">
+  <ion-fab vertical="bottom" horizontal="end" class="custom-fab">
+    <ion-fab-button class="fab-main">
       <ion-icon name="chevron-up-circle-outline"></ion-icon>
     </ion-fab-button>
 
     <ion-fab-list side="top">
-      <ion-fab-button class="color-secondary" routerLink="/profile">
+      <ion-fab-button class="fab-secondary" routerLink="/profile">
         <ion-icon name="person-circle-outline"></ion-icon>
       </ion-fab-button>
 
-      <ion-fab-button class="color-secondary" (click)="logout()">
+      <ion-fab-button class="fab-secondary" (click)="logout()">
         <ion-icon name="log-out-outline"></ion-icon>
       </ion-fab-button>
-      
     </ion-fab-list>
   </ion-fab>
 </ion-content>

@@ -1,60 +1,137 @@
+/* Header styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
+
+.back-button {
+  --color: #4A3500;
+}
+
+.user-button {
+  --color: #4A3500;
+  font-weight: 500;
+}
+
+.user-button ion-icon {
+  margin-left: 8px;
+  font-size: 1.2rem;
+}
+
+/* Content styling */
+.attendance-content {
+  --background: #FFF5E6;
+  padding: 16px;
+}
+
+/* Card styling */
 ion-card {
-    margin: 20px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
+  margin: 8px;
+  border-left: 4px solid #FF9800;
+}
+
+ion-card-header {
+  background: #FFF8E1;
+  padding: 16px;
+}
+
+ion-card-title {
+  color: #FF6F00;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-card-title ion-icon {
+  color: #FF9800;
+}
+
+/* Chart card specific styling */
+.chart-card ion-card-content {
+  padding: 16px;
+  height: 400px;
+}
+
+/* Progress card specific styling */
+.progress-card {
+  height: calc(100% - 16px);
+}
+
+/* Toggle button styling */
+.toggle-button {
+  --background: #FF9800;
+  --background-activated: #F57C00;
+  --color: #FFFFFF;
+  --border-radius: 8px;
+  margin: 16px 0;
+  font-weight: 500;
+}
+
+/* Progress bar styling */
+.progress-container {
+  margin-top: 24px;
+}
+
+.progress-bar {
+  background: #FFE0B2;
+  border-radius: 20px;
+  height: 20px;
+  position: relative;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress-fill {
+  background: #FF9800;
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #4A3500;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.attendance-stats {
+  color: #5D4037;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+
+.attendance-stats strong {
+  color: #FF6F00;
+}
+
+/* Hover effects */
+ion-card:hover {
+  box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
+  transition: box-shadow 0.2s ease;
+}
+
+.toggle-button:hover {
+  --background: #F57C00;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-card ion-card-content {
+    height: 300px;
   }
   
-  :host {
-    background-color:  #dabf98; /* Change page background color */
+  .progress-card {
+    height: auto;
+    margin-top: 16px;
   }
-  
-  ion-content {
-    --background: transparent; /* Make ion-content background transparent to show the page's background */
-  }
-  
-  canvas {
-    width: 100% !important;
-    height: auto !important;
-  }
-  
-  .progress-container {
-    width: 100%;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-  }
-  
-  .progress-bar {
-    width: 100%;
-    height: 20px;
-    position: relative;
-  }
-  
-  .progress-fill {
-    height: 100%;
-    width: 0;
-    transition: width 0.5s ease-out;
-  }
-  
-  .progress-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #000;
-    font-weight: bold;
-  }
-  
-  /* Additional Responsive Design Styles */
-  @media (min-width: 768px) {
-    .progress-container {
-      width: 80%; /* Adjust width on larger screens */
-      margin: auto; /* Center it */
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .progress-container {
-      width: 60%; /* Narrower on larger screens */
-    }
-  }
-  
+}

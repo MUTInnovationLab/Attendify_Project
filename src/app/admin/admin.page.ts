@@ -80,7 +80,10 @@ export class AdminPage implements OnInit {
     toast.present();
   }
   dismiss() {
-    this.router.navigate(['/lecture']); // Navigate to LecturePage
+    this.router.navigate(['/login']); // Navigate to LecturePage
+  }
+  goBack() {
+    this.navCtrl.navigateBack('/event');
   }
 
 }
