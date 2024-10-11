@@ -98,15 +98,15 @@ interface ModuleData {
 })
 export class AttendiesPage implements OnInit, OnDestroy {
   attendedStudents: any[] = []; 
-  groupedStudents: any[] = [];
+  // groupedStudents: any[] = [];
   showAttendedTable: boolean = false; 
   students: AttendedStudent[] = [];
-  // groupedStudents: GroupedStudent[] = [];
+  groupedStudents: GroupedStudent[] = [];
   showTable = true;
   expandedGroups: { [key: string]: boolean } = {};
   requestedInvites: any[] = [];
   showRequestsTable = false;
-  modules: any[] = []; 
+  // modules: any[] = []; 
   module: any[] = []; 
   moduleName: string = ''; 
   attendanceSubscription!: Subscription; 
@@ -119,7 +119,7 @@ groupedByDate: GroupedByDate[] = [];
 expandedDateGroups: { [key: string]: boolean } = {};
 attendanceRecords: AttendanceRecord[] = [];
   dates: string[] = [];
-  // modules: Module[] = []; // Change this to Module[]
+  modules: Module[] = []; // Change this to Module[]
   selectedDate: string | null = null;
   showStatistics: boolean = false;
 attendedStudentsCount: number = 0;
