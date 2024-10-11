@@ -1,87 +1,78 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title class="custom-title">View Students</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">
-        <ion-icon name="close-outline" class="close-icon"></ion-icon>
-      </ion-button>
+    <ion-buttons slot="start">
+      <ion-icon class="back-button" name="arrow-back-outline" routerLink="/lecture"></ion-icon>
     </ion-buttons>
+    <ion-title>View Students</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding custom-background">
-  <!-- Search Bar (hide when a student is selected) -->
-  <ion-searchbar
-    *ngIf="!selectedStudent"
-    [(ngModel)]="searchTerm"
-    (ionInput)="filterStudents()"
-    placeholder="Search by name or student number"
-    class="search-bar"
-  ></ion-searchbar>
+<ion-content [fullscreen]="true" class="view-students-content">
+  <ion-grid>
 
-  <ion-grid class="custom-grid">
-    <!-- Selected Student's Modules (Show when a student is selected) -->
-    <ion-row *ngIf="selectedStudent">
-      <ion-col>
-        <ion-card class="small-card">
-          <ion-card-header>
-            <ion-card-title>Modules for {{ selectedStudent.name }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="table-container">
-              <table *ngIf="studentModules.length > 0; else noModules">
-                <thead>
-                  <tr>
-                    <th>Module Code</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let module of studentModules">
-                    <td>{{ module }}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <ng-template #noModules>
-                <p>No modules available for this student.</p>
-              </ng-template>
-            </div>
-          </ion-card-content>
-          <ion-button expand="block" (click)="clearSelection()">Back to Student List</ion-button>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <!-- Selected Student's Modules Card -->
+    <ion-card *ngIf="selectedStudent" class="table-card">
+      <ion-card-header>
+        <ion-card-title>{{ selectedStudent.name }}'s Modules</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-container">
+          <table class="custom-table" *ngIf="studentModules.length > 0; else noModules">
+            <thead>
+              <tr>
+                <th>Module Code</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let module of studentModules">
+                <td>{{ module }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noModules>
+            <p class="no-data">No modules available for this student.</p>
+          </ng-template>
+        </div>
+        <ion-button expand="block" fill="solid" color="primary" class="back-button-custom" (click)="clearSelection()">
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+          Back to Student List
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
 
-    <!-- Student List Table (Hide when a student is selected) -->
-    <ion-row *ngIf="!selectedStudent">
-      <ion-col>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Student List</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Surname</th>
-                    <th>Student Number</th>
-                    <th>Email</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let student of filteredStudents" (click)="onStudentClick(student)">
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.surname }}</td>
-                    <td>{{ student.studentNumber }}</td>
-                    <td>{{ student.email }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <!-- Student List Card -->
+    <ion-card *ngIf="!selectedStudent" class="table-card">
+      <ion-card-content>
+        <ion-searchbar
+         [(ngModel)]="searchTerm"
+         (ionInput)="filterStudents()"
+         placeholder="Search by name or student number"
+         class="custom-searchbar">
+        </ion-searchbar>
+
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Student Number</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of filteredStudents" 
+                  (click)="onStudentClick(student)"
+                  class="clickable-row">
+                <td>{{ student.name }}</td>
+                <td>{{ student.surname }}</td>
+                <td>{{ student.studentNumber }}</td>
+                <td>{{ student.email }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
   </ion-grid>
 </ion-content>

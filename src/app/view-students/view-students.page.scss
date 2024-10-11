@@ -1,130 +1,114 @@
-/* Custom styles for the header */
-ion-header {
-  --background: #ff9800; /* Header background color */
-}
-
+/* Header Styling */
 ion-toolbar {
-  --background: #ff9800; /* Toolbar background color */
+  --background: #EECC8C;
 }
 
-.custom-title {
-  color: #ffffff; /* Title text color set to white */
-  text-align: center; /* Center align title text */
+ion-title {
+  color: #4A3500;
+  font-weight: 600;
 }
 
-/* Custom styles for the close icon button */
-.close-icon {
-  color: #ffffff; /* Close icon color */
+.back-button {
+  font-size: 24px;
+  color: #4A3500;
+  margin-left: 8px;
+  cursor: pointer;
 }
 
-/* Custom styles for the table container */
-.table-container {
-  overflow-x: auto; /* Allow horizontal scrolling if content overflows */
-  display: block; /* Make sure container behaves as block */
+/* Content Styling */
+.view-students-content {
+  --background: #FFF5E6;
 }
 
-/* Custom styles for the table */
-table {
-  width: 100%;
-  min-width: 600px; /* Minimum width for horizontal scrolling */
-  border-collapse: collapse;
-  border: 1px solid #e0e0e0;
-  margin: 0; /* Remove margin */
+/* Search Bar Styling */
+.custom-searchbar {
+  --background: #FFF5E6;
+  --color: #4A3500;
+  --placeholder-color: #8D6E63;
+  margin-bottom: 16px;
+  border-radius: 8px;
 }
 
-thead th {
-  background-color: #ffffff; /* Header background color */
-  border: 1px solid #ff9800;
-  color: #ff9800; /* Header text color */
-  height: 50px; /* Increase the height of the table header */
-  font-size: 18px; /* Increase the font size of the table header */
-  font-family: 'Times New Roman', Times, serif;
-  position: -webkit-sticky; /* For Safari */
-  position: sticky;
-  text-align: center;
-  top: 0; /* Stick to the top of the container */
-  z-index: 1; /* Ensure headers stay above other content */
+/* Card Styling */
+.table-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+  overflow: hidden;
 }
 
-th, td {
-  padding: 15px; /* Increase padding for readability */
-  text-align: left;
-  white-space: nowrap; /* Prevent text wrapping */
-  color:#383a3e; /* Set the font color of all <th> and <td> elements to white */
-  border: 1px solid #ff9800; /* Add a border to the cells */
-
+ion-card-header {
+  background: #FF9800;
+  padding: 16px;
 }
 
-tbody tr:nth-child(odd), tbody tr:nth-child(even) {
-  background-color:  #ffffff;; /* Row background color */
-  
-}
-
-/* Fix columns in place */
-.sticky-column {
-  position: -webkit-sticky; /* For Safari */
-  position: sticky;
-  left: 0;
-  background-color: #854836; /* Background color for sticky columns */
-  z-index: 2; /* Ensure columns stay above other content */
-}
-
-/* Custom styles for IonCard */
-ion-card {
-  max-width: 100%; /* Ensure card width is responsive */
-  margin: 10px auto; /* Center the card horizontally with margin */
-  border-radius: 8px; /* Slightly rounded corners */
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* Softer shadow for a smaller card */
-}
-
-/* Ensure the card header and content expand to full width */
-ion-card-header, ion-card-content {
-  padding: 0; /* Remove padding */
-}
-
-/* Custom styles for card titles */
 ion-card-title {
-  background-color: #ffffff;
-  font-size: 1.2rem; /* Smaller font size for the title */
-  font-weight: bold;
-  margin: 0;
-  color: #ff9800; /* Card title color */
-  padding: 10px; /* Add padding inside the title */
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-/* Styles to make the module card smaller */
-.small-card {
-  width: 80%; /* Adjust width for the smaller card */
-  margin: 20px auto; /* Center the card horizontally with margin */
-  border-radius: 8px; /* Slightly rounded corners */
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* Softer shadow for a smaller card */
+/* Table Styling */
+.table-container {
+  overflow-x: auto;
+  margin: 16px 0;
 }
 
-.small-card ion-card-header, .small-card ion-card-content {
-  padding: 10px; /* Add padding inside card header and content */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
 }
 
-/* Custom styles for buttons */
-ion-button {
-  --border-radius: 10px;
+.custom-table th {
+  background: #FF9800;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Custom styles for icons */
-ion-icon {
-  font-size: 2rem;
+.custom-table td {
+  padding: 12px;
+  border-bottom: 1px solid #FFE0B2;
+  color: #5D4037;
 }
 
-/* Ensure the table and its container fill the available space */
-.custom-grid {
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Make the grid take full height */
-  width: 100%; /* Make the grid cover the page width */
+/* Clickable Row Styling */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-/* Custom background color */
-.custom-background {
-  --background: #f4ede1;
+.clickable-row:hover {
+  background: #FFF8E1;
 }
 
+/* Back Button Styling */
+.back-button-custom {
+  --background: #FF9800;
+  --color: white;
+  margin-top: 16px;
+}
+
+/* Empty State */
+.no-data {
+  text-align: center;
+  color: #8D6E63;
+  padding: 24px;
+  font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .custom-table td,
+  .custom-table th {
+    white-space: nowrap;
+  }
   
+  .table-container {
+    margin: 8px;
+  }
+}
