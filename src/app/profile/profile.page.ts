@@ -6,15 +6,13 @@ import { AlertController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { Router } from '@angular/router';
-// Adjust the path according to the actual location of the fil
-
 
 interface StudentData {
   email: string;
   name: string;
   studentNumber: string;
   surname: string;
-  moduleCode:string;
+  moduleCode: string;
 }
 
 @Component({
@@ -24,9 +22,7 @@ interface StudentData {
 })
 export class ProfilePage implements OnInit {
   showUserInfo = false;
-  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
- 
-  // navCtrl: any;
+  currentUser: StudentData = { moduleCode: '', email: '', name: '', studentNumber: '', surname: '' };
 
   constructor(
     private auth: AngularFireAuth,
@@ -44,11 +40,9 @@ export class ProfilePage implements OnInit {
     this.getCurrentUser();
   }
 
- 
-  dismiss(){
+  dismiss() {
     this.router.navigate(['/login']);
   }
-
 
   async openAnnouncementsModal() {
     const modal = await this.modalController.create({
@@ -57,14 +51,12 @@ export class ProfilePage implements OnInit {
     return await modal.present();
   }
 
-
   async presentViewModal() {
     const modal = await this.modalController.create({
       component: ViewModalComponent
     });
     return await modal.present();
   }
-  
 
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
@@ -96,9 +88,6 @@ export class ProfilePage implements OnInit {
     });
   }
 
-
-  
-
   async editUserInfo() {
     const alert = await this.alertController.create({
       header: 'Edit User Info',
@@ -108,14 +97,14 @@ export class ProfilePage implements OnInit {
           type: 'text',
           placeholder: 'CSK100',
           value: this.currentUser.moduleCode,
-          disabled: true
+          disabled: true // Make module code non-editable
         },
         {
           name: 'studentNumber',
           type: 'text',
           placeholder: 'Student Number',
           value: this.currentUser.studentNumber,
-          // disabled: true // Make student number non-editable
+          disabled: true // Make student number non-editable
         },
         {
           name: 'name',
@@ -135,9 +124,6 @@ export class ProfilePage implements OnInit {
           placeholder: 'Email',
           value: this.currentUser.email
         }
-      
-
-      
       ],
       buttons: [
         {
@@ -146,7 +132,10 @@ export class ProfilePage implements OnInit {
         },
         {
           text: 'Save',
-          handler: (data) => {
+          handler: async (data) => {
+            if (data.email !== this.currentUser.email) {
+              await this.updateEmail(data.email);
+            }
             this.updateUserInfo(data);
           }
         }
@@ -156,17 +145,81 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
+  async updateEmail(newEmail: string) {
+    try {
+      const user = await this.auth.currentUser;
+      if (user) {
+        // Update email in Firebase Authentication
+        await user.updateEmail(newEmail);
+        console.log('Email updated in Firebase Authentication.');
+
+        // Update email in Firestore for all related collections
+        const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents'];
+        collectionsToUpdate.forEach((collectionName) => {
+          this.firestore
+            .collection(collectionName, (ref) => ref.where('email', '==', this.currentUser.email))
+            .get()
+            .subscribe((querySnapshot) => {
+              querySnapshot.forEach((doc) => {
+                this.firestore
+                  .collection(collectionName)
+                  .doc(doc.id)
+                  .update({ email: newEmail })
+                  .then(() => {
+                    console.log(`Email updated successfully in ${collectionName}`);
+                  })
+                  .catch((error) => {
+                    console.error(`Error updating email in ${collectionName}:`, error);
+                  });
+              });
+            });
+        });
+
+        // Update local email after successful updates
+        this.currentUser.email = newEmail;
+      }
+    } catch (error) {
+      console.error('Error updating email in Firebase Authentication:', error);
+      // Optionally, you can show an alert or message to the user if the email update fails
+    }
+  }
+
   updateUserInfo(data: any) {
-    this.firestore
-      .collection('enrolledModules')
-      .doc(this.currentUser.studentNumber) // Use student number as document ID
-      .update(data)
-      .then(() => {
-        this.currentUser = { ...this.currentUser, ...data };
-        console.log('User info updated successfully');
-      })
-      .catch((error) => {
-        console.error('Error updating user info:', error);
-      });
+    const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents'];
+
+    collectionsToUpdate.forEach((collectionName) => {
+      // Update documents based on email, excluding studentNumber and moduleCode
+      this.firestore
+        .collection(collectionName, (ref) => ref.where('email', '==', this.currentUser.email))
+        .get()
+        .subscribe((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const updatedData = {
+              name: data.name,
+              surname: data.surname,
+              email: this.currentUser.email, // Keep email consistent after updates
+              moduleCode: this.currentUser.moduleCode, // moduleCode remains unchanged
+              studentNumber: this.currentUser.studentNumber // studentNumber remains unchanged
+            };
+
+            this.firestore
+              .collection(collectionName)
+              .doc(doc.id)
+              .update(updatedData)
+              .then(() => {
+                console.log(`User info updated successfully in ${collectionName}`);
+
+                // Re-fetch the user profile data after the update
+                this.getCurrentUser();
+              })
+              .catch((error) => {
+                console.error(`Error updating user info in ${collectionName}:`, error);
+              });
+          });
+        });
+    });
+
+    // Optionally, update the local currentUser object immediately
+    this.currentUser = { ...this.currentUser, ...data };
   }
 }

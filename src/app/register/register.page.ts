@@ -31,71 +31,66 @@ export class RegisterPage implements OnInit {
     this.navCtrl.navigateForward("/login");
   }
 
-
   async register() {
-
-    if(this.email==""){
-      alert("enter email");
-      return
+    if(this.email == ""){
+      alert("Please enter email");
+      return;
     }
-    if(this.password==""){
-      alert("enter password");
-      return
+    if(this.password == ""){
+      alert("Please enter password");
+      return;
     }
-     
-    
-     
+  
     const loader = await this.loadingController.create({
       message: 'Signing up',
       cssClass: 'custom-loader-class'
     });
     await loader.present();
-
-
-
-
-
+  
     this.auth.createUserWithEmailAndPassword(this.email, this.password)
-      .then(userCredential => {
-         this.firestore.collection('registeredStudents').add({
-          email: this.email,
-          name : this.name,
-          surname: this.surname,
-          studentNumber: this.studentNumber,
-
-        });
-        loader.dismiss();
-
-      
-
-
-        this.router.navigateByUrl("/login");
-        this.presentToast()
-        
-        // ...
+      .then(async userCredential => {
+        const user = userCredential.user;
+  
+        if (user) {
+          // Store user data in Firestore with the user's UID
+          await this.firestore.collection('registeredStudents').doc(user.uid).set({
+            uid: user.uid,
+            email: this.email,
+            name: this.name,
+            surname: this.surname,
+            studentNumber: this.studentNumber
+          });
+  
+          loader.dismiss();
+          this.router.navigateByUrl("/login");
+          this.presentToast('Successfully registered!');
+        }
       })
-      .catch((error) => {
+      .catch(error => {
         loader.dismiss();
-        const errorCode = error.code;
-        const errorMessage = error.message;
-
-        if(errorMessage=="Firebase: Error (auth/missing-email)."){
-
-        }else if(errorMessage=="Firebase: The email address is badly formatted. (auth/invalid-email)."){
-          alert("badly formatted e email");
-        }else if(errorMessage=="Firebase: The email address is already in use by another account. (auth/email-already-in-use)."){
-          alert("invalid email or password");
-        }
-        else if(errorMessage=="Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found)."){
-          alert("invalid email");
-        }else{
-          alert(errorMessage);
-        }
-
+        this.handleRegisterError(error);
       });
-
   }
-  async presentToast() {
+  
+  handleRegisterError(error: any) {
+    const errorMessage = error.message;
+    switch (errorMessage) {
+      case 'Firebase: Error (auth/missing-email).':
+        alert("Please provide an email address.");
+        break;
+      case 'Firebase: The email address is badly formatted. (auth/invalid-email).':
+        alert("The email address is badly formatted.");
+        break;
+      case 'Firebase: The email address is already in use by another account. (auth/email-already-in-use).':
+        alert("The email address is already in use.");
+        break;
+      default:
+        alert(errorMessage);
+        break;
+    }
+  }
+  
+  async presentToast(p0: string) {
     const toast = await this.toastController.create({
       message: 'successfully registered!',
       duration: 1500,
