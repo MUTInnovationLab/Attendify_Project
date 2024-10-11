@@ -72,7 +72,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
         this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
         this.studentCount = this.students.length;
   
-        const allAttendedEmails: Set<string> = new Set(); // Use a Set to store unique attended student emails
+        const attendedStudentNumbers: Set<string> = new Set(); // Use a Set to store unique attended student numbers
   
         // Step 2: Fetch attendance data for all modules from the 'Attended' collection
         const attendedModulesSnapshot = await this.firestore.collection('Attended').get().toPromise();
@@ -81,19 +81,23 @@ export class DeptAnalyticsPage implements AfterViewInit {
         if (attendedModulesSnapshot && !attendedModulesSnapshot.empty) {
           // Step 3: Loop through each module document in 'Attended' collection
           for (const moduleDoc of attendedModulesSnapshot.docs) {
-            const attendedData = moduleDoc.data() as Record<string, any>; // Change to any to avoid type issues
+            const attendedData = moduleDoc.data() as Record<string, any>;
             
-            // Log attended data for debugging
             console.log('Attended Data:', attendedData);
             
-            // Collect all attended students' emails across all dates for each module
+            // Collect all attended students' numbers across all dates for each module
             for (const date in attendedData) {
               if (attendedData.hasOwnProperty(date)) {
                 const studentsArray = attendedData[date];
   
-                // Check if studentsArray is an array before using forEach
                 if (Array.isArray(studentsArray)) {
-                  studentsArray.forEach(email => allAttendedEmails.add(email)); // Add emails to the Set
+                  studentsArray.forEach(studentInfo => {
+                    if (typeof studentInfo === 'object' && studentInfo.studentNumber) {
+                      attendedStudentNumbers.add(studentInfo.studentNumber);
+                    } else {
+                      console.error(`Invalid student info for date ${date}:`, studentInfo);
+                    }
+                  });
                 } else {
                   console.error(`Expected an array for date ${date}, but got:`, studentsArray);
                 }
@@ -101,27 +105,23 @@ export class DeptAnalyticsPage implements AfterViewInit {
             }
           }
   
-          // Convert Set to Array for further processing
-          this.attendingStudents = Array.from(allAttendedEmails); // Unique attended students' emails
+          this.attendingStudents = Array.from(attendedStudentNumbers);
           this.nonAttendingCount = this.studentCount - this.attendingStudents.length;
   
-          // Log the results for debugging purposes
           console.log('Total registered students:', this.studentCount);
           console.log('Total attended students:', this.attendingStudents.length);
           console.log('Total non-attending students:', this.nonAttendingCount);
         } else {
           console.error('No attendance data found in any modules.');
           this.attendingStudents = [];
-          this.nonAttendingCount = this.studentCount; // Set non-attending count to total registered students if no attendance data exists
+          this.nonAttendingCount = this.studentCount;
         }
-  
       } else {
         console.error('No registered students data found');
         this.studentCount = 0;
         this.nonAttendingCount = 0;
         this.attendingStudents = [];
       }
-  
     } catch (error) {
       console.error('Error fetching attended students:', error);
     }
