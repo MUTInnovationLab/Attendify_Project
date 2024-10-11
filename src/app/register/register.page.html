@@ -1,48 +1,232 @@
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="register-content ion-padding">
   <div class="register-container">
     <div class="form-container">
-      <h1 class="title">Attendify Register</h1>
+      <h1 class="title">
+        <ion-icon name="people-circle-outline" class="title-icon"></ion-icon>
+        Attendify Register
+      </h1>
+      
       <form class="form">
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating" class="ion-text-uppercase">Email</ion-label>
-          <ion-input type="text" name="email" id="email" [(ngModel)]="email"></ion-input>
+          <ion-label position="floating">EMAIL</ion-label>
+          <ion-input type="email" name="email" id="email" [(ngModel)]="email"></ion-input>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
         </ion-item>
+
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating" class="ion-text-uppercase">Name</ion-label>
+          <ion-label position="floating">NAME</ion-label>
           <ion-input type="text" name="name" id="name" [(ngModel)]="name"></ion-input>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
         </ion-item>
+
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating" class="ion-text-uppercase">Surname</ion-label>
+          <ion-label position="floating">SURNAME</ion-label>
           <ion-input type="text" name="surname" id="surname" [(ngModel)]="surname"></ion-input>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
         </ion-item>
+
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating" class="ion-text-uppercase">Student Number</ion-label>
+          <ion-label position="floating">STUDENT NUMBER</ion-label>
           <ion-input type="text" name="studentnumber" id="studentnumber" [(ngModel)]="studentNumber"></ion-input>
+          <ion-icon name="card-outline" slot="start"></ion-icon>
         </ion-item>
+
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating" class="ion-text-uppercase">Password</ion-label>
+          <ion-label position="floating">PASSWORD</ion-label>
           <ion-input type="password" name="password" id="password" [(ngModel)]="password"></ion-input>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-button fill="clear" slot="end" class="forgot-btn">
-            <a rel="noopener noreferrer" routerLink="/reset">Forgot Password?</a>
+            <a routerLink="/reset">Forgot Password?</a>
           </ion-button>
         </ion-item>
 
-        <ion-button class="sign-btn ion-margin-top" (click)="register()" expand="block" shape="round">
-          <ion-text class="ion-text-uppercase">Sign Up</ion-text>
+        <ion-button class="sign-btn" (click)="register()" expand="block">
+          SIGN UP
+          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
         </ion-button>
       </form>
     </div>
 
-    <div class="divider-container ion-margin-top">
+    <div class="divider-container">
       <div class="divider-line"></div>
       <p class="divider-text">Already have an account?</p>
       <div class="divider-line"></div>
     </div>
 
-    <p class="signup-text ion-text-center ion-margin-top">
+    <div class="login-link-container">
       <span>Go to login with your account</span>
-      <a rel="noopener noreferrer" routerLink="/login" class="signup-link">Log-in</a>
-    </p>
+      <a routerLink="/login" class="login-link">
+        Log-in
+        <ion-icon name="log-in-outline"></ion-icon>
+      </a>
+    </div>
   </div>
 </ion-content>
+
+<style>
+/* Main container styling */
+.register-content {
+  --background: #FFF5E6;
+}
+
+.register-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Title styling */
+.title {
+  color: #4A3500;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.title-icon {
+  font-size: 2.2rem;
+  color: #FF9800;
+}
+
+/* Form container styling */
+.form-container {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.1);
+}
+
+/* Input items styling */
+.input-item {
+  --background: #FFF5E6;
+  --border-color: #EECC8C;
+  --border-radius: 8px;
+  --border-width: 1px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  margin: 16px 0;
+}
+
+.input-item.item-has-focus {
+  --background: #FFFFFF;
+  --border-color: #FF9800;
+  --border-width: 2px;
+}
+
+/* Input labels */
+.input-item ion-label {
+  color: #8D6E63;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Input icons */
+.input-item ion-icon[slot="start"] {
+  color: #FF9800;
+  margin-right: 8px;
+}
+
+/* Forgot password button */
+.forgot-btn {
+  --color: #FF9800;
+  font-size: 0.8rem;
+  text-transform: none;
+}
+
+.forgot-btn a {
+  color: #FF9800;
+  text-decoration: none;
+}
+
+/* Sign up button */
+.sign-btn {
+  --background: #FF9800;
+  --background-hover: #F57C00;
+  --color: #FFFFFF;
+  --border-radius: 25px;
+  --box-shadow: 0 4px 8px rgba(255, 152, 0, 0.2);
+  margin-top: 24px;
+  height: 48px;
+  font-weight: 600;
+}
+
+.sign-btn ion-icon {
+  margin-left: 8px;
+}
+
+/* Divider styling */
+.divider-container {
+  display: flex;
+  align-items: center;
+  margin: 32px 0;
+  gap: 16px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #EECC8C;
+}
+
+.divider-text {
+  color: #8D6E63;
+  font-size: 0.9rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Login link section */
+.login-link-container {
+  text-align: center;
+  color: #5D4037;
+  font-size: 0.9rem;
+}
+
+.login-link {
+  color: #FF9800;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.login-link:hover {
+  color: #F57C00;
+}
+
+/* Animations */
+.input-item, .sign-btn {
+  transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .register-container {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .form-container {
+    padding: 16px;
+  }
+}
+
+/* Focus states */
+.input-item:focus-within {
+  transform: translateY(-2px);
+}
+
+.sign-btn:active {
+  transform: scale(0.98);
+}
+</style>

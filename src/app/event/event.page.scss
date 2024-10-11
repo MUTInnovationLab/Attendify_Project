@@ -1,148 +1,140 @@
+/* Header styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
 
-:host {
-    --background-dark: #56231F;
-    --background-hover: #7a3330;
-    --accent-color: #a77a20;
-    --accent-hover: #c99125;
-    --event-color: #FFD700;
-    --text-color: #ffffff;
-    --event-text-color: #000000;
-  
-    ion-content {
-      --background: var(--background-dark);
-    }
-  
-    .header {
-      background-color: var(--accent-color);
-      color: var(--text-color);
-      padding: 10px;
-  
-      h4 {
-        font-size: 1.8em;
-        text-align: center;
-        margin: 0;
-      }
-    }
-  
-    .calendar-content {
-      background-color: var(--background-dark);
-      --ion-background-color: var(--background-dark);
-      padding: 20px;
-    }
-  
-    ion-card.date-picker-card,
-    ion-card.events-card,
-    ion-card.all-events-card,
-    ion-card.calendar-grid-card {
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      background-color: var(--background-dark);
-      color: var(--text-color);
-    }
-  
-    .date-picker-card {
-      padding: 10px;
-    }
-  
-    .calendar-grid-card {
-      margin-top: 20px;
-    }
-  
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
-  
-    .calendar-day {
-      position: relative;
-      padding: 10px;
-      text-align: center;
-      background-color: var(--background-dark);
-      border-radius: 50%;
-      min-height: 40px;
-      min-width: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-color);
-      transition: background-color 0.3s ease;
-  
-      &:hover {
-        background-color: var(--background-hover);
-      }
-  
-      &.event-day {
-        background-color: var(--event-color);
-        color: var(--event-text-color);
-        font-weight: bold;
-        border: 2px solid var(--accent-color);
-      }
-    }
-  
-    .event-marker {
-      position: absolute;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 18px;
-      color: #FF0000;
-    }
-  
-    .no-events-card {
-      padding: 10px;
-      text-align: center;
-      color: var(--text-color);
-    }
-  
-    ion-button.view-calendar-button {
-      margin-top: 20px;
-      --background: var(--accent-color);
-      --color: var(--text-color);
-      font-weight: bold;
-      font-size: 1.2em;
-      --padding-start: 10px;
-      --padding-end: 10px;
-      --border-radius: 8px;
-  
-      &:hover {
-        --background: var(--accent-hover);
-      }
-    }
-  
-    // Ensure white text on dark backgrounds
-    ion-card-title,
-    ion-card-content,
-    ion-item,
-    ion-label,
-    p {
-      color: var(--text-color);
-    }
-  
-    // Style for the date picker to ensure visibility
-    ion-datetime {
-      background-color: var(--text-color);
-      color: var(--background-dark);
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-    }
-  
-    // Additional Ionic-specific styles
-    ion-item {
-      --background: var(--background-dark);
-      --color: var(--text-color);
-    }
-  
-    ion-card-header {
-      background-color: var(--accent-color);
-      color: var(--text-color);
-    }
-  
-    ion-card-title {
-      font-size: 1.4em;
-      font-weight: bold;
-    }
+ion-toolbar ion-title {
+  color: #4A3500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Content styling */
+.event-form-content {
+  --background: #FFF5E6;
+  padding: 16px;
+}
+
+.event-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.1);
+  margin: 16px auto;
+  max-width: 600px;
+}
+
+/* Card Header */
+ion-card-header {
+  background: #FFF8E1;
+  border-bottom: 2px solid #EECC8C;
+  margin-bottom: 10px;
+}
+
+ion-card-title {
+  color: #FF6F00;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-field {
+  --background: #FFFFFF;
+  --border-color: #EECC8C;
+  --border-radius: 8px;
+  --border-style: solid;
+  --border-width: 1px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 8px;
+}
+
+ion-item.form-field {
+  --highlight-color: #FF9800;
+}
+
+ion-label {
+  color: #4A3500 !important;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-datetime, ion-textarea {
+  --background: #FFFFFF;
+  --color: #5D4037;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+/* Button styling */
+.button-container {
+  margin-top: 24px;
+}
+
+ion-button.submit-button {
+  --background: #FF9800;
+  --background-hover: #F57C00;
+  --background-activated: #FF9800;
+  --border-radius: 8px;
+  --color: #FFFFFF;
+  font-weight: 600;
+  height: 48px;
+  margin: 0;
+}
+
+ion-button.submit-button[disabled] {
+  --background: #FFE0B2;
+  --color: #8D6E63;
+  opacity: 0.7;
+}
+
+/* Error message styling */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #D32F2F;
+  font-size: 0.9rem;
+  margin-top: 16px;
+  padding: 8px;
+  background: #FFEBEE;
+  border-radius: 4px;
+}
+
+/* Icons in labels */
+ion-icon {
+  font-size: 1.2rem;
+}
+
+/* Animations */
+.form-field {
+  transition: transform 0.2s ease;
+}
+
+.form-field:focus-within {
+  transform: translateX(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-card {
+    margin: 8px;
   }
+  
+  ion-card-title {
+    font-size: 1.1rem;
+  }
+}

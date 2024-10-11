@@ -27,6 +27,7 @@ export class DeptAnPage implements OnInit {
   searchStaffNumber: string = '';
   searchStudentNumber: string = '';
   presentToast: any;
+  selectedSegment: string = 'lecturers';
 
   constructor(
     private firestore: AngularFirestore,
@@ -104,6 +105,10 @@ export class DeptAnPage implements OnInit {
         this.displayedStudents = data;
       });
     }
+  }
+
+  toggleView() {
+    this.selectedSegment = this.selectedSegment === 'lecturers' ? 'students' : 'lecturers';
   }
 
   toggleStudentTable() {

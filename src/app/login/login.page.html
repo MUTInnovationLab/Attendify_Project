@@ -1,16 +1,17 @@
-
-
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
     <div class="form-container">
-      <h1 class="title">Attendify Login</h1>
+      <h1 class="title">
+        <ion-icon name="people-circle-outline"></ion-icon>
+        Attendify Login
+      </h1>
       <form class="form">
-        <ion-item lines="none">
+        <ion-item lines="none" class="custom-input">
           <ion-label position="floating" class="ion-text-uppercase">Username</ion-label>
-          <ion-input type="text" name="username" id="username" [(ngModel)]="email"></ion-input>
+          <ion-input type="text" name="username" id="username" [(ngModel)]="username"></ion-input>
         </ion-item>
 
-        <ion-item lines="none">
+        <ion-item lines="none" class="custom-input">
           <ion-label position="floating" class="ion-text-uppercase">Password</ion-label>
           <ion-input type="password" name="password" id="password" [(ngModel)]="password"></ion-input>
           <ion-button fill="clear" slot="end" class="forgot-btn ion-text-capitalize">
@@ -32,7 +33,7 @@
    
     <p class="signup-text ion-text-center ion-margin-top">
       <span class="ion-text-uppercase">Don't have an account?</span>
-      <a rel="noopener noreferrer" routerLink="/register" href="#" class="signup-link">Sign up</a>
+      <a rel="noopener noreferrer" routerLink="/register" class="signup-link">Sign up</a>
     </p>
   </div>
 </ion-content>

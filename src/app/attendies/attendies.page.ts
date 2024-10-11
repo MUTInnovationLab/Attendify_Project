@@ -66,6 +66,31 @@ interface GroupedByDate {
   }[];
 }
 
+interface GroupedAttendanceRecord {
+  date: string;
+  moduleCode: string;
+  attendances: {
+    scanTime: string;
+    studentNumber: string;
+  }[];
+}
+
+interface AttendanceRecord {
+  date: string;
+  module: {
+    moduleCode: string;
+  };
+  attendances: {
+    scanTime: string;
+    studentNumber: string;
+  }[];
+}
+
+interface ModuleData {
+  enrolledStudents?: string[];
+  attendedStudents?: string[];
+}
+
 @Component({
   selector: 'app-attendies',
   templateUrl: './attendies.page.html',
@@ -81,21 +106,25 @@ export class AttendiesPage implements OnInit, OnDestroy {
   expandedGroups: { [key: string]: boolean } = {};
   requestedInvites: any[] = [];
   showRequestsTable = false;
-  modules: any[] = []; 
+  // modules: any[] = []; 
+  module: any[] = []; 
   moduleName: string = ''; 
   attendanceSubscription!: Subscription; 
   requestedInvitesSubscription!: Subscription; 
   studentsInModule: any;
   selectedModule: Module | null = null; 
   currentLecturerEmail: string | null = null;
-  // expandedGroups: { [key: string]: boolean } = {};
 expandedModuleGroups: { [key: string]: boolean } = {};
-// students: AttendedStudent[] = [];
 groupedByDate: GroupedByDate[] = [];
 expandedDateGroups: { [key: string]: boolean } = {};
-// expandedModuleGroups: { [key: string]: boolean } = {};
-// showTable = true;
-
+attendanceRecords: AttendanceRecord[] = [];
+  dates: string[] = [];
+  modules: Module[] = []; // Change this to Module[]
+  selectedDate: string | null = null;
+  showStatistics: boolean = false;
+attendedStudentsCount: number = 0;
+nonAttendedStudentsCount: number = 0;
+totalEnrolledStudents: number = 0;
 
   constructor(
     private firestore: AngularFirestore,
@@ -165,127 +194,99 @@ expandedDateGroups: { [key: string]: boolean } = {};
   
   async fetchAttendedStudents() {
     try {
-      const modulesSnapshot = await this.firestore.collection('modules', ref => 
-        ref.where('userEmail', '==', this.currentLecturerEmail)
-      ).get().toPromise();
+      const attendedCollection = await this.firestore.collection('Attended').get().toPromise();
+      if (attendedCollection) {
+        const records: AttendanceRecord[] = [];
+        const modulesSet = new Set<string>();
 
-      if (!modulesSnapshot || modulesSnapshot.empty) {
-        console.log('No modules found for the lecturer.');
-        this.students = [];
-        this.groupedStudents = []; // Add this line
-        return;
-      }
+        attendedCollection.forEach(doc => {
+          const moduleCode = doc.id;
+          modulesSet.add(moduleCode);
+          const data = doc.data() as { [key: string]: any };
 
-      const moduleCodes = modulesSnapshot.docs.map(doc => {
-        const moduleData = doc.data() as Module;
-        return moduleData.moduleCode;
-      });
-
-      console.log('Module codes:', moduleCodes);
-
-      const attendedData: AttendedStudent[] = [];
-
-      for (const moduleCode of moduleCodes) {
-        console.log(`Fetching attendance data for module code: ${moduleCode}`);
-        const attendedDoc = await this.firestore.collection('Attended')
-          .doc(moduleCode)
-          .get().toPromise();
-
-        if (attendedDoc && attendedDoc.exists) {
-          const data = attendedDoc.data() as { details: any[] };
-          console.log('Attendance data for module code:', moduleCode, data);
-
-          if (data && data.details) {
-            data.details.forEach(detail => {
-              attendedData.push({
-                email: detail.email,
-                module: detail.module,
-                scanDate: detail.scanDate,
-                name: detail.name,
-                surname: detail.surname,
-                studentNumber: detail.studentNumber,
-                count: detail.count
-              });
+          Object.keys(data).forEach(date => {
+            const attendances = data[date];
+            records.push({
+              date,
+              module: { moduleCode },
+              attendances: attendances.map((a: any) => ({
+                scanTime: a.scanTime,
+                studentNumber: a.studentNumber
+              }))
             });
-          }
-        } else {
-          console.log(`No attendance data found for module ${moduleCode}.`);
-        }
-      }
+          });
+        });
 
-      this.students = attendedData;
-      this.groupByDateAndModule(this.students);
-      console.log('Grouped students data:', this.groupedByDate);
+        this.attendanceRecords = records.sort((a, b) => b.date.localeCompare(a.date));
+        this.dates = [...new Set(records.map(r => r.date))].sort((a, b) => b.localeCompare(a));
+        
+        // Update this part to create proper Module objects
+        this.modules = [...modulesSet].map(moduleCode => ({
+          id: moduleCode,
+          moduleCode,
+          moduleLevel: '', 
+          moduleName: '', 
+          userEmail: this.currentLecturerEmail || ''
+        })).sort((a, b) => a.moduleCode.localeCompare(b.moduleCode));
+        
+        console.log('Attendance records:', this.attendanceRecords);
+        console.log('Dates:', this.dates);
+        console.log('Modules:', this.modules);
+      }
     } catch (error) {
-      console.error('Error fetching attended students data:', error);
-      this.students = [];
-      this.groupedByDate = [];
+      console.error('Error fetching attendance data:', error);
     }
   }
 
-  groupByDateAndModule(students: AttendedStudent[]) {
-    const groupedData: { [key: string]: GroupedByDate } = {};
+  selectDate(date: string) {
+    this.selectedDate = this.selectedDate === date ? null : date;
+    this.selectedModule = null;
+  }
 
-    students.forEach(student => {
-      if (!groupedData[student.scanDate]) {
-        groupedData[student.scanDate] = { date: student.scanDate, modules: [] };
-      }
+  selectModule(module: Module) {
+    this.selectedModule = this.selectedModule?.id === module.id ? null : module;
+  }
 
-      let moduleGroup = groupedData[student.scanDate].modules.find(m => m.moduleCode === student.module);
-      if (!moduleGroup) {
-        moduleGroup = { moduleCode: student.module, students: [] };
-        groupedData[student.scanDate].modules.push(moduleGroup);
-      }
-
-      moduleGroup.students.push({
-        email: student.email,
-        name: student.name,
-        surname: student.surname,
-        studentNumber: student.studentNumber,
-        count: student.count
-      });
-    });
-
-    this.groupedByDate = Object.values(groupedData).sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+  getFilteredRecords(): AttendanceRecord[] {
+    return this.attendanceRecords.filter(record => 
+      (!this.selectedDate || record.date === this.selectedDate) &&
+      (!this.selectedModule || record.module.moduleCode === this.selectedModule.moduleCode)
     );
+  }
 
-    this.groupedByDate.forEach(dateGroup => {
-      dateGroup.modules.sort((a, b) => a.moduleCode.localeCompare(b.moduleCode));
-      dateGroup.modules.forEach(moduleGroup => {
-        moduleGroup.students.sort((a, b) => a.email.localeCompare(b.email));
-      });
+  getGroupedRecords(): GroupedAttendanceRecord[] {
+    const filteredRecords = this.getFilteredRecords();
+    const groupedRecords: GroupedAttendanceRecord[] = [];
+
+    filteredRecords.forEach(record => {
+      const existingGroup = groupedRecords.find(
+        group => group.date === record.date && group.moduleCode === record.module.moduleCode
+      );
+
+      if (existingGroup) {
+        existingGroup.attendances.push(...record.attendances);
+      } else {
+        groupedRecords.push({
+          date: record.date,
+          moduleCode: record.module.moduleCode,
+          attendances: [...record.attendances]
+        });
+      }
+    });
+
+    // Sort attendances within each group by scanTime
+    groupedRecords.forEach(group => {
+      group.attendances.sort((a, b) => a.scanTime.localeCompare(b.scanTime));
+    });
+
+    // Sort grouped records by date (descending) and then by moduleCode
+    return groupedRecords.sort((a, b) => {
+      const dateComparison = b.date.localeCompare(a.date);
+      if (dateComparison !== 0) return dateComparison;
+      return a.moduleCode.localeCompare(b.moduleCode);
     });
   }
 
-  // toggleTable() {
-  //   this.showTable = !this.showTable;
-  // }
-
-  toggleDateGroup(date: string) {
-    this.expandedDateGroups[date] = !this.expandedDateGroups[date];
-    // When collapsing a date group, collapse all its module groups
-    if (!this.expandedDateGroups[date]) {
-      this.groupedByDate.find(group => group.date === date)?.modules.forEach(module => {
-        this.expandedModuleGroups[`${date}-${module.moduleCode}`] = false;
-      });
-    }
-  }
-
-  isDateGroupExpanded(date: string): boolean {
-    return this.expandedDateGroups[date] || false;
-  }
-
-  toggleModuleGroup(date: string, moduleCode: string) {
-    const key = `${date}-${moduleCode}`;
-    this.expandedModuleGroups[key] = !this.expandedModuleGroups[key];
-  }
-
-  isModuleGroupExpanded(date: string, moduleCode: string): boolean {
-    const key = `${date}-${moduleCode}`;
-    return this.expandedModuleGroups[key] || false;
-  }
-    
   
   async fetchPendingRequests(moduleCode: string, moduleName: string) {
     if (!moduleCode || !moduleName) {
@@ -356,119 +357,63 @@ expandedDateGroups: { [key: string]: boolean } = {};
 
   async updateStudentStatus(request: any, status: string) {
     console.log('--- Start of updateStudentStatus ---');
-    console.log('Module Code:', request.moduleCode);
-    console.log('Student Number:', request.studentNumber);
-  
-    // Ensure we have the necessary information
-    if (!request.moduleCode || !request.studentNumber || !this.moduleName) {
-      console.warn('Module code, student number, or module name is missing.');
-      await this.presentToast('Error updating student status. Required information is missing.', 'danger');
-      return;
-    }
-     alert(" ngifikile");
-     
-    console.log('Module Name:', this.moduleName);
-  
-    try {
-      console.log('Constructing Firestore references...');
-      // Reference to the specific document in the allModules collection
-      const allModulesRef = this.firestore.collection('allModules')
-          .doc(request.moduleCode)
-          .collection(this.moduleName)
-          .doc(request.studentNumber);
-  
-      // Reference to the enrolledModules collection (where the student is enrolled)
-      const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(request.studentNumber);
-  
-      console.log('Starting batch write...');
-      // Start a batch write
-      const batch = this.firestore.firestore.batch();
-  
-      console.log('Fetching student document from allModules...');
-      // Fetch the student document from allModules
-      const allModulesDoc = await allModulesRef.get().toPromise();
-  
-      console.log('Attempting to access document at path:',
-          `allModules/${request.moduleCode}/${this.moduleName}/${request.studentNumber}`
-      );
-      console.log('Document exists?', allModulesDoc?.exists);
-  
-      // Check if the moduleName already exists for the moduleCode
-      const moduleNamesSnapshot = await this.firestore.collection(`allModules/${request.moduleCode}`).get().toPromise();
-  
-      // Ensure moduleNamesSnapshot is defined before accessing its properties
-      const existingModuleNames = moduleNamesSnapshot ? moduleNamesSnapshot.docs.map(doc => doc.id) : [];
-  
-      // Update status in allModules collection
-      if (allModulesDoc && allModulesDoc.exists) {
-          console.log('Updating existing document in allModules');
-          batch.update(allModulesRef.ref, { status: status });
-      } else {
-          // Ensure we do not create a new module name if it does not exist
-          if (!existingModuleNames.includes(this.moduleName)) {
-              console.log('Creating new document in allModules');
-              batch.set(allModulesRef.ref, {
-                  status: status,
-                  studentNumber: request.studentNumber,
-                  name: request.name,
-                  surname: request.surname,
-                  email: request.email,
-                  moduleName: this.moduleName,
-                  moduleCode: request.moduleCode
-              });
-          } else {
-              console.log('Module name already exists, not creating a new document in allModules');
-          }
-      }
-  
-      console.log('Checking enrolledModules collection...');
-      // Check if the student already exists in the enrolledModules collection
-      const enrolledModulesDoc = await enrolledModulesRef.get().toPromise();
-  
-      if (enrolledModulesDoc?.exists) {
-          console.log('Updating existing document in enrolledModules');
-          // Document exists, update the moduleCode array to add the moduleCode
-          batch.update(enrolledModulesRef.ref, {
-              moduleCode: firebase.firestore.FieldValue.arrayUnion(request.moduleCode)
-          });
-      } else {
-          console.log('Creating new document in enrolledModules');
-          // Document doesn't exist, create a new one with the moduleCode array and use studentNumber as the document ID
-          batch.set(enrolledModulesRef.ref, {
-              email: request.email,
-              moduleCode: [request.moduleCode],
-              name: request.name,
-              studentNumber: request.studentNumber,
-              surname: request.surname
-          });
-      }
-  
-      console.log('Committing batch...');
-      // Commit the batch
-      await batch.commit();
-      console.log('Batch committed successfully');
-  
-      console.log('Removing request from requestedInvites array...');
-      // Remove the request from requestedInvites array after approval
-      const requestIndex = this.requestedInvites.findIndex(req => req.id === request.id);
-      if (requestIndex > -1) {
-          this.requestedInvites.splice(requestIndex, 1);
-      }
-  
-      console.log('Presenting success toast...');
-      // Notify success with a toast message
-      await this.presentToast(`${status.charAt(0).toUpperCase() + status.slice(1)} student successfully.`, 'success');
-      
-      console.log('--- End of updateStudentStatus ---');
-  } catch (error) {
-      console.error('--- Error in updateStudentStatus ---');
-      console.error(`Error updating student status to ${status}:`, error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      await this.presentToast('Error updating student status. Please try again.', 'danger');
-  }
-  }  
 
-  
+    // Ensure request has the required fields
+    if (!request.moduleCode || !request.studentNumber || !request.email || !request.name || !request.surname) {
+        await this.presentToast('Error updating student status. Required information is missing.', 'danger');
+        console.error('Missing required fields: moduleCode, studentNumber, email, name, or surname.');
+        return;
+    }
+
+    try {
+        // Fetch the correct moduleName from the 'modules' collection using the moduleCode
+        const moduleSnapshot = await this.firestore.collection('modules', ref =>
+            ref.where('moduleCode', '==', request.moduleCode)
+        ).get().toPromise();
+
+        if (moduleSnapshot && !moduleSnapshot.empty) {
+            const moduleData = moduleSnapshot.docs[0].data() as { moduleName: string };
+            const correctModuleName = moduleData.moduleName;
+
+            // Use the correct moduleName to update the allModules collection
+            const allModulesRef = this.firestore.collection('allModules')
+                .doc(request.moduleCode)
+                .collection(correctModuleName)
+                .doc(request.studentNumber).ref; // Get the DocumentReference using .ref
+
+            const enrolledModulesRef = this.firestore.collection('enrolledModules')
+                .doc(request.studentNumber).ref; // Get the DocumentReference for enrolledModules
+
+            // Start a batch write
+            const batch = this.firestore.firestore.batch();
+
+            // Update the student's status in allModules
+            batch.update(allModulesRef, { status: status });
+
+            // Update or add the student's document in enrolledModules, with merge set to true to avoid overwriting
+            batch.set(enrolledModulesRef, {
+                email: request.email,
+                moduleCode: firebase.firestore.FieldValue.arrayUnion(request.moduleCode), // Add moduleCode to array
+                name: request.name,
+                studentNumber: request.studentNumber,
+                surname: request.surname
+            }, { merge: true });
+
+            // Commit the batch
+            await batch.commit();
+
+            await this.presentToast('Student status and enrolled module updated successfully.', 'success');
+        } else {
+            await this.presentToast('Error updating student status. Module not found.', 'danger');
+            console.error(`Module not found for moduleCode: ${request.moduleCode}`);
+        }
+
+    } catch (error) {
+        console.error('Error updating student status:', error);
+        await this.presentToast('Error updating student status. Please try again.', 'danger');
+    }
+}
+
   
   // Method to approve a student's request, marking them active in allModules
   approveStudent(request: any) {
@@ -481,8 +426,6 @@ expandedDateGroups: { [key: string]: boolean } = {};
     console.log('Declining student:', request);
     this.updateStudentStatus(request, 'declined');
   }
-
-
 
 
   // Unsubscribe from observables when the component is destroyed
@@ -508,4 +451,3 @@ expandedDateGroups: { [key: string]: boolean } = {};
     toast.present();
   }
 }
-

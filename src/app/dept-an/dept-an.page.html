@@ -1,143 +1,133 @@
 <ion-header>
   <ion-toolbar>
-    <!-- <ion-title>Dept Analytics</ion-title> -->
-    <ion-buttons slot="end">
-      <ion-button (click)="navigateToDeptAnalysis()">
-        <ion-icon name="analytics-outline"></ion-icon>
-        <ion-label>Dept Analytsis</ion-label>
-      </ion-button>
-    </ion-buttons>
     <ion-buttons slot="start">
       <ion-button (click)="navigateToLogin()">
         <ion-icon name="log-out-outline"></ion-icon>
         <ion-label>Logout</ion-label>
       </ion-button>
     </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="navigateToDeptAnalysis()">
+        <ion-icon name="analytics-outline"></ion-icon>
+        <ion-label>Dept Analysis</ion-label>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="custom-background">
+<ion-content [fullscreen]="true" class="user-management-content">
+  <ion-segment [(ngModel)]="selectedSegment" class="user-segment">
+    <ion-segment-button value="lecturers">
+      <ion-label>Lecturers</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="students">
+      <ion-label>Students</ion-label>
+    </ion-segment-button>
+  </ion-segment>
 
   <ion-grid>
-    <!-- Lecturer Table and Search Card -->
-    <ion-card *ngIf="!showStudents">
+    <!-- Lecturer Table Section -->
+    <ion-card *ngIf="selectedSegment === 'lecturers'" class="table-card">
       <ion-card-content>
-        <ion-card *ngIf="showLecturerSearchCard">
-          <ion-card-header>
-            <ion-searchbar [(ngModel)]="searchStaffNumber" (ionInput)="searchLecturers()" placeholder="Search by Staff Number"></ion-searchbar>
-          </ion-card-header>
-        </ion-card>
+        <ion-searchbar [(ngModel)]="searchStaffNumber" 
+                      (ionInput)="searchLecturers()" 
+                      placeholder="Search by Staff Number"
+                      class="custom-searchbar">
+        </ion-searchbar>
 
-        <!-- Lecturer Table -->
-        <table>
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Position</th>
-              <th>Staff Number</th>
-              <th>Department</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let lecturer of displayedLecturers">
-              <td>{{ lecturer.fullName }}</td>
-              <td>{{ lecturer.email }}</td>
-              <td>{{ lecturer.position }}</td>
-              <td>{{ lecturer.staffNumber }}</td>
-              <td>{{ lecturer.department }}</td>
-              <td>
-                <ion-button (click)="deleteLecturer(lecturer.staffNumber)" class="icon-only delete-icon">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>    
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Position</th>
+                <th>Staff Number</th>
+                <th>Department</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lecturer of displayedLecturers">
+                <td>{{ lecturer.fullName }}</td>
+                <td>{{ lecturer.email }}</td>
+                <td>{{ lecturer.position }}</td>
+                <td>{{ lecturer.staffNumber }}</td>
+                <td>{{ lecturer.department }}</td>
+                <td>
+                  <ion-button fill="clear" (click)="deleteLecturer(lecturer.staffNumber)" 
+                            class="delete-button">
+                    <ion-icon name="trash-outline" color="danger"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <!-- Lecturer Table Pagination -->
-        <ion-footer>
-          <ion-toolbar>
-            <ion-buttons slot="start">
-              <ion-button (click)="prevLecturerPage()" [disabled]="currentLecturerPage === 1">
-                <ion-icon name="arrow-back-outline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-            <ion-buttons slot="end">
-              <ion-button (click)="nextLecturerPage()" [disabled]="currentLecturerPage * lecturersPageSize >= lecturers.length">
-                <ion-icon name="arrow-forward-outline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-footer>
+        <div class="pagination">
+          <ion-button fill="clear" (click)="prevLecturerPage()" 
+                    [disabled]="currentLecturerPage === 1">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          </ion-button>
+          <span>Page {{ currentLecturerPage }}</span>
+          <ion-button fill="clear" (click)="nextLecturerPage()" 
+                    [disabled]="currentLecturerPage * lecturersPageSize >= lecturers.length">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
       </ion-card-content>
     </ion-card>
 
-    <!-- Student Table and Search Card -->
-    <ion-card *ngIf="showStudents">
+    <!-- Student Table Section -->
+    <ion-card *ngIf="selectedSegment === 'students'" class="table-card">
       <ion-card-content>
-        <ion-card *ngIf="showStudentSearchCard">
-          <ion-card-header>
-            <ion-searchbar [(ngModel)]="searchStudentNumber" (ionInput)="searchStudents()" placeholder="Search by Student Number"></ion-searchbar>
-          </ion-card-header>
-        </ion-card>
+        <ion-searchbar [(ngModel)]="searchStudentNumber" 
+                      (ionInput)="searchStudents()" 
+                      placeholder="Search by Student Number"
+                      class="custom-searchbar">
+        </ion-searchbar>
 
-        <!-- Student Table -->
-        <table>
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Student Number</th>
-              <th>Surname</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let student of displayedStudents">
-              <td>{{ student.fullName }}</td>
-              <td>{{ student.email }}</td>
-              <td>{{ student.studentNumber }}</td>
-              <td>{{ student.surname }}</td>
-              <td>
-                <ion-button (click)="deleteStudent(student.studentNumber)" class="icon-only delete-icon">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Student Number</th>
+                <th>Surname</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of displayedStudents">
+                <td>{{ student.fullName }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.studentNumber }}</td>
+                <td>{{ student.surname }}</td>
+                <td>
+                  <ion-button fill="clear" (click)="deleteStudent(student.studentNumber)" 
+                            class="delete-button">
+                    <ion-icon name="trash-outline" color="danger"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <!-- Student Table Pagination -->
-        <ion-footer>
-          <ion-toolbar>
-            <ion-buttons slot="start">
-              <ion-button (click)="prevStudentPage()" [disabled]="currentStudentPage === 1">
-                <ion-icon name="arrow-back-outline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-            <ion-buttons slot="end">
-              <ion-button (click)="nextStudentPage()" [disabled]="currentStudentPage * studentsPageSize >= students.length">
-                <ion-icon name="arrow-forward-outline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-footer>
+        <div class="pagination">
+          <ion-button fill="clear" (click)="prevStudentPage()" 
+                    [disabled]="currentStudentPage === 1">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          </ion-button>
+          <span>Page {{ currentStudentPage }}</span>
+          <ion-button fill="clear" (click)="nextStudentPage()" 
+                    [disabled]="currentStudentPage * studentsPageSize >= students.length">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
       </ion-card-content>
     </ion-card>
   </ion-grid>
 </ion-content>
-
-<ion-footer>
-  <ion-toolbar>
-    <ion-buttons slot="end">
-      <ion-button *ngIf="!showStudents" (click)="toggleStudentTable()" color="maroon">
-        View Students
-      </ion-button>
-      <ion-button *ngIf="showStudents" (click)="backToLecturerTable()">
-        Lecturer Table
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-footer>

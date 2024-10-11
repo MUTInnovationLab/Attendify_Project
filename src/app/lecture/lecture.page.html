@@ -1,67 +1,101 @@
 <ion-content [fullscreen]="true" class="custom-background">
-  <div class="text">
+  <div class="header">
+    <ion-icon name="log-out-outline" (click)=" presentConfirmationAlert()"></ion-icon>
+  </div>
+  
+  <div class="profile-section">
     <ion-card class="profile-card">
       <ion-card-content>
-        <ion-icon name="person-circle-outline" class="icon"></ion-icon>
+        <ion-icon name="person-circle-outline" class="profile-icon"></ion-icon>
         <ion-card-title class="card-title"></ion-card-title>
-        <p> {{ userName }}</p> <!-- Display the user's name here -->
+        <p class="username">{{ userName }}</p>
       </ion-card-content>
     </ion-card>
-    
 
     <ion-card class="student-card" routerLink="/attendies">
       <ion-card-content>
-        <ion-icon name="receipt-outline" class="icon"></ion-icon>
+        <ion-icon name="receipt-outline" class="feature-icon"></ion-icon>
         <ion-card-title class="card-title">Student Attendance</ion-card-title>
         <ion-card-subtitle class="number"></ion-card-subtitle>
       </ion-card-content>
     </ion-card>
   </div>
 
-  <section id="contact" *ngIf="showAddCard">
-    <div class="sectionheader"><h1>Add Modules</h1></div>
+  <section id="contact" *ngIf="showAddCard" class="add-module-section">
+    <div class="section-header">
+      <h1>Add Modules</h1>
+    </div>
     <article>
-      <form action="" method="post" class="contactform">
-        <p class="input_wrapper"><input type="text" name="contact_nom" [(ngModel)]="moduleName" id="contact_nom"><label for="contact_nom">MODULE</label></p>
-        <p class="input_wrapper"><input type="text" name="contact_email" [(ngModel)]="moduleCode" id="contact_email"><label for="contact_email">CODE</label></p>
-        <p class="input_wrapper"><input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet"><label for="contact_sujet">LEVEL</label></p>
-        <p class="submit_wrapper"><input type="submit" (click)="addModule()" value="SUBMIT"></p>
+      <form action="" method="post" class="module-form">
+        <div class="input-wrapper">
+          <input type="text" name="contact_nom" [(ngModel)]="moduleName" id="contact_nom">
+          <label for="contact_nom">MODULE</label>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" name="contact_email" [(ngModel)]="moduleCode" id="contact_email">
+          <label for="contact_email">CODE</label>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet">
+          <label for="contact_sujet">LEVEL</label>
+        </div>
+        <div class="submit-wrapper">
+          <button type="submit" (click)="addModule()">SUBMIT</button>
+        </div>
       </form>
     </article>
   </section>
 
-  <ion-card class="tablecard">
-    <table>
+  <ion-card class="modules-card">
+    <table class="modules-table">
       <thead>
         <tr>
-          <th>Classes</th>
+          <th>CLASSES</th>
           <th>VIEW CLASS</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let module of tableData" (click)="selectModule(module.id)" [attr.data-id]="module.id">
+        <tr *ngFor="let module of tableData" (click)="selectModule(module.id)" [attr.data-id]="module.id" 
+            [class.selected]="module.id === selectedModuleId">
           <td>{{ module.moduleCode }}</td>
-          <td (click)="gotoQRscan(module.moduleCode)">View</td>
+          <td class="view-cell" (click)="gotoQRscan(module.moduleCode)">
+            <span class="view-button">View</span>
+          </td>
         </tr>
       </tbody>
     </table>
 
-    <div class="ion-text-center">
-      <ion-button fill="clear" color="warning" (click)="presentConfirmationAlert()">Logout</ion-button>
-      <ion-button fill="outline" color="danger" (click)="deleteModule()">Delete</ion-button>
-      <ion-button fill="solid" class="addbutton" (click)="showAddCard = true">Add</ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" [disabled]="!selectedModuleId">Add Students</ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" [disabled]="!selectedModuleId">Announcement</ion-button>
-      <ion-button fill="solid" color="primary" (click)="viewStudents()">View Students</ion-button> <!-- New button added -->
-      
+    <div class="action-buttons">
+      <ion-button fill="outline" color="danger" (click)="deleteModule()" class="delete-btn">
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        Delete
+      </ion-button>
+      <ion-button fill="solid" (click)="showAddCard = true" class="add-btn">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add
+      </ion-button>
+      <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" 
+                  [disabled]="!selectedModuleId" class="add-students-btn">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Add Students
+      </ion-button>
+      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" 
+                  [disabled]="!selectedModuleId" class="announcement-btn">
+        <ion-icon name="megaphone-outline" slot="start"></ion-icon>
+        Announcement
+      </ion-button>
+      <ion-button fill="solid" color="primary" (click)="viewStudents()" class="view-students-btn">
+        <ion-icon name="people-circle-outline" slot="start"></ion-icon>
+        View Students
+      </ion-button>
     </div>
   </ion-card>
 
-  <!-- New modal for adding students -->
+  <!-- Modal styling -->
   <ion-modal [isOpen]="showAddStudentsModal">
     <ng-template>
       <ion-header>
-        <ion-toolbar color="primary">
+        <ion-toolbar>
           <ion-title>
             <ion-icon name="people-outline"></ion-icon>
             Add Students to Module
@@ -73,44 +107,46 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      
+      <ion-content class="modal-content">
         <ion-searchbar 
           [(ngModel)]="searchTerm" 
           (ionInput)="onSearchInput($event)"
           placeholder="Search by name or student number"
+          class="custom-searchbar"
           animated="true"
           debounce="300"
         ></ion-searchbar>
         
         <ng-container *ngIf="filteredStudents.length > 0; else noStudents">
-          <ion-list>
+          <ion-list class="student-list">
             <ion-item *ngFor="let student of filteredStudents" class="student-item">
               <ion-avatar slot="start">
                 <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
               </ion-avatar>
               <ion-label>
                 <h2>{{ student.name }} {{ student.surname }}</h2>
-                <p>
+                <p class="student-email">
                   <ion-icon name="mail-outline"></ion-icon>
                   {{ student.email }}
                 </p>
-                <p>
+                <p class="student-number">
                   <ion-icon name="id-card-outline"></ion-icon>
                   Student Number: {{ student.studentNumber }}
                 </p>
               </ion-label>
-              <ion-checkbox slot="end" [(ngModel)]="student.selected"></ion-checkbox>
+              <ion-checkbox slot="end" [(ngModel)]="student.selected" class="custom-checkbox"></ion-checkbox>
             </ion-item>
           </ion-list>
           
-          <ion-button expand="block" (click)="confirmAddStudents()" class="ion-margin-top">
+          <ion-button expand="block" (click)="confirmAddStudents()" class="confirm-button">
             <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
             Confirm Add
           </ion-button>
         </ng-container>
         
         <ng-template #noStudents>
-          <ion-card>
+          <ion-card class="no-students-card">
             <ion-card-header>
               <ion-card-title>No New Students Available</ion-card-title>
             </ion-card-header>
@@ -119,9 +155,7 @@
             </ion-card-content>
           </ion-card>
         </ng-template>
-        
-     
       </ion-content>
     </ng-template>
   </ion-modal>
-</ion-content>   
+</ion-content>

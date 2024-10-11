@@ -336,28 +336,56 @@ export class LecturePage implements OnInit {
       alert('No module selected for deletion.');
       return;
     }
-
-    const loader = await this.loadingController.create({
-      message: 'Deleting...',
-      cssClass: 'custom-loader-class',
+  
+    // Creating the confirm alert
+    const confirmAlert = await this.alertController.create({
+      header: 'Confirm Deletion',
+      message: 'Are you sure you want to delete this module?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Delete operation canceled');
+          },
+        },
+        {
+          text: 'Delete',
+          handler: async () => {
+            const loader = await this.loadingController.create({
+              message: 'Deleting...',
+              cssClass: 'custom-loader-class',
+            });
+            await loader.present();
+  
+            try {
+              // Ensure selectedModuleId is a string and not null
+              if (this.selectedModuleId) {
+                await this.db.collection('modules').doc(this.selectedModuleId).delete();
+                alert('Module successfully deleted');
+                this.selectedModuleId = null; // Clear the selected module
+  
+                const user = firebase.auth().currentUser;
+                if (user && user.email) {
+                  this.getData(user.email); // Refresh the module list
+                }
+              }
+              loader.dismiss();
+            } catch (error) {
+              loader.dismiss();
+              console.error('Error deleting module:', error);
+              alert('An error occurred while deleting the module.');
+            }
+          },
+        },
+      ],
     });
-    await loader.present();
-
-    try {
-      await this.db.collection('modules').doc(this.selectedModuleId).delete();
-      alert('Module successfully deleted');
-      this.selectedModuleId = null; // Clear the selected module
-      const user = firebase.auth().currentUser;
-      if (user && user.email) {
-        this.getData(user.email); // Refresh the module list
-      }
-      loader.dismiss();
-    } catch (error) {
-      loader.dismiss();
-      console.error('Error deleting module:', error);
-      alert('An error occurred while deleting the module.');
-    }
+  
+    // Present the confirmation alert
+    await confirmAlert.present();
   }
+  
 
   selectModule(moduleId: string) {
     this.selectedModuleId = moduleId;
@@ -410,7 +438,4 @@ export class LecturePage implements OnInit {
     this.router.navigate(['profile']);
   }
 
-  
-
-  
 }
