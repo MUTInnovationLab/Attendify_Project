@@ -124,12 +124,6 @@ export class CalenderPage implements OnInit {
     });
   }
 
-  generateYearOptions() {
-    const currentYear = new Date().getFullYear();
-    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
-      this.yearOptions.push(i);
-    }
-  }
 
   onDateChange(event: any) {
     this.selectedDate = event.detail.value.substring(0, 10);

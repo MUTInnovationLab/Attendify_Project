@@ -2,13 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { NavController, LoadingController, ToastController } from '@ionic/angular';
-// import { Staff }from '../services/staff.mode';]
-interface staff{
-  department:string;
-  email:string;
-  fullName:string;
-  position:string;
-  staffNumber:number;
+
+interface staff {
+  department: string;
+  email: string;
+  fullName: string;
+  position: string;
+  staffNumber: number;
+}
+
+interface student {
+  email: string;
+  fullName: string;
+  studentNumber: number;
+  // Add other relevant student fields
 }
 
 @Component({
@@ -17,8 +24,7 @@ interface staff{
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
-
-  email: string = '';
+  username: string = '';
   password: string = '';
   emailRegex: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   adminEmail: string = 'mutinnovationlab@gmail.com';
@@ -35,12 +41,8 @@ export class LoginPage implements OnInit {
   ngOnInit() {}
 
   async validate() {
-    if (!this.email || !this.password) {
-      this.presentToast('Please enter your email and password.');
-      return;
-    }
-    if (!this.emailRegex.test(this.email)) {
-      this.presentToast('Please provide a valid email address.');
+    if (!this.username || !this.password) {
+      this.presentToast('Please enter your username and password.');
       return;
     }
     await this.login();
@@ -51,67 +53,114 @@ export class LoginPage implements OnInit {
       message: 'Signing in',
       cssClass: 'custom-loader-class'
     });
-  
+
     try {
       await loader.present();
-  
 
-  
-      const userCredential = await this.auth.signInWithEmailAndPassword(this.email, this.password);
-
-      if (this.email === 'mutinnovationlab@gmail.com' && this.password === 'InnovationLab123') {
+      // Check for admin login first
+      if (this.username === this.adminEmail && this.password === this.adminPassword) {
+        await this.auth.signInWithEmailAndPassword(this.adminEmail, this.adminPassword);
         loader.dismiss();
         this.navController.navigateForward('/dashboard');
         return;
       }
-  
-      if (userCredential) {
-        const userType = await this.getUserType();
+
+      const staffData = await this.getStaffData();
+      
+      if (staffData) {
+        // Staff login
+        await this.auth.signInWithEmailAndPassword(staffData.email, this.password);
         loader.dismiss();
-        this.navigateBasedOnUserType(userType);
+        this.navigateBasedOnUserType(staffData.position);
+      } else {
+        // Student login or unknown user
+        const studentData = await this.getStudentData();
+        
+        if (studentData) {
+          await this.auth.signInWithEmailAndPassword(studentData.email, this.password);
+          loader.dismiss();
+          this.navigateBasedOnUserType('student');
+        } else {
+          loader.dismiss();
+          this.presentToast('Invalid username or password');
+        }
       }
     } catch (error) {
       loader.dismiss();
-      const errorMessage = (error as Error).message;
-  
-      switch (errorMessage) {
-        case 'Firebase: The password is invalid or the user does not have a password. (auth/wrong-password)':
-        case 'Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found)':
-          this.presentToast('Invalid email or password');
-          break;
-        case 'Firebase: The email address is badly formatted. (auth/invalid-email)':
-          this.presentToast('Incorrectly formatted email');
-          break;
-        default:
-          this.presentToast('An unexpected error occurred.');
-          break;
-      }
+      this.handleLoginError(error);
     }
-  }
-  
-
-  checkAdminCredentials(): boolean {
-    return this.email === this.adminEmail && this.password === this.adminPassword;
   }
 
   async getUserType(): Promise<string> {
-    const studentQuerySnapshot = await this.db.collection('registeredStudents')
-      .ref.where('email', '==', this.email)
-      .get();
-    if (!studentQuerySnapshot.empty) {
+    const studentData = await this.getStudentData();
+    if (studentData) {
       return 'student';
     }
 
-    const staffQuerySnapshot = await this.db.collection('registered staff')
-      .ref.where('email', '==', this.email).where('staffNumber', '==', this.password)
-      .get();
-    if (!staffQuerySnapshot.empty) {
-      const staffDoc = staffQuerySnapshot.docs[0];
-      const staffData = staffDoc.data() as staff;
+    const staffData = await this.getStaffData();
+    if (staffData) {
       return staffData.position;
     }
 
     return 'unknown';
+  }
+
+  async getStudentData(): Promise<student | null> {
+    const studentEmailQuerySnapshot = await this.db.collection('registeredStudents')
+      .ref.where('email', '==', this.username)
+      .get();
+
+    if (!studentEmailQuerySnapshot.empty) {
+      return studentEmailQuerySnapshot.docs[0].data() as student;
+    }
+
+    const studentNumberQuerySnapshot = await this.db.collection('registeredStudents')
+      .ref.where('studentNumber', '==', this.username)
+      .get();
+    
+    if (!studentNumberQuerySnapshot.empty) {
+      return studentNumberQuerySnapshot.docs[0].data() as student;
+    }
+
+    return null;
+  }
+
+  async getStaffData(): Promise<staff | null> {
+    const staffEmailQuerySnapshot = await this.db.collection('registered staff')
+      .ref.where('email', '==', this.username)
+      .get();
+
+    if (!staffEmailQuerySnapshot.empty) {
+      return staffEmailQuerySnapshot.docs[0].data() as staff;
+    }
+
+    const staffNumberQuerySnapshot = await this.db.collection('registered staff')
+      .ref.where('staffNumber', '==', this.username)
+      .get();
+    
+    if (!staffNumberQuerySnapshot.empty) {
+      return staffNumberQuerySnapshot.docs[0].data() as staff;
+    }
+
+    return null;
+  }
+
+  handleLoginError(error: any) {
+    const errorMessage = (error as Error).message;
+    console.error('Login error:', errorMessage);
+    
+    switch (errorMessage) {
+      case 'Firebase: The password is invalid or the user does not have a password. (auth/wrong-password)':
+      case 'Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found)':
+        this.presentToast('Invalid username or password');
+        break;
+      case 'Firebase: The email address is badly formatted. (auth/invalid-email)':
+        this.presentToast('Incorrectly formatted email');
+        break;
+      default:
+        this.presentToast('An unexpected error occurred. Please try again.');
+        break;
+    }
   }
 
   navigateBasedOnUserType(userType: string) {
@@ -123,14 +172,10 @@ export class LoginPage implements OnInit {
         this.navController.navigateForward('/lecture');
         break;
       case 'dept-admin':
-          this.navController.navigateForward('/dept-an');
-          break;
-      // case 'staff':
-      //     this.navController.navigateForward('/lecture');
-      //     break;
-
+        this.navController.navigateForward('/dept-an');
+        break;
       default:
-        alert('User not found in registeredStudents or registeredStaff collections.');
+        this.presentToast('Unknown user type');
         break;
     }
   }
