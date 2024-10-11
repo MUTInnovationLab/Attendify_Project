@@ -1,3 +1,4 @@
+
 /* attendies.page.scss */
 
 /* Table styling */
@@ -41,6 +42,68 @@
     font-size: 0.8em; /* Adjust font size for smaller screens */
   }
 }
+
+
+
+
+.custom-table {
+  width: 100%;
+}
+
+.custom-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.custom-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.custom-table .date-row > td:first-child,
+.custom-table .module-row > td:nth-child(2) {
+  border-right: none;
+}
+
+.custom-table .date-row > td:not(:first-child),
+.custom-table .module-row > td:not(:nth-child(2)) {
+  border-left: none;
+}
+
+.custom-table .attendance-row > td:empty {
+  border: none;
+}
+
+.custom-table ion-button {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.custom-table ion-icon {
+  margin-left: 5px;
+}
+
+.custom-table .date-row {
+  background-color: #e9ecef;
+}
+
+.custom-table .module-row {
+  background-color: #f8f9fa;
+}
+
+.custom-table .attendance-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+
 
 
 
