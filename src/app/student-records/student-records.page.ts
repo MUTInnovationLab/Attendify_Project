@@ -14,7 +14,13 @@ interface StudentData {
   name: string;
   studentNumber: string;
   surname: string;
-  moduleCode:string;
+  moduleCode: string;
+}
+
+interface AttendanceRecord {
+  scanDate: string;
+  scanTime: string;
+  studentNumber: string;
 }
 
 @Component({
@@ -23,9 +29,8 @@ interface StudentData {
   styleUrls: ['./student-records.page.scss'],
 })
 export class StudentRecordsPage implements OnInit {
-
   showUserInfo = false;
-  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+  currentUser: StudentData = { moduleCode: '', email: '', name: '', studentNumber: '', surname: '' };
 
   @ViewChild('modulesChart', { static: false })
   chartCanvas!: ElementRef;
@@ -60,10 +65,6 @@ export class StudentRecordsPage implements OnInit {
         }
       })
       .catch(error => console.error('Error fetching current user: ', error));
-  }
-
-  dismiss() {
-    this.router.navigate(['/login']); // Navigate to LecturePage
   }
 
   getCurrentUser() {
@@ -151,14 +152,21 @@ export class StudentRecordsPage implements OnInit {
   }
 
   async getAttendanceCount(moduleId: string): Promise<number> {
-    const attendedDoc = await this.firestore.collection('Attended').doc(moduleId).get().toPromise();
-    if (attendedDoc && attendedDoc.exists) {
-      const attendanceData = attendedDoc.data() as any;
-      if (Array.isArray(attendanceData.details)) {
-        return attendanceData.details.reduce((total: number, attendance: any) => {
-          return attendance.email === this.studentEmail ? total + (attendance.count || 0) : total;
-        }, 0);
+    try {
+      const attendedDoc = await this.firestore.collection('Attended').doc(moduleId).get().toPromise();
+      if (attendedDoc && attendedDoc.exists) {
+        const attendanceData = attendedDoc.data() as Record<string, AttendanceRecord[]>;
+        let count = 0;
+        
+        for (const date in attendanceData) {
+          const records = attendanceData[date];
+          count += records.filter(record => record.studentNumber === this.currentUser.studentNumber).length;
+        }
+        
+        return count;
       }
+    } catch (error) {
+      console.error(`Error fetching attendance for module ${moduleId}:`, error);
     }
     return 0;
   }
@@ -184,7 +192,7 @@ export class StudentRecordsPage implements OnInit {
 
   calculateProgress() {
     if (this.totalRequiredAttendance > 0) {
-      this.progressPercentage = (this.totalAttendance / this.totalRequiredAttendance) * 100;
+      this.progressPercentage = Math.round((this.totalAttendance / this.totalRequiredAttendance) * 100);
       this.updateProgressBar(this.progressPercentage);
     } else {
       console.error('Total required attendance is zero or invalid');
@@ -201,9 +209,8 @@ export class StudentRecordsPage implements OnInit {
     const progressText = progressBar.querySelector('.progress-text') as HTMLSpanElement;
   
     if (progressFill && progressText) {
-      this.progressPercentage = Math.round(percentage);
       progressFill.style.width = `${percentage}%`;
-      progressText.textContent = `${this.progressPercentage}%`;
+      progressText.textContent = `${percentage}%`;
   
       let color1, color2;
       if (percentage < 30) {

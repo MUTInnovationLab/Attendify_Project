@@ -1,13 +1,30 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>reset</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="reset-container">
+    <div class="form-container">
+      <h1 class="title">
+        <ion-icon name="lock-open-outline"></ion-icon>
+        Reset Password
+      </h1>
+      <form class="form">
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating" class="ion-text-uppercase">Email</ion-label>
+          <ion-input type="email" name="email" id="email" [(ngModel)]="email"></ion-input>
+        </ion-item>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">reset</ion-title>
-    </ion-toolbar>
-  </ion-header>
+        <ion-button class="reset-btn ion-margin-top" (click)="resetPassword()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Reset Password</ion-text>
+        </ion-button>
+      </form>
+    </div>
+
+    <div class="divider-container ion-margin-top">
+      <div class="divider-line"></div>
+      <p class="divider-text ion-text-uppercase">Remember your password?</p>
+      <div class="divider-line"></div>
+    </div>
+   
+    <p class="login-text ion-text-center ion-margin-top">
+      <a rel="noopener noreferrer" routerLink="/login" class="login-link">Back to Login</a>
+    </p>
+  </div>
 </ion-content>
