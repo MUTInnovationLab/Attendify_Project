@@ -1,326 +1,231 @@
-/* Custom styles for the grid */
-/* Custom styles for the grid */
-.custom-grid {
-    display: flex;
-    justify-content: space-between;
-    margin: auto; /* Center horizontally */
-    padding: 0 10px;
-    width: 100%; /* Make the grid cover the page width */
-  }
-  
-  
-  /* Custom styles for square IonCol */
-  .square-card {
-    flex: 1; /* Make the columns flexible to cover the width */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: center;
-  }
-  
-  /* Custom styles for IonCard */
-  .student-card, .profile-card {
-    background: #ff9800; /* Background color */
-    color: #ffffff; /* Text color */
-    width: 200px; /* Make the cards cover the column width */
-    height: 150px;
-    justify-content: space-between;
-    border-radius: 10px;
-  }
-.student-card{
-    margin-left:-200px;
-    color: #ffffff;
-}
-
-  @media (max-width: 1000px) {
-    .student-card, .profile-card {
-        width: 150px; /* Make the cards cover the column width */
-        height: 150px;
-      
-    }
-    .student-card{
-        margin-left:20px;
-    }
-  }
-  
-  /* Custom styles for IonIcon */
-  .icon {
-    font-size: 2rem;
-    margin: 10px 0;
-  }
-  
-  /* Custom styles for card title */
-  .card-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin: 0;
-    color: #ffffff;
-  }
-  
-  /* Custom styles for the number in the Student Card */
-  .number {
-    font-size: 1.2rem;
-  }
-  
- /* Custom background color */
+/* Base styles */
 .custom-background {
-    --background:#f4ede1;
-}
-ion-content {
-    --background:#ff9800;
-  }
-
-
-
-
-
-.addbutton{
-    --background:#854836;
+  --background: #FFF5E6;
 }
 
-  
-
-
-
-
-   //CARDS
-   ion-card {
-    max-width: 600px;
-    margin: auto;
-    margin-top: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-
-    ion-card-header {
-      background-color: #EECC8C;
-      color: rgb(255, 251, 251);
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
-      font-size: 20px;
-      text-align: center;
-      font-weight: bold;
-      font-style: italic;
-    }
-
-    
-  }
-
-  a {
-    transition: opacity 0.3s ease-in-out;
-  }
-  
-  a:hover {
-    opacity: 0.7;
-  }
-  
-
-
-  //TABLE STYLE
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: auto;
+/* Profile Section */
+.profile-section {
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
-
-th, td {
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background-color: #ff9800; /* Header background color */
-    color: white; /* Header text color */
-    height: 40px; /* Increase the height of the table header */
-    font-size: 18px; /* Increase the font size of the table header */
-    font-family: var(--ion-font-family);
-    font-family:'Times New Roman', Times, serif;
-}
-
-tbody tr:nth-child(odd) {
-    background-color: #854836; /* Odd row background color */
-}
-
-tbody tr:nth-child(even) {
-    background-color: #854836; /* Even row background color */
-}
-
-th:nth-child(2), td:nth-child(2) {
-    width: 30px; /* Adjust the width of the "Check" column */
-}
-
-td {
-    color: rgb(255, 255, 255); /* Set the font color of all <td> elements to black */
-}
-
-input[type="checkbox"] {
-    margin-right: 5px;
-}
-
-.text{
-    text-align: center;
-    display: flex;
-}
-
-
-.add-card{
-  margin-top:20px;
-}
-
-#contact {
-  max-width: 600px;
-  margin: auto;
-  margin-top: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  background-color: #854836;
-  color: #262626;
-  padding: 20px;
-  box-sizing: border-box;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.sectionheader {
-  background-color: #ff9800;
-  color: #fff;
-  padding: 10px;
-  border-radius: 10px 10px 0 0;
-  transition: background-color 0.3s, color 0.3s;
-  text-align: center;
-}
-
-h1 {
-  margin: 0;
-}
-
-article {
-  text-align: center;
-}
-
-p {
-  color: #262626;
-  margin-bottom: 20px;
-  transition: color 0.3s;
-}
-
-.contactform {
+.header {
+  background: #EECC8C;
+  padding: 16px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
 }
 
-.input_wrapper {
-  width: 100%;
-  margin-bottom: 15px;
-  transition: margin-bottom 0.3s;
+.header h4 {
+  color: #4A3500;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-input[type="text"] {
-  width: calc(100% - 20px);
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  transition: border-color 0.3s;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #fff;
-  transition: color 0.3s;
-}
-
-.submit_wrapper {
-  margin-top: 15px;
-  transition: margin-top 0.3s;
-}
-
-input[type="submit"] {
-  background-color: #ff9800;
-  color: #fff;
-  padding: 10px 20px;
-  font-size: 16px;
+.header ion-icon {
+  font-size: 24px;
+  color: #4A3500;
   cursor: pointer;
+}
+
+.profile-card, .student-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #EECC8C;
+  transition: transform 0.2s ease;
+}
+
+.profile-card:hover, .student-card:hover {
+  transform: translateY(-2px);
+}
+
+.profile-icon, .feature-icon {
+  font-size: 48px;
+  color: #FF9800;
+  margin-bottom: 12px;
+}
+
+.username {
+  color: #4A3500;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* Add Module Form */
+.add-module-section {
+  background: #FFFFFF;
+  border-radius: 12px;
+  margin: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-header h1 {
+  color: #FF9800;
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+.module-form .input-wrapper {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.module-form input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #EECC8C;
+  border-radius: 6px;
+  background: #FFF5E6;
+  transition: border-color 0.3s ease;
+}
+
+.module-form input:focus {
+  border-color: #FF9800;
+  outline: none;
+}
+
+.module-form label {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  color: #FF9800;
+  font-size: 0.8rem;
+}
+
+.submit-wrapper button {
+  background: #FF9800;
+  color: white;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-input[type="submit"]:hover {
-  background-color: #385c7b;
+.submit-wrapper button:hover {
+  background: #F57C00;
 }
 
-/* Keyframe Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Modules Table */
+.modules-card {
+  margin: 16px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-/* Apply animation to specific elements */
-#contact, .sectionheader, p, .input_wrapper, .submit_wrapper, input[type="submit"] {
-  animation: fadeIn 1s ease-out;
+.modules-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-
-table tbody tr.selected {
-    background-color: #ee1313; /* Change this to the desired background color for the selected row */
-    color: #333; /* Change this to the desired text color for the selected row */
-  }
-  
-  .student-item {
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    --background: #f4f5f8;
-  
-    ion-label {
-      margin: 10px 0;
-    }
-  
-    h2 {
-      font-weight: bold;
-      color: #333;
-    }
-  
-    p {
-      margin: 5px 0;
-      color: #666;
-    }
-  
-    ion-icon {
-      margin-right: 5px;
-      color: #3880ff;
-    }
-  }
-  
-  .avatar-icon {
-    font-size: 2em;
-    color: #3880ff;
-  }
-  
-  ion-searchbar {
-    --box-shadow: none;
-    --background: #f4f5f8;
-    --border-radius: 10px;
-    padding: 0;
-    margin-bottom: 15px;
-  }
-  
-  ion-button {
-    --border-radius: 10px;
-  }
-  
-  .student-card *, .profile-card * {
-    color: #ffffff !important;
+.modules-table th {
+  background: #EECC8C;
+  color: #4A3500;
+  padding: 12px;
+  text-align: left;
 }
 
-.student-card p, .profile-card p {
-  font-size: 1.3rem; /* Add this new rule for larger paragraph text */
-  margin: 5px 0;
+.modules-table td {
+  padding: 12px;
+  border-bottom: 1px solid #FFE0B2;
+  color: #5D4037;
+}
+
+.modules-table tr:hover {
+  background: #FFF8E1;
+}
+
+.modules-table tr.selected {
+  background: #FFE0B2;
+}
+
+.view-cell {
+  cursor: pointer;
+}
+
+.view-button {
+  color: #FF9800;
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.action-buttons {
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+ion-button {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+/* Modal Styling */
+ion-modal ion-toolbar {
+  --background: #EECC8C;
+  --color: #4A3500;
+}
+
+.modal-content {
+  --background: #FFF5E6;
+}
+
+.custom-searchbar {
+  --background: #FFFFFF;
+  --color: #4A3500;
+  --placeholder-color: #8D6E63;
+  margin-bottom: 16px;
+}
+
+.student-list {
+  background: transparent;
+}
+
+.student-item {
+  --background: #FFFFFF;
+  margin: 8px;
+  border-radius: 8px;
+  --border-color: #FFE0B2;
+}
+
+.avatar-icon {
+  font-size: 40px;
+  color: #FF9800;
+}
+
+.student-email, .student-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8D6E63;
+}
+
+.custom-checkbox {
+  --checkbox-background: #FFFFFF;
+  --checkbox-background-checked: #FF9800;
+  --border-color: #EECC8C;
+  --border-color-checked: #FF9800;
+  --checkmark-color: #FFFFFF;
+}
+
+.confirm-button {
+  margin: 16px;
+  --background: #FF9800;
+  --background-activated: #F57C00;
+}
+
+.no-students-card {
+  margin: 16px;
+  border-left: 4px solid #FF9800;
 }

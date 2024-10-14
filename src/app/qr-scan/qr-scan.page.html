@@ -1,24 +1,157 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="qr-code-content">
+  <div class="container">
+    <ion-card class="qr-input-card">
+      <ion-card-content>
+        <ion-label class="input-label">QR Code Text</ion-label>
+        <ion-input 
+          [(ngModel)]="qrCodeText" 
+          placeholder="Your QR code text will appear here" 
+          readonly
+          class="qr-input"
+        ></ion-input>
+      </ion-card-content>
+    </ion-card>
 
-  <ion-card>
-    <ion-card-content class="ion-text-center">
-      <ion-input [(ngModel)]="qrCodeText" placeholder="QR Code Text" readonly></ion-input>
-    </ion-card-content>
-  </ion-card>
-  <br>
-  <br>
-  <br>
-  <br>
-  
- 
-  
-  
-  <div class="centered-content"> <!-- Apply the CSS class to center content -->
-    <img [src]="qrCodeDataUrl" *ngIf="qrCodeDataUrl" alt="QR Code">
-    <br>
-    <br>
-    <br>
-    <br>
-    <ion-button (click)="generateQRCode()" class="colser">Generate  <ion-icon name="qr-code-outline" class="hude"></ion-icon> QR Code</ion-button>
+    <div class="qr-display-section">
+      <div class="qr-code-container" *ngIf="qrCodeDataUrl">
+        <img [src]="qrCodeDataUrl" alt="QR Code" class="qr-image">
+      </div>
+      
+      <ion-button (click)="generateQRCode()" class="generate-button">
+        <span class="button-content">
+          Generate
+          <ion-icon name="qr-code-outline" class="qr-icon"></ion-icon>
+          QR Code
+        </span>
+      </ion-button>
+    </div>
   </div>
 </ion-content>
+
+<style>
+/* Main content styling */
+.qr-code-content {
+  --background: #FFF5E6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Input card styling */
+.qr-input-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
+  border-left: 4px solid #EECC8C;
+  margin-bottom: 2rem;
+}
+
+.input-label {
+  display: block;
+  color: #4A3500;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.qr-input {
+  --background: #FFF8E1;
+  --color: #5D4037;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --border-radius: 8px;
+  --placeholder-color: #8D6E63;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+/* QR Code display section */
+.qr-display-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.qr-code-container {
+  background: #FFFFFF;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
+  border: 2px solid #EECC8C;
+  transition: transform 0.3s ease;
+}
+
+.qr-code-container:hover {
+  transform: scale(1.02);
+}
+
+.qr-image {
+  max-width: 250px;
+  height: auto;
+  display: block;
+}
+
+/* Button styling */
+.generate-button {
+  --background: #FF9800;
+  --background-hover: #F57C00;
+  --background-activated: #EF6C00;
+  --border-radius: 25px;
+  --padding-start: 2rem;
+  --padding-end: 2rem;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+  height: 48px;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.qr-icon {
+  font-size: 1.4rem;
+}
+
+/* Animation for QR code appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.qr-code-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .qr-image {
+    max-width: 200px;
+  }
+  
+  .generate-button {
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+  }
+}
+</style>

@@ -35,8 +35,11 @@ export class CalenderPage implements OnInit {
   ];
 
   yearOptions: number[] = [];
-  
-  constructor(private firestore: AngularFirestore,  private auth: AngularFireAuth) {}
+
+  constructor(private firestore: AngularFirestore,
+    private auth: AngularFireAuth,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.selectedDate = this.currentDate.substring(0, 10);
@@ -120,6 +123,7 @@ export class CalenderPage implements OnInit {
       this.allEventsGroupedByMonth = groupedEvents;
     });
   }
+
 
   onDateChange(event: any) {
     this.selectedDate = event.detail.value.substring(0, 10);

@@ -1,205 +1,152 @@
+/* Header Styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
 
-/* attendies.page.scss */
+ion-title {
+  color: #4A3500;
+  font-weight: 600;
+}
 
-/* Table styling */
+.back-button {
+  font-size: 24px;
+  color: #4A3500;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.requests-button {
+  --color: #4A3500;
+  font-weight: 500;
+}
+
+/* Content Styling */
+.attendance-content {
+  --background: #FFF5E6;
+}
+
+/* Button Styling */
+.toggle-button {
+  --background: #FF9800;
+  --color: white;
+  margin: 16px 0;
+  font-weight: 500;
+}
+
+/* Table Container */
+.table-container {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+/* Table Styling */
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px;
+}
+
 .attendance-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.attendance-table th,
-.attendance-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
-
-.attendance-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.attendance-table th, .attendance-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  background: white;
 }
 
 .attendance-table th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #f2f2f2;
-}
-
-.table-responsive {
-  overflow-x: auto;
-}
-
-@media (max-width: 600px) {
-  .attendance-table {
-    font-size: 0.8em; /* Adjust font size for smaller screens */
-  }
-}
-
-
-
-
-.custom-table {
-  width: 100%;
-}
-
-.custom-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.custom-table th,
-.custom-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-.custom-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-.custom-table .date-row > td:first-child,
-.custom-table .module-row > td:nth-child(2) {
-  border-right: none;
-}
-
-.custom-table .date-row > td:not(:first-child),
-.custom-table .module-row > td:not(:nth-child(2)) {
-  border-left: none;
-}
-
-.custom-table .attendance-row > td:empty {
-  border: none;
-}
-
-.custom-table ion-button {
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-.custom-table ion-icon {
-  margin-left: 5px;
-}
-
-.custom-table .date-row {
-  background-color: #e9ecef;
-}
-
-.custom-table .module-row {
-  background-color: #f8f9fa;
-}
-
-.custom-table .attendance-row:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-
-
-
-
-
-
-
-.attend-table th {
-  background-color: #854836; /* Green color for table headers */
-  color: white; /* White text color for table headers */
-  font-weight: bold;
-}
-
-/* Row hover effect */
-.attend-table tbody tr:hover {
-  background-color: #f5f5f5;
-}
-
-/* Alternating row colors */
-.attend-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2; /* Light gray for even rows */
-}
-
-/* Media query for responsiveness */
-@media screen and (max-width: 600px) {
-  .attend-table th,
-  .attend-table td {
-    padding: 8px;
-  }
-}
-/* Example CSS */
-ion-back-button {
-  color: white; /* Example color to make the button visible */
-}
-  
-
-ion-toolbar{
-  --background: #ff9800;
-  color:white;
-}
-ion-icon{
-  font-size: 25px;
-  font-weight: bold;
-}
-
-
-
-.attend-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
-  font-size: 16px;
-}
-
-.attend-table th,
-.attend-table td {
+  background: #FF9800;
+  color: white;
   padding: 12px;
   text-align: left;
-  border: 1px solid #ddd;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.attend-table thead {
-  background-color: #f4f4f4;
+.attendance-table td {
+  padding: 12px;
+  border-bottom: 1px solid #FFE0B2;
+  color: #5D4037;
 }
 
+/* Group Styling */
+.date-group {
+  background: #FFF3E0;
+}
+
+.module-group {
+  background: #FFF8E1;
+}
+
+.student-row:hover {
+  background: #FFF8E1;
+}
+
+.group-toggle-btn {
+  --color: #FF6F00;
+  --padding-start: 4px;
+  --padding-end: 4px;
+  font-weight: 500;
+}
+
+.toggle-icon {
+  margin-right: 4px;
+}
+
+/* Requests Section */
+.requests-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.requests-section h2 {
+  color: #4A3500;
+  margin-bottom: 16px;
+}
+
+.status-badge {
+  background: #FFE0B2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #FF6F00;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-buttons ion-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+/* Empty State */
+.no-data {
+  text-align: center;
+  color: #8D6E63;
+  padding: 24px;
+  font-style: italic;
+  background: white;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .attend-table,
-  .attend-table thead,
-  .attend-table tbody,
-  .attend-table th,
-  .attend-table td,
-  .attend-table tr {
-    display: block;
+  .action-buttons {
+    flex-direction: column;
   }
-
-  .attend-table thead tr {
-    display: none;
-  }
-
-  .attend-table td {
-    position: relative;
-    padding-left: 50%;
+  
+  .attendance-table td {
     white-space: nowrap;
   }
-
-  .attend-table td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    width: 45%;
-    padding-left: 10px;
-    font-weight: bold;
-    white-space: nowrap;
-    background-color: #f4f4f4;
-    border-right: 1px solid #ddd;
-  }
-
-  .attend-table td:last-child {
-    border-bottom: 0;
+  
+  .table-responsive {
+    margin: 8px;
   }
 }

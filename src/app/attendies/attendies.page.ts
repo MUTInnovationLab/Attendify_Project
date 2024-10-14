@@ -131,7 +131,7 @@ totalEnrolledStudents: number = 0;
     private toastController: ToastController,
     private afAuth: AngularFireAuth
   ) {}
-
+  
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
@@ -438,6 +438,9 @@ totalEnrolledStudents: number = 0;
     }
   }
 
+  
+  
+  
   // Show a toast message
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
