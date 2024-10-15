@@ -1,26 +1,19 @@
-/* Header Styling */
 ion-toolbar {
   --background: #EECC8C;
 }
-
 ion-title {
   color: #4A3500;
   font-weight: 600;
 }
-
 .back-button {
   font-size: 24px;
   color: #4A3500;
   margin-left: 8px;
   cursor: pointer;
 }
-
-/* Content Styling */
 .view-students-content {
   --background: #FFF5E6;
 }
-
-/* Search Bar Styling */
 .custom-searchbar {
   --background: #FFF5E6;
   --color: #4A3500;
@@ -28,8 +21,6 @@ ion-title {
   margin-bottom: 16px;
   border-radius: 8px;
 }
-
-/* Card Styling */
 .table-card {
   background: #FFFFFF;
   border-radius: 8px;
@@ -37,30 +28,24 @@ ion-title {
   margin: 16px 0;
   overflow: hidden;
 }
-
 ion-card-header {
   background: #FF9800;
   padding: 16px;
 }
-
 ion-card-title {
   color: white;
   font-size: 1.2rem;
   font-weight: 600;
 }
-
-/* Table Styling */
 .table-container {
   overflow-x: auto;
   margin: 16px 0;
 }
-
 .custom-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
 }
-
 .custom-table th {
   background: #FF9800;
   color: white;
@@ -69,45 +54,34 @@ ion-card-title {
   font-weight: 600;
   white-space: nowrap;
 }
-
 .custom-table td {
   padding: 12px;
   border-bottom: 1px solid #FFE0B2;
   color: #5D4037;
 }
-
-/* Clickable Row Styling */
 .clickable-row {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
 .clickable-row:hover {
   background: #FFF8E1;
 }
-
-/* Back Button Styling */
 .back-button-custom {
   --background: #FF9800;
   --color: white;
   margin-top: 16px;
 }
-
-/* Empty State */
 .no-data {
   text-align: center;
   color: #8D6E63;
   padding: 24px;
   font-style: italic;
 }
-
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .custom-table td,
   .custom-table th {
     white-space: nowrap;
   }
-  
   .table-container {
     margin: 8px;
   }

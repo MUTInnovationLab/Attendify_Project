@@ -9,39 +9,39 @@ ion-content {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: #56231F; /* Header background color */
+  background-color: #56231F;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .header h4 {
   margin: 0;
   font-weight: bold;
-  color: #ffffff; /* Header text color */
-}
+  color: #ffffff;
 
 .timetable-content {
-  padding: 16px; /* Optional padding for content */
+  padding: 16px; 
 }
 
 .timetable-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px; /* Space above the table */
+  margin-top: 16px; 
 }
 
 .timetable-table th, .timetable-table td {
-  border: 1px solid #a77a20; /* Border color */
+  border: 1px solid #a77a20; 
   padding: 8px;
   text-align: center;
 }
 
 .timetable-table th {
-  background-color: #56231F; /* Header background color */
-  color: #ffffff; /* Header text color */
+  background-color: #56231F; 
+  color: #ffffff; 
 }
 
 .timetable-table td {
-  background-color: #ffffff; /* White background for table cells */
-  color: #56231F; /* Table cell text color */
+  background-color: #ffffff; 
+  color: #56231F;
   font-size: 14px;
+}
 }
