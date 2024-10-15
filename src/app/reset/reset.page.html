@@ -1,13 +1,63 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>reset</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="reset-container">
+    <div class="form-container">
+      <h1 class="title">
+        <ion-icon name="lock-open-outline"></ion-icon>
+        Reset Password
+      </h1>
+      
+      <!-- Step 1: Enter Email -->
+      <form *ngIf="currentStep === 1" class="form">
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating" class="ion-text-uppercase">Email</ion-label>
+          <ion-input type="email" name="email" id="email" [(ngModel)]="email"></ion-input>
+        </ion-item>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">reset</ion-title>
-    </ion-toolbar>
-  </ion-header>
+        <ion-button class="reset-btn ion-margin-top" (click)="sendResetEmail()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Send Reset Email</ion-text>
+        </ion-button>
+      </form>
+
+      <!-- Step 2: Email Sent Confirmation -->
+      <div *ngIf="currentStep === 2" class="confirmation-message">
+        <ion-icon name="mail-outline" class="large-icon"></ion-icon>
+        <h2>Password reset email sent</h2>
+        <p>A password reset email has been sent to your email address.</p>
+        <ion-button class="reset-btn ion-margin-top" (click)="goToNewPassword()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Set New Password</ion-text>
+        </ion-button>
+      </div>
+
+      <!-- Step 3: Enter New Password -->
+      <form *ngIf="currentStep === 3" class="form">
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating" class="ion-text-uppercase">New Password</ion-label>
+          <ion-input type="password" name="newPassword" id="newPassword" [(ngModel)]="newPassword"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="floating" class="ion-text-uppercase">Confirm New Password</ion-label>
+          <ion-input type="password" name="confirmPassword" id="confirmPassword" [(ngModel)]="confirmPassword"></ion-input>
+        </ion-item>
+
+        <ion-button class="reset-btn ion-margin-top" (click)="resetPassword()" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Reset Password</ion-text>
+        </ion-button>
+      </form>
+
+      <!-- Step 4: Password Reset Success -->
+      <div *ngIf="currentStep === 4" class="confirmation-message">
+        <ion-icon name="checkmark-circle-outline" class="large-icon"></ion-icon>
+        <h2>Password Reset Successful</h2>
+        <p>Your password has been successfully reset. You can now log in with your new password.</p>
+        <ion-button class="reset-btn ion-margin-top" routerLink="/login" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Go to Login</ion-text>
+        </ion-button>
+      </div>
+    </div>
+
+    <p *ngIf="currentStep === 1" class="login-text ion-text-center ion-margin-top">
+      <a rel="noopener noreferrer" routerLink="/login" class="login-link">Back to Login</a>
+    </p>
+  </div>
 </ion-content>

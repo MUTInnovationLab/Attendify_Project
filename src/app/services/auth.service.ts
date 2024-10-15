@@ -60,4 +60,16 @@ export class AuthService {
       const currentUser = firebase.auth().currentUser;
       return currentUser !== null;
     }
+
+
+
+
+
+
+
+    
+
+    sendPasswordResetEmail(email: string): Promise<void> {
+      return this.afAuth.sendPasswordResetEmail(email);
+    }
 }
