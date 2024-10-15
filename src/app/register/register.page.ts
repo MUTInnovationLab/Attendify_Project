@@ -59,25 +59,6 @@ export class RegisterPage implements OnInit {
     await loader.present();
   
     this.auth.createUserWithEmailAndPassword(this.email, this.password)
-<<<<<<< HEAD
-      .then(async userCredential => {
-        const user = userCredential.user;
-  
-        if (user) {
-          // Store user data in Firestore with the user's UID
-          await this.firestore.collection('registeredStudents').doc(user.uid).set({
-            uid: user.uid,
-            email: this.email,
-            name: this.name,
-            surname: this.surname,
-            studentNumber: this.studentNumber
-          });
-  
-          loader.dismiss();
-          this.router.navigateByUrl("/login");
-          this.presentToast('Successfully registered!');
-        }
-=======
       .then(userCredential => {
         this.firestore.collection('registeredStudents').add({
           email: this.email,
@@ -88,35 +69,9 @@ export class RegisterPage implements OnInit {
         loader.dismiss();
         this.router.navigateByUrl("/login");
         this.presentToast();
->>>>>>> 5c723cf3770662b99eaff1afbb0d419e20adc24b
       })
       .catch(error => {
         loader.dismiss();
-<<<<<<< HEAD
-        this.handleRegisterError(error);
-      });
-  }
-  
-  handleRegisterError(error: any) {
-    const errorMessage = error.message;
-    switch (errorMessage) {
-      case 'Firebase: Error (auth/missing-email).':
-        alert("Please provide an email address.");
-        break;
-      case 'Firebase: The email address is badly formatted. (auth/invalid-email).':
-        alert("The email address is badly formatted.");
-        break;
-      case 'Firebase: The email address is already in use by another account. (auth/email-already-in-use).':
-        alert("The email address is already in use.");
-        break;
-      default:
-        alert(errorMessage);
-        break;
-    }
-  }
-  
-  async presentToast(p0: string) {
-=======
         const errorMessage = error.message;
   
         if (errorMessage === "Firebase: Error (auth/missing-email).") {
@@ -138,7 +93,6 @@ export class RegisterPage implements OnInit {
 
 
   async presentToast() {
->>>>>>> 5c723cf3770662b99eaff1afbb0d419e20adc24b
     const toast = await this.toastController.create({
       message: 'successfully registered!',
       duration: 1500,
