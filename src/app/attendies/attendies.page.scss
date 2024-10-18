@@ -8,33 +8,39 @@ ion-title {
   font-weight: 600;
 }
 
-.back-button {
-  font-size: 24px;
-  color: #4A3500;
-  margin-left: 8px;
-  cursor: pointer;
-}
-
-.requests-button {
-  --color: #4A3500;
-  font-weight: 500;
-}
-
 /* Content Styling */
 .attendance-content {
   --background: #FFF5E6;
 }
 
-/* Button Styling */
-.toggle-button {
-  --background: #FF9800;
-  --color: white;
-  margin: 16px 0;
-  font-weight: 500;
+/* Icon Styling */
+.header-icon {
+  font-size: 32px;
+  color: #FF9800;
+  margin-bottom: 8px;
 }
 
-/* Table Container */
-.table-container {
+/* List Styling */
+ion-list {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #EECC8C;
+  margin-bottom: 16px;
+}
+
+ion-list-header {
+  text-align: center;
+}
+
+// ion-select::part(text),
+ion-select::part(placeholder),
+ion-select-option {
+  color: #5D4037;
+}
+
+/* Table Styling */
+.table-card {
   background: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -42,55 +48,32 @@ ion-title {
   overflow: hidden;
 }
 
-/* Table Styling */
-.table-responsive {
+.table-container {
   overflow-x: auto;
-  margin: 16px;
 }
 
-.attendance-table {
+.custom-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
 }
 
-.attendance-table th {
+.custom-table th {
   background: #FF9800;
   color: white;
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  white-space: nowrap;
 }
 
-.attendance-table td {
+.custom-table td {
   padding: 12px;
   border-bottom: 1px solid #FFE0B2;
   color: #5D4037;
 }
 
-/* Group Styling */
-.date-group {
-  background: #FFF3E0;
-}
-
-.module-group {
+.clickable-row:hover {
   background: #FFF8E1;
-}
-
-.student-row:hover {
-  background: #FFF8E1;
-}
-
-.group-toggle-btn {
-  --color: #FF6F00;
-  --padding-start: 4px;
-  --padding-end: 4px;
-  font-weight: 500;
-}
-
-.toggle-icon {
-  margin-right: 4px;
+  cursor: pointer;
 }
 
 /* Requests Section */
@@ -112,17 +95,12 @@ ion-title {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: #FF6F00;
+  color: #FF9800;
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
-}
-
-.action-buttons ion-button {
-  --padding-start: 8px;
-  --padding-end: 8px;
 }
 
 /* Empty State */
@@ -142,11 +120,12 @@ ion-title {
     flex-direction: column;
   }
   
-  .attendance-table td {
+  .custom-table td,
+  .custom-table th {
     white-space: nowrap;
   }
   
-  .table-responsive {
+  .table-container {
     margin: 8px;
   }
 }

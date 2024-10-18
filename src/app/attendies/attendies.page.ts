@@ -125,13 +125,16 @@ attendanceRecords: AttendanceRecord[] = [];
 attendedStudentsCount: number = 0;
 nonAttendedStudentsCount: number = 0;
 totalEnrolledStudents: number = 0;
+currentPage: number = 1;
+pageSize: number = 7;
+totalPages: number = 1;
 
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
     private afAuth: AngularFireAuth
   ) {}
-  
+
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
@@ -287,6 +290,20 @@ totalEnrolledStudents: number = 0;
     });
   }
 
+  getPaginatedRecords(): GroupedAttendanceRecord[] {
+    const groupedRecords = this.getGroupedRecords();
+    this.totalPages = Math.max(1, Math.ceil(groupedRecords.length / this.pageSize));
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return groupedRecords.slice(startIndex, endIndex);
+  }
+
+  changePage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalPages) {
+      this.currentPage = newPage;
+    }
+  }
+
   
   async fetchPendingRequests(moduleCode: string, moduleName: string) {
     if (!moduleCode || !moduleName) {
@@ -438,9 +455,6 @@ totalEnrolledStudents: number = 0;
     }
   }
 
-  
-  
-  
   // Show a toast message
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({

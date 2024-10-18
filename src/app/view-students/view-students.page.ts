@@ -29,6 +29,9 @@ export class ViewStudentsPage implements OnInit {
   selectedStudent: Student | null = null;
   studentModules: string[] = []; // To store modules for the selected student
   searchTerm: string = ''; // To hold the search term
+  currentPage: number = 1;
+  pageSize: number = 9;
+  totalPages: number = 1;
 
   constructor(
     private toastController: ToastController,
@@ -60,6 +63,7 @@ export class ViewStudentsPage implements OnInit {
           console.log('Fetched students:', students);
           this.students = students;
           this.filteredStudents = students; // Initialize filteredStudents
+          this.updatePagination();
         },
         error => {
           console.error('Error fetching students:', error);
@@ -147,5 +151,31 @@ export class ViewStudentsPage implements OnInit {
         student.studentNumber.toString().includes(this.searchTerm.toLowerCase())
       );
     }
+    this.currentPage = 1; // Reset to first page when filtering
+    this.updatePagination();
   }
+    // New pagination methods
+    updatePagination() {
+      this.totalPages = Math.ceil(this.filteredStudents.length / this.pageSize);
+    }
+  
+    getPaginatedStudents(): Student[] {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredStudents.slice(startIndex, endIndex);
+    }
+  
+    changePage(newPage: number) {
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+      }
+    }
+  
+    nextPage() {
+      this.changePage(this.currentPage + 1);
+    }
+  
+    previousPage() {
+      this.changePage(this.currentPage - 1);
+    }
 }

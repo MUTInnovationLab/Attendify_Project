@@ -12,7 +12,7 @@
 
     <!-- Selected Student's Modules Card -->
     <ion-card *ngIf="selectedStudent" class="table-card">
-      <ion-card-header>
+   <ion-card-header>
         <ion-card-title>{{ selectedStudent.name }}'s Modules</ion-card-title>
       </ion-card-header>
       <ion-card-content>
@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let student of filteredStudents" 
+              <tr *ngFor="let student of getPaginatedStudents()" 
                   (click)="onStudentClick(student)"
                   class="clickable-row">
                 <td>{{ student.name }}</td>
@@ -72,6 +72,27 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <ion-grid *ngIf="filteredStudents.length > 0">
+          <ion-row class="ion-align-items-center ion-justify-content-center">
+            <ion-col size="auto">
+              <ion-button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+                Previous
+              </ion-button>
+            </ion-col>
+            <ion-col size="auto">
+              <ion-text>Page {{ currentPage }} of {{ totalPages }}</ion-text>
+            </ion-col>
+            <ion-col size="auto">
+              <ion-button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+                Next
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </ion-card-content>
     </ion-card>
   </ion-grid>

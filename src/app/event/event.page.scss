@@ -1,112 +1,96 @@
+/* Header styling */
 ion-toolbar {
   --background: #EECC8C;
+  --color: #4A3500;
 }
-ion-toolbar ion-title {
-  color: #4A3500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+ion-title ion-icon {
   font-size: 1.2rem;
   font-weight: 600;
-  text-align: center;
+  color: #4A3500;
 }
+
+/* Content styling */
 .event-form-content {
   --background: #FFF5E6;
-  padding: 16px;
 }
+
 .event-card {
-  background: #FFFFFF;
+  background-color: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(238, 204, 140, 0.1);
-  margin: 16px auto;
-  max-width: 600px;
-}
-ion-card-header {
-  background: #FFF8E1;
-  border-bottom: 2px solid #EECC8C;
-  margin-bottom: 10px;
-}
-ion-card-title {
-  color: #FF6F00;
-  font-size: 1.3rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.form-group {
   margin-bottom: 16px;
 }
-.form-field {
-  --background: #FFFFFF;
-  --border-color: #EECC8C;
-  --border-radius: 8px;
-  --border-style: solid;
-  --border-width: 1px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  margin-bottom: 8px;
+
+ion-card-header {
+  background-color: #EECC8C;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
-ion-item.form-field {
-  --highlight-color: #FF9800;
+
+ion-card-title {
+  color: #4A3500;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
+
+/* Form items */
+.form-item {
+  --background: transparent;
+  --border-color: #FFB74D;
+  --highlight-color-focused: #FF9800;
+  margin-bottom: 16px;
+}
+
 ion-label {
-  color: #4A3500 !important;
+  color: #5D4037 !important;
   font-weight: 500;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
+
 ion-datetime, ion-textarea {
-  --background: #FFFFFF;
-  --color: #5D4037;
+  --placeholder-color: #8D6E63;
+  --placeholder-opacity: 0.8;
+  color: #4A3500;
   font-size: 1rem;
-  margin-top: 8px;
 }
-.button-container {
-  margin-top: 24px;
-}
-ion-button.submit-button {
+
+/* Button styling */
+.submit-button {
   --background: #FF9800;
-  --background-hover: #F57C00;
-  --background-activated: #FF9800;
-  --border-radius: 8px;
+  --background-activated: #F57C00;
   --color: #FFFFFF;
   font-weight: 600;
-  height: 48px;
-  margin: 0;
+  margin-top: 16px;
+  transition: opacity 0.3s ease;
 }
-ion-button.submit-button[disabled] {
-  --background: #FFE0B2;
-  --color: #8D6E63;
-  opacity: 0.7;
+
+.submit-button[disabled] {
+  opacity: 0.6;
 }
+
+/* Error message */
 .error-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: #D32F2F;
   font-size: 0.9rem;
-  margin-top: 16px;
-  padding: 8px;
-  background: #FFEBEE;
-  border-radius: 4px;
+  margin-top: 12px;
+  text-align: center;
 }
-ion-icon {
-  font-size: 1.2rem;
-}
-.form-field {
-  transition: transform 0.2s ease;
-}
-.form-field:focus-within {
-  transform: translateX(4px);
-}
-@media (max-width: 768px) {
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
   .event-card {
-    margin: 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
-  ion-card-title {
-    font-size: 1.1rem;
-  }
+}
+
+/* Animation for form items */
+.form-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-item:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(238, 204, 140, 0.2);
 }

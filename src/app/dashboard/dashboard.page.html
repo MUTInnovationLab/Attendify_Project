@@ -28,12 +28,27 @@
       </ion-card-content>
     </div>
     
+    <div>
+      <ion-card-content>
+        <ion-icon name="calendar-outline" (click)="navigateToEvents()"></ion-icon>
+        <h3>Calender</h3>
+        <p class="number"></p>
+      </ion-card-content>
+    </div>
+
+    <div>
+      <ion-card-content>
+        <ion-icon name="add-outline" (click)="openAddAdminModal()"></ion-icon>
+        <h3>Add Admin</h3>
+        <p class="number"></p>
+      </ion-card-content>
+    </div>
   </div>
 
-  <div class="display-content">
+  <!-- <div class="display-content">
     <ion-label>Add admin</ion-label>
     <ion-icon name="add-outline" button (click)="openAddAdminModal()" slot="end"></ion-icon>
-  </div>
+  </div> -->
 
   <div id="admin-container">
     <div class="admin-details" *ngFor="let deptAdmin of (deptAdmins$ | async)">

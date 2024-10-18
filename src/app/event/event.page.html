@@ -7,14 +7,14 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding event-form-content">
   <form (ngSubmit)="addEvent()" #eventForm="ngForm">
-    <ion-card>
+    <ion-card class="event-card">
       <ion-card-header>
         <ion-card-title>{{ eventIdToUpdate ? 'Edit Event Details' : 'New Event Details' }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-item>
+        <ion-item class="form-item">
           <ion-label position="floating">Date and Time</ion-label>
           <ion-datetime
             [(ngModel)]="newEvent.date"
@@ -26,7 +26,7 @@
           ></ion-datetime>
         </ion-item>
 
-        <ion-item>
+        <ion-item class="form-item">
           <ion-label position="floating">Description</ion-label>
           <ion-textarea
             [(ngModel)]="newEvent.description"
@@ -42,13 +42,14 @@
             expand="block"
             type="submit"
             [disabled]="!eventForm.form.valid"
+            class="submit-button"
           >
             {{ eventIdToUpdate ? 'Update Event' : 'Add Event' }}
           </ion-button>
         </div>
 
         <ion-text color="danger" *ngIf="eventForm.form.invalid && eventForm.form.touched">
-          <p class="ion-padding-top">Please fill out all required fields.</p>
+          <p class="error-message">Please fill out all required fields.</p>
         </ion-text>
       </ion-card-content>
     </ion-card>
