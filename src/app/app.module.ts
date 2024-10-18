@@ -12,6 +12,8 @@ import { ViewModalModule } from './view-modal/view-modal.module';
 import { FormsModule } from '@angular/forms';
 import { MakeAnnouncementModule } from './make-announcement/make-announcement.module'; // Import the MakeAnnouncementModule
 import { AnnouncementsModule } from './view-announcements/view-announcements.module';
+import { HttpClientModule } from '@angular/common/http';
+
 
 
 @NgModule({
@@ -25,6 +27,7 @@ import { AnnouncementsModule } from './view-announcements/view-announcements.mod
     AngularFirestoreModule,
     AngularFireAuthModule,
     AnnouncementsModule,
+    HttpClientModule,
     MakeAnnouncementModule // Include MakeAnnouncementModule in the imports array
    
   ],
