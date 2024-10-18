@@ -1,40 +1,29 @@
-/* Header styling */
 ion-toolbar {
   --background: #EECC8C;
 }
-
 ion-toolbar ion-button {
   --color: #4A3500;
 }
-
-/* Content styling */
 .user-management-content {
   --background: #FFF5E6;
 }
-
-/* Segment styling */
 .user-segment {
   background: #FFF5E6;
   border-radius: 0;
   padding: 8px;
 }
-
 ion-segment-button {
   --background-checked: #FF9800;
   --color-checked: #4A3500;
   --color: #4A3500;
   --indicator-color: #FF9800;
 }
-
-/* Card styling */
 .table-card {
   background: #FFFFFF;
   margin: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
 }
-
-/* Searchbar styling */
 .custom-searchbar {
   --background: #FFF5E6;
   --color: #4A3500;
@@ -42,18 +31,14 @@ ion-segment-button {
   margin-bottom: 16px;
   border-radius: 8px;
 }
-
-/* Table styling */
 .table-container {
   overflow-x: auto;
 }
-
 .custom-table {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
 }
-
 .custom-table th {
   background: #FF9800;
   color: #FFFFFF;
@@ -61,18 +46,14 @@ ion-segment-button {
   text-align: left;
   font-weight: 600;
 }
-
 .custom-table td {
   padding: 12px;
   color: #5D4037;
   border-bottom: 1px solid #FFE0B2;
 }
-
 .custom-table tr:hover {
   background-color: #FFF8E1;
 }
-
-/* Pagination styling */
 .pagination {
   display: flex;
   justify-content: center;
@@ -80,32 +61,24 @@ ion-segment-button {
   padding: 16px;
   gap: 16px;
 }
-
 .pagination span {
   color: #4A3500;
   font-weight: 500;
 }
-
 .pagination ion-button {
   --color: #FF9800;
 }
-
-/* Delete button styling */
 .delete-button {
   --padding-start: 4px;
   --padding-end: 4px;
 }
-
 .delete-button ion-icon {
   font-size: 20px;
 }
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .custom-table {
     font-size: 0.9rem;
   }
-  
   .custom-table th,
   .custom-table td {
     padding: 8px;

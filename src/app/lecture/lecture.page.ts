@@ -135,7 +135,7 @@ export class LecturePage implements OnInit {
   async fetchExistingStudents() {
     try {
       const snapshot = await firebase.firestore()
-        .collection('allmodules')
+        .collection('allModules')
         .doc(this.selectedModule.moduleCode)
         .collection(this.selectedModule.moduleName)
         .get();
@@ -196,10 +196,10 @@ export class LecturePage implements OnInit {
   
     try {
       const batch = firebase.firestore().batch();
-      const moduleRef = firebase.firestore().collection('allmodules').doc(this.selectedModule.moduleCode);
+      const moduleRef = firebase.firestore().collection('allModules').doc(this.selectedModule.moduleCode);
       const studentsRef = moduleRef.collection(this.selectedModule.moduleName);
   
-      const enrolledmodulesRef = firebase.firestore().collection('enrolledmodules');
+      const enrolledmodulesRef = firebase.firestore().collection('enrolledModules');
   
       for (const student of selectedStudents) {
         const studentDocRef = studentsRef.doc(student.id);

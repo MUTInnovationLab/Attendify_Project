@@ -1,33 +1,24 @@
-/* Header styling */
 ion-toolbar {
   --background: #EECC8C;
 }
-
 ion-title {
   color: #4A3500;
   font-weight: 600;
 }
-
-/* Content styling */
 .module-selection-content {
   --background: #fff5e6;
   padding: 16px;
 }
-
-/* Searchbar customization */
 .custom-searchbar {
   --background: #FFFFFF;
   --box-shadow: none;
   --border-radius: 8px;
   margin-bottom: 16px;
 }
-
-/* Module list styling */
 .module-list {
   background: transparent;
   margin-bottom: 20px;
 }
-
 .module-item {
   --background: #FFFFFF;
   margin-bottom: 8px;
@@ -36,13 +27,10 @@ ion-title {
   border-left: 4px solid #FF9800;
   box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
 }
-
 .module-item ion-label {
   color: #4A3500;
   font-weight: 500;
 }
-
-/* Checkbox customization */
 ion-checkbox {
   --checkbox-background: #FFFFFF;
   --checkbox-background-checked: #FF9800;
@@ -50,53 +38,41 @@ ion-checkbox {
   --border-color-checked: #FF9800;
   --checkmark-color: #FFFFFF;
 }
-
-/* Selected modules cards */
 .selected-module-card {
   background: #FFFFFF;
   margin-bottom: 16px;
   border-radius: 8px;
-  // border-left: 4px solid #FF9800;
   box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
 }
-
 ion-card-header {
   background: #FFF8E1;
 }
-
 ion-card-title {
   color: #FF6F00;
   font-size: 1.1rem;
   font-weight: 700;
 }
-
 ion-card-subtitle {
   color: #8D6E63;
   font-weight: 500;
 }
-
 .module-detail {
   color: #5D4037;
   margin: 8px 0;
   font-size: 0.9rem;
   line-height: 1.5;
 }
-
 .module-detail strong {
   color: #4A3500;
 }
-
 .card-actions {
   padding: 8px 16px;
   border-top: 1px solid #FFE0B2;
 }
-
 .cancel-button {
   --color: #D32F2F;
   font-size: 0.9rem;
 }
-
-/* Submit button */
 .submit-button {
   --background: #FF9800;
   --background-activated: #F57C00;
@@ -105,18 +81,13 @@ ion-card-subtitle {
   margin: 16px 0;
   font-weight: 600;
 }
-
-/* Hover effects */
 .module-item:hover {
   --background: #FFF8E1;
 }
-
 .selected-module-card:hover {
   box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
   transition: box-shadow 0.2s ease;
 }
-
-/* Disabled states */
 ion-button[disabled] {
   opacity: 0.7;
 }

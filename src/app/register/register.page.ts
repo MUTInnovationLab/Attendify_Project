@@ -35,7 +35,6 @@ export class RegisterPage implements OnInit {
     this.navCtrl.navigateForward("/login");
   }
 
-
   async register() {
     if (this.email === "") {
       alert("Please enter your email.");
@@ -71,7 +70,7 @@ export class RegisterPage implements OnInit {
         this.router.navigateByUrl("/login");
         this.presentToast();
       })
-      .catch((error) => {
+      .catch(error => {
         loader.dismiss();
         const errorMessage = error.message;
   

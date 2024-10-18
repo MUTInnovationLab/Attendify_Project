@@ -174,14 +174,35 @@ export class DashboardPage {
       this.presentToast('You must be logged in to delete a Dept-Admin.');
       return;
     }
-
-    try {
-      await this.firestore.collection('registered staff').doc(deptAdminId).delete();
-      this.presentToast('Dept-Admin successfully deleted!');
-    } catch (error) {
-      console.error('Error deleting Dept-Admin: ', error);
-      this.presentToast('Error deleting Dept-Admin.');
-    }
+  
+    const alert = await this.alertController.create({
+      header: 'Confirm Deletion',
+      message: 'Are you sure you want to delete this Dept-Admin? This action cannot be undone.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Deletion cancelled');
+          }
+        }, {
+          text: 'Delete',
+          cssClass: 'danger',
+          handler: async () => {
+            try {
+              await this.firestore.collection('registered staff').doc(deptAdminId).delete();
+              this.presentToast('Dept-Admin successfully deleted!');
+            } catch (error) {
+              console.error('Error deleting Dept-Admin: ', error);
+              this.presentToast('Error deleting Dept-Admin.');
+            }
+          }
+        }
+      ]
+    });
+  
+    await alert.present();
   }
 
   async presentToast(message: string) {
@@ -221,7 +242,7 @@ export class DashboardPage {
         {
           text: 'Logout',
           handler: () => {
-            this.authService.logout();
+            this.navCtrl.navigateRoot('/login');
           },
         },
       ],
@@ -232,6 +253,10 @@ export class DashboardPage {
 
   navigateToDeptAnalytics() {
     this.navCtrl.navigateForward('/dept-analytics'); // The path should match your routing setup
+  }
+
+  navigateToEvents() {
+    this.navCtrl.navigateForward('/event'); // The path should match your routing setup
   }
 
   departmentsAnalytics = [
