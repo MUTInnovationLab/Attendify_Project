@@ -10,6 +10,7 @@ interface Student {
   name: string;
   surname: string;
   studentNumber: string;
+  faculty: string;
 }
 
 interface Lecturer {
@@ -17,6 +18,7 @@ interface Lecturer {
   fullName: string;
   position: string;
   staffNumber: string;
+  faculty: string;
 }
 
 @Component({
@@ -27,23 +29,26 @@ interface Lecturer {
 export class DeptAnalyticsPage implements AfterViewInit {
   lecturers: Lecturer[] = [];
   students: Student[] = [];
-  attendingStudents: string[] = []; // Array of emails of students who attended
+  attendingStudents: string[] = [];
   studentCount: number = 0;
   lecturerCount: number = 0;
   nonAttendingCount: number = 0;
   lecturerChart: any;
-  moduleCode: string = ' '; // Set this dynamically if needed
+  studentChart: any;
+  moduleCode: string = ' ';
+  selectedFaculty: string = 'All';
+  faculties: string[] = ['All','Faculty of ICT', 'Faculty of Engineering', 'Faculty of Management Science', 'Faculty of Applied and Health Science'];
 
   constructor(private firestore: AngularFirestore) {}
 
   ngAfterViewInit() {
-    this.fetchLecturers().then(() => {
-      this.createLecturerAttendanceChart(); // Create lecturer bar chart
-    });
+    this.fetchData();
+  }
 
-    this.fetchAttendedStudents().then(() => {
-      this.createStudentAttendanceChart(); // Create student pie chart
-    });
+  async fetchData() {
+    await this.fetchLecturers();
+    await this.fetchAttendedStudents();
+    this.createCharts();
   }
 
   async fetchLecturers() {
@@ -54,7 +59,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
 
       if (lecturersSnapshot) {
         this.lecturers = lecturersSnapshot.docs.map(doc => doc.data() as Lecturer);
-        this.lecturerCount = this.lecturers.length;
+        this.updateLecturerCount();
       } else {
         console.error('No lecturers data found');
       }
@@ -65,140 +70,160 @@ export class DeptAnalyticsPage implements AfterViewInit {
 
   async fetchAttendedStudents() {
     try {
-      // Step 1: Fetch all registered students
       const studentsSnapshot = await this.firestore.collection('registeredStudents').get().toPromise();
       
       if (studentsSnapshot && !studentsSnapshot.empty) {
         this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
-        this.studentCount = this.students.length;
-  
-        const attendedStudentNumbers: Set<string> = new Set(); // Use a Set to store unique attended student numbers
-  
-        // Step 2: Fetch attendance data for all modules from the 'Attended' collection
+        this.updateStudentCount();
+
+        const attendedStudentNumbers: Set<string> = new Set();
+
         const attendedModulesSnapshot = await this.firestore.collection('Attended').get().toPromise();
-  
-        // Ensure that attendedModulesSnapshot exists before proceeding
+
         if (attendedModulesSnapshot && !attendedModulesSnapshot.empty) {
-          // Step 3: Loop through each module document in 'Attended' collection
           for (const moduleDoc of attendedModulesSnapshot.docs) {
             const attendedData = moduleDoc.data() as Record<string, any>;
             
-            console.log('Attended Data:', attendedData);
-            
-            // Collect all attended students' numbers across all dates for each module
             for (const date in attendedData) {
               if (attendedData.hasOwnProperty(date)) {
                 const studentsArray = attendedData[date];
-  
+
                 if (Array.isArray(studentsArray)) {
                   studentsArray.forEach(studentInfo => {
                     if (typeof studentInfo === 'object' && studentInfo.studentNumber) {
                       attendedStudentNumbers.add(studentInfo.studentNumber);
-                    } else {
-                      console.error(`Invalid student info for date ${date}:`, studentInfo);
                     }
                   });
-                } else {
-                  console.error(`Expected an array for date ${date}, but got:`, studentsArray);
                 }
               }
             }
           }
-  
+
           this.attendingStudents = Array.from(attendedStudentNumbers);
-          this.nonAttendingCount = this.studentCount - this.attendingStudents.length;
-  
-          console.log('Total registered students:', this.studentCount);
-          console.log('Total attended students:', this.attendingStudents.length);
-          console.log('Total non-attending students:', this.nonAttendingCount);
+          this.updateNonAttendingCount();
         } else {
           console.error('No attendance data found in any modules.');
           this.attendingStudents = [];
-          this.nonAttendingCount = this.studentCount;
+          this.updateNonAttendingCount();
         }
       } else {
         console.error('No registered students data found');
-        this.studentCount = 0;
-        this.nonAttendingCount = 0;
-        this.attendingStudents = [];
+        this.resetCounts();
       }
     } catch (error) {
       console.error('Error fetching attended students:', error);
     }
   }
-  
-  
-  createStudentAttendanceChart() {
-  const studentCanvas = <HTMLCanvasElement>document.getElementById('studentAttendanceChart');
-  const studentCtx = studentCanvas?.getContext('2d');
 
-  // Debugging: Log the data being used
-  console.log("Attending Students:", this.attendingStudents);
-  console.log("Non-Attending Count:", this.nonAttendingCount);
-
-  if (studentCtx) {
-    // Ensure the data is valid
-    const attendingCount = this.attendingStudents.length;
-    const nonAttendingCount = typeof this.nonAttendingCount === 'number' ? this.nonAttendingCount : 0; // Default to 0 if not a number
-
-    new Chart(studentCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Attending', 'Not Attending'],
-        datasets: [{
-          data: [attendingCount, nonAttendingCount],
-          backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
-          borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
-          borderWidth: 1,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: (tooltipItem: any) => {
-                const dataset = tooltipItem.dataset;
-                const dataIndex = tooltipItem.dataIndex;
-                const dataValue = dataset.data[dataIndex];
-                const total = dataset.data.reduce((sum: number, value: number) => sum + value, 0);
-                const percentage = ((dataValue / total) * 100).toFixed(2);
-                return `${tooltipItem.label}: ${dataValue} (${percentage}%)`;
-              }
-            }
-          },
-          legend: {
-            display: true,
-            position: 'top',
-          }
-        }
-      },
-    });
-  } else {
-    console.error('Failed to get the 2D context for student attendance pie chart');
+  updateLecturerCount() {
+    this.lecturerCount = this.selectedFaculty === 'All' 
+      ? this.lecturers.length 
+      : this.lecturers.filter(l => l.faculty === this.selectedFaculty).length;
   }
-}
 
+  updateStudentCount() {
+    this.studentCount = this.selectedFaculty === 'All' 
+      ? this.students.length 
+      : this.students.filter(s => s.faculty === this.selectedFaculty).length;
+  }
+
+  updateNonAttendingCount() {
+    const attendingCount = this.selectedFaculty === 'All' 
+      ? this.attendingStudents.length 
+      : this.attendingStudents.filter(email => 
+          this.students.find(s => s.email === email && s.faculty === this.selectedFaculty)
+        ).length;
+    this.nonAttendingCount = this.studentCount - attendingCount;
+  }
+
+  resetCounts() {
+    this.studentCount = 0;
+    this.nonAttendingCount = 0;
+    this.attendingStudents = [];
+  }
+
+  onFacultyChange() {
+    this.updateLecturerCount();
+    this.updateStudentCount();
+    this.updateNonAttendingCount();
+    this.createCharts();
+  }
+
+  createCharts() {
+    this.createStudentAttendanceChart();
+    this.createLecturerAttendanceChart();
+  }
+
+  createStudentAttendanceChart() {
+    const studentCanvas = <HTMLCanvasElement>document.getElementById('studentAttendanceChart');
+    const studentCtx = studentCanvas?.getContext('2d');
+
+    if (studentCtx) {
+      if (this.studentChart) {
+        this.studentChart.destroy();
+      }
+
+      const attendingCount = this.studentCount - this.nonAttendingCount;
+
+      this.studentChart = new Chart(studentCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Attending', 'Not Attending'],
+          datasets: [{
+            data: [attendingCount, this.nonAttendingCount],
+            backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
+            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (tooltipItem: any) => {
+                  const dataset = tooltipItem.dataset;
+                  const dataIndex = tooltipItem.dataIndex;
+                  const dataValue = dataset.data[dataIndex];
+                  const total = dataset.data.reduce((sum: number, value: number) => sum + value, 0);
+                  const percentage = ((dataValue / total) * 100).toFixed(2);
+                  return `${tooltipItem.label}: ${dataValue} (${percentage}%)`;
+                }
+              }
+            },
+            legend: {
+              display: true,
+              position: 'top',
+            }
+          }
+        },
+      });
+    } else {
+      console.error('Failed to get the 2D context for student attendance pie chart');
+    }
+  }
 
   createLecturerAttendanceChart() {
     const lecturerCanvas = <HTMLCanvasElement>document.getElementById('lecturerAttendanceChart');
     const lecturerCtx = lecturerCanvas?.getContext('2d');
 
-    // Destroy existing chart instance if it exists
-    if (this.lecturerChart) {
-      this.lecturerChart.destroy();
-    }
-
     if (lecturerCtx) {
-      // Create a new chart instance and store it
+      if (this.lecturerChart) {
+        this.lecturerChart.destroy();
+      }
+
+      const filteredLecturers = this.selectedFaculty === 'All' 
+        ? this.lecturers 
+        : this.lecturers.filter(l => l.faculty === this.selectedFaculty);
+
       this.lecturerChart = new Chart(lecturerCtx, {
         type: 'bar',
         data: {
-          labels: this.lecturers.map(lecturer => lecturer.fullName),
+          labels: filteredLecturers.map(lecturer => lecturer.fullName),
           datasets: [{
             label: 'Lecturer Attendance',
-            data: this.lecturers.map(() => Math.random() * 10), // Replace with actual data
+            data: filteredLecturers.map(() => Math.random() * 10), // Replace with actual data
             backgroundColor: 'rgba(75, 192, 192, 0.7)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,

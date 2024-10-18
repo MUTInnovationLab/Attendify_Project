@@ -186,6 +186,11 @@ export class LecturePage implements OnInit {
     this.searchTerms.next(event.target.value);
   }
 
+
+
+
+
+
   async confirmAddStudents() {
     const selectedStudents = this.filteredStudents.filter(student => student.selected);
     
@@ -199,7 +204,7 @@ export class LecturePage implements OnInit {
       const moduleRef = firebase.firestore().collection('allModules').doc(this.selectedModule.moduleCode);
       const studentsRef = moduleRef.collection(this.selectedModule.moduleName);
   
-      const enrolledmodulesRef = firebase.firestore().collection('enrolledModules');
+      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(this.selectedModule.moduleCode);
   
       for (const student of selectedStudents) {
         const studentDocRef = studentsRef.doc(student.id);
@@ -211,30 +216,13 @@ export class LecturePage implements OnInit {
           moduleCode: this.selectedModule.moduleCode
         });
   
-        // Use studentNumber as document ID in 'enrolledmodules'
-        const enrolledStudentDocRef = enrolledmodulesRef.doc(student.studentNumber.toString());
-        const enrolledStudentDoc = await enrolledStudentDocRef.get();
-        
-        if (enrolledStudentDoc.exists) {
-          // Student exists, update the moduleCode array
-          const enrolledStudentData = enrolledStudentDoc.data();
-          if (enrolledStudentData) {
-            const existingModuleCodes = enrolledStudentData['moduleCode'] || [];
-            if (!existingModuleCodes.includes(this.selectedModule.moduleCode)) {
-              existingModuleCodes.push(this.selectedModule.moduleCode);
-              batch.update(enrolledStudentDocRef, { moduleCode: existingModuleCodes });
-            }
-          }
-        } else {
-          // Student does not exist, create a new document
-          batch.set(enrolledStudentDocRef, {
-            email: student.email,
-            name: student.name,
-            surname: student.surname,
-            studentNumber: student.studentNumber,
-            moduleCode: [this.selectedModule.moduleCode]
-          });
-        }
+        // Update the enrolledModules collection
+        batch.set(enrolledModulesRef, {
+          Enrolled: firebase.firestore.FieldValue.arrayUnion({
+            status: "Enrolled",
+            sstudentNumber: student.studentNumber
+          })
+        }, { merge: true });
       }
   
       await batch.commit();
@@ -246,6 +234,7 @@ export class LecturePage implements OnInit {
     }
   }
   
+
   
   async presentConfirmationAlert() {
     const alert = await this.alertController.create({
@@ -278,6 +267,10 @@ export class LecturePage implements OnInit {
     });
     await alert.present();
   }
+
+
+
+
 
   async presentToast() {
     const toast = await this.toastController.create({

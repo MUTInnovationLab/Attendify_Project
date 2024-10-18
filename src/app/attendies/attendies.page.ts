@@ -288,64 +288,49 @@ totalEnrolledStudents: number = 0;
   }
 
   
+
+
+
+
   async fetchPendingRequests(moduleCode: string, moduleName: string) {
-    if (!moduleCode || !moduleName) {
-      console.warn('Module code or module name is missing.');
+    if (!moduleCode) {
+      console.warn('Module code is missing.');
       return;
     }
   
     try {
-      console.log(`Fetching pending requests for module: ${moduleCode}, module name: ${moduleName}`);
+      console.log(`Fetching pending requests for module: ${moduleCode}`);
   
-      const correctModuleName = this.moduleName || moduleName;
+      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules').doc(moduleCode).get().toPromise();
   
-      const requestsSnapshot = await this.firestore.collection('allModules')
-        .doc(moduleCode)
-        .collection(correctModuleName, ref => ref.where('status', '==', 'pending'))
-        .get()
-        .toPromise();
+      if (enrolledModulesSnapshot && enrolledModulesSnapshot.exists) {
+        const enrolledData = enrolledModulesSnapshot.data() as { Enrolled?: any[] };
+        const pendingRequests = enrolledData.Enrolled?.filter(student => student.status === 'pending') || [];
   
-      if (requestsSnapshot && !requestsSnapshot.empty) {
-        const batch = this.firestore.firestore.batch();
+        const newRequests = pendingRequests.map(student => ({
+          id: student.studentNumber,
+          studentNumber: student.studentNumber,
+          status: student.status,
+          moduleCode: moduleCode,
+          email: student.email || '',
+          name: student.name || '',
+          surname: student.surname || ''
+        }));
   
-        for (const doc of requestsSnapshot.docs) {
-          const data = doc.data();
-          const studentNumber = data['studentNumber'];
-          const studentEmail = data['email'];
-          const studentName = data['name'];
-          const studentSurname = data['surname'];
-          const id = doc.id;
+        // Concatenate new requests with existing ones
+        this.requestedInvites = [...this.requestedInvites, ...newRequests];
   
-          this.requestedInvites.push({ id, ...data });
-  
-          // Reference to the student's document in enrolledModules
-          const studentRef = this.firestore.collection('enrolledModules').doc(studentEmail).ref;
-  
-          // Update enrolledModules collection
-          batch.set(studentRef, {
-            email: studentEmail,
-            name: studentName,
-            surname: studentSurname,
-            studentNumber: studentNumber,
-            moduleCode: firebase.firestore.FieldValue.arrayUnion(moduleCode)
-          }, { merge: true });
-        }
-  
-        // Commit the batch
-        await batch.commit();
-  
-        console.log('Pending requests data:', this.requestedInvites);
+        console.log('Updated pending requests data:', this.requestedInvites);
       } else {
-        console.log(`No pending requests data found for module ${moduleCode}.`);
+        console.log(`No enrolled students found for module ${moduleCode}.`);
       }
-  
-      this.showRequestsTable = this.requestedInvites.length > 0;
   
     } catch (error) {
       console.error('Error fetching pending requests data:', error);
-      this.requestedInvites = [];
-      this.showRequestsTable = false; 
     }
+  
+    // Always set showRequestsTable to true after fetching, even if there are no pending requests
+    this.showRequestsTable = true;
   }
   toggleTable() {
     this.showTable = !this.showTable;
@@ -355,77 +340,64 @@ totalEnrolledStudents: number = 0;
     this.showRequestsTable = !this.showRequestsTable;
   }
 
-  async updateStudentStatus(request: any, status: string) {
+  async updateStudentStatus(request: any, action: 'enroll' | 'remove') {
     console.log('--- Start of updateStudentStatus ---');
 
-    // Ensure request has the required fields
-    if (!request.moduleCode || !request.studentNumber || !request.email || !request.name || !request.surname) {
-        await this.presentToast('Error updating student status. Required information is missing.', 'danger');
-        console.error('Missing required fields: moduleCode, studentNumber, email, name, or surname.');
-        return;
+    if (!request.moduleCode || !request.studentNumber) {
+      await this.presentToast('Error updating student status. Required information is missing.', 'danger');
+      console.error('Missing required fields: moduleCode or studentNumber.');
+      return;
     }
 
     try {
-        // Fetch the correct moduleName from the 'modules' collection using the moduleCode
-        const moduleSnapshot = await this.firestore.collection('modules', ref =>
-            ref.where('moduleCode', '==', request.moduleCode)
-        ).get().toPromise();
+      const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(request.moduleCode);
 
-        if (moduleSnapshot && !moduleSnapshot.empty) {
-            const moduleData = moduleSnapshot.docs[0].data() as { moduleName: string };
-            const correctModuleName = moduleData.moduleName;
+      // Get the current Enrolled array
+      const doc = await enrolledModulesRef.get().toPromise();
+      if (doc && doc.exists) {
+        const data = doc.data() as { Enrolled?: any[] };
+        let enrolledArray = data.Enrolled || [];
 
-            // Use the correct moduleName to update the allModules collection
-            const allModulesRef = this.firestore.collection('allModules')
-                .doc(request.moduleCode)
-                .collection(correctModuleName)
-                .doc(request.studentNumber).ref; // Get the DocumentReference using .ref
-
-            const enrolledModulesRef = this.firestore.collection('enrolledModules')
-                .doc(request.studentNumber).ref; // Get the DocumentReference for enrolledModules
-
-            // Start a batch write
-            const batch = this.firestore.firestore.batch();
-
-            // Update the student's status in allModules
-            batch.update(allModulesRef, { status: status });
-
-            // Update or add the student's document in enrolledModules, with merge set to true to avoid overwriting
-            batch.set(enrolledModulesRef, {
-                email: request.email,
-                moduleCode: firebase.firestore.FieldValue.arrayUnion(request.moduleCode), // Add moduleCode to array
-                name: request.name,
-                studentNumber: request.studentNumber,
-                surname: request.surname
-            }, { merge: true });
-
-            // Commit the batch
-            await batch.commit();
-
-            await this.presentToast('Student status and enrolled module updated successfully.', 'success');
-        } else {
-            await this.presentToast('Error updating student status. Module not found.', 'danger');
-            console.error(`Module not found for moduleCode: ${request.moduleCode}`);
+        if (action === 'enroll') {
+          // Find and update the student's status
+          const studentIndex = enrolledArray.findIndex(student => student.studentNumber === request.studentNumber);
+          if (studentIndex !== -1) {
+            enrolledArray[studentIndex].status = 'enrolled';
+            await enrolledModulesRef.update({ Enrolled: enrolledArray });
+            await this.presentToast('Student enrolled successfully.', 'success');
+          } else {
+            await this.presentToast('Student not found in the module.', 'danger');
+          }
+        } else if (action === 'remove') {
+          // Remove the student from the array
+          enrolledArray = enrolledArray.filter(student => student.studentNumber !== request.studentNumber);
+          await enrolledModulesRef.update({ Enrolled: enrolledArray });
+          await this.presentToast('Student removed successfully.', 'success');
         }
 
+        // Refresh the pending requests
+        await this.fetchPendingRequests(request.moduleCode, '');
+      } else {
+        await this.presentToast('Module not found.', 'danger');
+      }
     } catch (error) {
-        console.error('Error updating student status:', error);
-        await this.presentToast('Error updating student status. Please try again.', 'danger');
+      console.error('Error updating student status:', error);
+      await this.presentToast('Error updating student status. Please try again.', 'danger');
     }
-}
+  }
 
-  
-  // Method to approve a student's request, marking them active in allModules
   approveStudent(request: any) {
     console.log('Approving student:', request);
-    this.updateStudentStatus(request, 'active');
+    this.updateStudentStatus(request, 'enroll');
   }
   
-  // Method to decline a student's request, marking them as declined
   declineStudent(request: any) {
     console.log('Declining student:', request);
-    this.updateStudentStatus(request, 'declined');
+    this.updateStudentStatus(request, 'remove');
   }
+
+
+
 
 
   // Unsubscribe from observables when the component is destroyed
