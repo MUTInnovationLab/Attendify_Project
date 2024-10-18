@@ -1,29 +1,21 @@
-/* Header styling */
 ion-toolbar {
   --background: #EECC8C;
 }
-
 .back-button {
   --color: #4A3500;
 }
-
 .user-button {
   --color: #4A3500;
   font-weight: 500;
 }
-
 .user-button ion-icon {
   margin-left: 8px;
   font-size: 1.2rem;
 }
-
-/* Content styling */
 .attendance-content {
   --background: #FFF5E6;
   padding: 16px;
 }
-
-/* Card styling */
 ion-card {
   background: #FFFFFF;
   border-radius: 8px;
@@ -31,12 +23,10 @@ ion-card {
   margin: 8px;
   border-left: 4px solid #FF9800;
 }
-
 ion-card-header {
   background: #FFF8E1;
   padding: 16px;
 }
-
 ion-card-title {
   color: #FF6F00;
   font-size: 1.2rem;
@@ -45,23 +35,16 @@ ion-card-title {
   align-items: center;
   gap: 8px;
 }
-
 ion-card-title ion-icon {
   color: #FF9800;
 }
-
-/* Chart card specific styling */
 .chart-card ion-card-content {
   padding: 16px;
   height: 400px;
 }
-
-/* Progress card specific styling */
 .progress-card {
   height: calc(100% - 16px);
 }
-
-/* Toggle button styling */
 .toggle-button {
   --background: #FF9800;
   --background-activated: #F57C00;
@@ -70,12 +53,9 @@ ion-card-title ion-icon {
   margin: 16px 0;
   font-weight: 500;
 }
-
-/* Progress bar styling */
 .progress-container {
   margin-top: 24px;
 }
-
 .progress-bar {
   background: #FFE0B2;
   border-radius: 20px;
@@ -84,14 +64,12 @@ ion-card-title ion-icon {
   overflow: hidden;
   margin: 16px 0;
 }
-
 .progress-fill {
   background: #FF9800;
   height: 100%;
   border-radius: 20px;
   transition: width 0.3s ease;
 }
-
 .progress-text {
   position: absolute;
   left: 50%;
@@ -102,34 +80,26 @@ ion-card-title ion-icon {
   font-size: 0.9rem;
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
-
 .attendance-stats {
   color: #5D4037;
   text-align: center;
   margin-top: 16px;
   font-size: 0.9rem;
 }
-
 .attendance-stats strong {
   color: #FF6F00;
 }
-
-/* Hover effects */
 ion-card:hover {
   box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
   transition: box-shadow 0.2s ease;
 }
-
 .toggle-button:hover {
   --background: #F57C00;
 }
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .chart-card ion-card-content {
     height: 300px;
   }
-  
   .progress-card {
     height: auto;
     margin-top: 16px;

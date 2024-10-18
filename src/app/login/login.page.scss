@@ -1,8 +1,6 @@
-/* Main container styling */
 ion-content {
   --background: #FFF5E6;
 }
-
 .login-container {
   max-width: 400px;
   margin: 2rem auto;
@@ -11,8 +9,6 @@ ion-content {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(238, 204, 140, 0.2);
 }
-
-/* Title styling */
 .title {
   color: #4A3500;
   font-size: 1.8rem;
@@ -24,13 +20,10 @@ ion-content {
   justify-content: center;
   gap: 0.5rem;
 }
-
 .title ion-icon {
   font-size: 2rem;
   color: #FF9800;
 }
-
-/* Form styling */
 .custom-input {
   --background: transparent;
   --border-color: #EECC8C;
@@ -41,25 +34,20 @@ ion-content {
   --padding-end: 16px;
   margin-bottom: 1rem;
 }
-
 .custom-input.item-has-focus {
   --border-color: #FF9800;
   --border-width: 2px;
 }
-
 ion-label {
   color: #8D6E63 !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
 }
-
 ion-input {
   --color: #4A3500;
   --placeholder-color: #8D6E63;
   font-size: 1rem;
 }
-
-/* Button styling */
 .sign-btn {
   --background: #FF9800;
   --background-hover: #F57C00;
@@ -72,82 +60,64 @@ ion-input {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .forgot-btn {
   --color: #FF9800;
   font-size: 0.9rem;
   font-weight: 500;
 }
-
 .forgot-btn a {
   color: #FF9800;
   text-decoration: none;
 }
-
-/* Divider styling */
 .divider-container {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin: 2rem 0;
 }
-
 .divider-line {
   flex: 1;
   height: 1px;
   background: #EECC8C;
 }
-
 .divider-text {
   color: #8D6E63;
   font-size: 0.9rem;
   font-weight: 600;
   white-space: nowrap;
 }
-
-/* Sign up section */
 .signup-text {
   color: #5D4037;
   font-size: 0.9rem;
 }
-
 .signup-text span {
   margin-right: 0.5rem;
 }
-
 .signup-link {
   color: #FF9800;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
-
 .signup-link:hover {
   color: #F57C00;
 }
-
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .login-container {
   animation: fadeIn 0.5s ease-out;
 }
-
-/* Focus states */
 ion-item.item-has-focus {
   --highlight-background: #FF9800;
 }
 
-/* Responsive adjustments */
 @media (max-width: 480px) {
   .login-container {
     margin: 1rem;
     padding: 1.5rem;
   }
-
   .title {
     font-size: 1.5rem;
   }

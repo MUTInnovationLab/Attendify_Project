@@ -1,9 +1,6 @@
-/* Base styles */
 .custom-background {
   --background: #FFF5E6;
 }
-
-/* Profile Section */
 .profile-section {
   padding: 16px;
   display: grid;
@@ -17,20 +14,17 @@
   justify-content: space-between;
   align-items: center;
 }
-
 .header h4 {
   color: #4A3500;
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
 }
-
 .header ion-icon {
   font-size: 24px;
   color: #4A3500;
   cursor: pointer;
 }
-
 .profile-card, .student-card {
   background: #FFFFFF;
   border-radius: 12px;
@@ -38,25 +32,20 @@
   border-left: 4px solid #EECC8C;
   transition: transform 0.2s ease;
 }
-
 .profile-card:hover, .student-card:hover {
   transform: translateY(-2px);
 }
-
 .profile-icon, .feature-icon {
   font-size: 48px;
   color: #FF9800;
   margin-bottom: 12px;
 }
-
 .username {
   color: #4A3500;
   font-size: 1.2rem;
   font-weight: 500;
   margin-top: 8px;
 }
-
-/* Add Module Form */
 .add-module-section {
   background: #FFFFFF;
   border-radius: 12px;
@@ -64,18 +53,15 @@
   padding: 24px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 .section-header h1 {
   color: #FF9800;
   font-size: 1.5rem;
   margin-bottom: 24px;
 }
-
 .module-form .input-wrapper {
   margin-bottom: 20px;
   position: relative;
 }
-
 .module-form input {
   width: 100%;
   padding: 12px;
@@ -84,12 +70,10 @@
   background: #FFF5E6;
   transition: border-color 0.3s ease;
 }
-
 .module-form input:focus {
   border-color: #FF9800;
   outline: none;
 }
-
 .module-form label {
   position: absolute;
   left: 12px;
@@ -99,7 +83,6 @@
   color: #FF9800;
   font-size: 0.8rem;
 }
-
 .submit-wrapper button {
   background: #FF9800;
   color: white;
@@ -109,55 +92,43 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .submit-wrapper button:hover {
   background: #F57C00;
 }
-
-/* Modules Table */
 .modules-card {
   margin: 16px;
   background: #FFFFFF;
   border-radius: 12px;
   overflow: hidden;
 }
-
 .modules-table {
   width: 100%;
   border-collapse: collapse;
 }
-
 .modules-table th {
   background: #EECC8C;
   color: #4A3500;
   padding: 12px;
   text-align: left;
 }
-
 .modules-table td {
   padding: 12px;
   border-bottom: 1px solid #FFE0B2;
   color: #5D4037;
 }
-
 .modules-table tr:hover {
   background: #FFF8E1;
 }
-
 .modules-table tr.selected {
   background: #FFE0B2;
 }
-
 .view-cell {
   cursor: pointer;
 }
-
 .view-button {
   color: #FF9800;
   font-weight: 500;
 }
-
-/* Action Buttons */
 .action-buttons {
   padding: 16px;
   display: flex;
@@ -165,52 +136,42 @@
   gap: 8px;
   justify-content: center;
 }
-
 ion-button {
   --padding-start: 16px;
   --padding-end: 16px;
 }
-
-/* Modal Styling */
 ion-modal ion-toolbar {
   --background: #EECC8C;
   --color: #4A3500;
 }
-
 .modal-content {
   --background: #FFF5E6;
 }
-
 .custom-searchbar {
   --background: #FFFFFF;
   --color: #4A3500;
   --placeholder-color: #8D6E63;
   margin-bottom: 16px;
 }
-
 .student-list {
   background: transparent;
 }
-
 .student-item {
   --background: #FFFFFF;
   margin: 8px;
   border-radius: 8px;
   --border-color: #FFE0B2;
 }
-
 .avatar-icon {
   font-size: 40px;
   color: #FF9800;
 }
-
 .student-email, .student-number {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #8D6E63;
 }
-
 .custom-checkbox {
   --checkbox-background: #FFFFFF;
   --checkbox-background-checked: #FF9800;
@@ -218,13 +179,11 @@ ion-modal ion-toolbar {
   --border-color-checked: #FF9800;
   --checkmark-color: #FFFFFF;
 }
-
 .confirm-button {
   margin: 16px;
   --background: #FF9800;
   --background-activated: #F57C00;
 }
-
 .no-students-card {
   margin: 16px;
   border-left: 4px solid #FF9800;

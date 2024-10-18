@@ -1,11 +1,9 @@
-/* Header styling */
 ion-toolbar {
   --background: #EECC8C;
   --min-height: 56px;
   --padding-top: 4px;
   --padding-bottom: 4px;
 }
-
 .logout-button {
   --color: #4A3500;
   font-weight: 500;
@@ -13,28 +11,21 @@ ion-toolbar {
   align-items: center;
   gap: 8px;
 }
-
 .logout-button ion-icon {
   font-size: 1.3rem;
 }
-
 .logout-button ion-label {
   font-size: 0.95rem;
 }
-
-/* Hover states */
 .logout-button:hover, 
 .user-button:hover {
   --color: #663D00;
   opacity: 0.9;
 }
-
-/* Active states */
 .logout-button:active,
 .user-button:active {
   --color: #804D00;
 }
-
 .user-button {
   --color: #4A3500;
   font-weight: 500;
@@ -42,22 +33,16 @@ ion-toolbar {
   align-items: center;
   gap: 8px;
 }
-
 .user-button ion-icon {
   margin-left: 8px;
   font-size: 1.3rem;
 }
-
-/* Content styling */
 .dashboard-content {
   --background: #FFF5E6;
 }
-
 .frame {
   padding: 16px;
 }
-
-/* User Info Card styling */
 .user-info-card {
   background: #FFFFFF;
   border-radius: 12px;
@@ -66,7 +51,6 @@ ion-toolbar {
   padding: 16px;
   margin-bottom: 24px;
 }
-
 .user-info-item {
   display: flex;
   align-items: center;
@@ -75,25 +59,20 @@ ion-toolbar {
   border-radius: 8px;
   background: #FFF8E1;
 }
-
 .user-info-item ion-icon {
   color: #FF9800;
   font-size: 1.4rem;
   margin-right: 12px;
 }
-
 .info-text p {
   color: #4A3500;
   margin: 0;
   font-size: 0.95rem;
 }
-
 .edit-button {
   --color: #FF9800;
   float: right;
 }
-
-/* Welcome section styling */
 .heading {
   color: #4A3500;
   font-size: 1.8rem;
@@ -101,22 +80,18 @@ ion-toolbar {
   margin: 24px 0;
   text-align: center;
 }
-
-/* Navigation buttons styling */
 .actions-card {
   background: #FFFFFF;
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
 }
-
 .cont {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
-
 .navigation-button {
   display: flex;
   flex-direction: column;
@@ -129,18 +104,15 @@ ion-toolbar {
   cursor: pointer;
   min-height: 120px;
 }
-
 .navigation-button:hover {
   background: #FFE0B2;
   transform: translateY(-2px);
 }
-
 .navigation-button ion-icon {
   font-size: 2rem;
   color: #FF9800;
   margin-bottom: 8px;
 }
-
 .navigation-button ion-label,
 .navigation-button .download-link {
   color: #4A3500;
@@ -148,47 +120,34 @@ ion-toolbar {
   text-align: center;
   text-decoration: none;
 }
-
-/* Download link styling */
 .download-link {
   color: #4A3500;
   text-decoration: none;
   font-weight: 500;
 }
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .cont {
     grid-template-columns: 1fr;
   }
-
   .navigation-button {
     min-height: 100px;
   }
-
   .logout-button ion-label,
   .user-button ion-label {
     display: none;
   }
-  
   .logout-button ion-icon,
   .user-button ion-icon {
     font-size: 1.5rem;
   }
-
 }
-
-/* Active states */
 .navigation-button:active {
   background: #FFE0B2;
   transform: translateY(0);
 }
-
-/* Animation for user info toggle */
 .user-info-card {
   animation: slideDown 0.3s ease;
 }
-
 @keyframes slideDown {
   from {
     opacity: 0;

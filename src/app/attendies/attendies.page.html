@@ -5,7 +5,6 @@
     </ion-buttons>
     <ion-title slot="start">Attendance Details</ion-title>
     <ion-buttons slot="end">
-     
       <ion-button (click)="toggleRequestsTable()">
         {{ showRequestsTable ? 'Hide' : 'Show' }} Requests
       </ion-button>
@@ -13,15 +12,13 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="attendance-content">
   <ion-grid>
-
-   
     <ion-row>
       <ion-col size="6">
         <ion-list>
           <ion-list-header>
-            <ion-label>Dates</ion-label>
+            <ion-icon name="calendar-outline" class="header-icon"></ion-icon>
           </ion-list-header>
           <ion-item>
             <ion-select placeholder="Select Date" (ionChange)="selectDate($event.detail.value)">
@@ -35,7 +32,7 @@
       <ion-col size="6">
         <ion-list>
           <ion-list-header>
-            <ion-label>Modules</ion-label>
+            <ion-icon name="book-outline" class="header-icon"></ion-icon>
           </ion-list-header>
           <ion-item>
             <ion-select placeholder="Select Module" (ionChange)="selectModule($event.detail.value)">
@@ -48,11 +45,12 @@
       </ion-col>
     </ion-row>
 
-    <!-- Attendance Table -->
-    <ion-row>
-      <ion-col size="12">
-        <div class="table-responsive custom-table">
-          <table *ngIf="getFilteredRecords().length > 0">
+  <!-- Attendance Table -->
+  <ion-row>
+    <ion-col size="12">
+      <div class="table-card">
+        <div class="table-container">
+          <table class="custom-table" *ngIf="getFilteredRecords().length > 0">
             <thead>
               <tr>
                 <th>Date</th>
@@ -62,59 +60,87 @@
               </tr>
             </thead>
             <tbody>
-              <ng-container *ngFor="let group of getGroupedRecords(); let i = index">
-                <tr>
+              <ng-container *ngFor="let group of getPaginatedRecords(); let i = index">
+                <tr class="clickable-row">
                   <td [attr.rowspan]="group.attendances.length">{{ group.date | date:'shortDate' }}</td>
                   <td [attr.rowspan]="group.attendances.length">{{ group.moduleCode }}</td>
                   <td>{{ group.attendances[0].scanTime }}</td>
                   <td>{{ group.attendances[0].studentNumber }}</td>
                 </tr>
-                <tr *ngFor="let attendance of group.attendances.slice(1)">
+                <tr *ngFor="let attendance of group.attendances.slice(1)" class="clickable-row">
                   <td>{{ attendance.scanTime }}</td>
                   <td>{{ attendance.studentNumber }}</td>
                 </tr>
               </ng-container>
             </tbody>
-          </table>>
+          </table>
         </div>
-        <p *ngIf="getFilteredRecords().length === 0">No attendance data found.</p>
-      </ion-col>
-    </ion-row>
+        <p class="no-data" *ngIf="getFilteredRecords().length === 0">No attendance data found.</p>
+      </div>
+    </ion-col>
+  </ion-row>
+
+  <!-- Pagination Controls -->
+  <ion-row *ngIf="getFilteredRecords().length > 0">
+    <ion-col size="12">
+      <ion-grid>
+        <ion-row class="ion-align-items-center ion-justify-content-center">
+          <ion-col size="auto">
+            <ion-button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+              Previous
+            </ion-button>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-text>Page {{ currentPage }} of {{ totalPages }}</ion-text>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+              Next
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-col>
+  </ion-row>
 
     <!-- Requests Table -->
     <ion-row *ngIf="showRequestsTable">
       <ion-col size="12">
-        <h2>Pending Requests</h2>
-        <div class="table-responsive">
-          <table class="attendance-table" *ngIf="requestedInvites.length > 0">
-            <thead>
-              <tr>
-                <th>Module Code</th>
-                <th>Email</th>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Student No</th>
-                <th>Surname</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let student of requestedInvites">
-                <td>{{ student.moduleCode }}</td>
-                <td>{{ student.email }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.status }}</td>
-                <td>{{ student.studentNumber }}</td>
-                <td>{{ student.surname }}</td>
-                <td>
-                  <ion-button color="success" (click)="approveStudent(student)">Approve</ion-button>
-                  <ion-button color="danger" (click)="declineStudent(student)">Decline</ion-button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="requests-section">
+          <h2>Pending Requests</h2>
+          <div class="table-responsive">
+            <table class="custom-table" *ngIf="requestedInvites.length > 0">
+              <thead>
+                <tr>
+                  <th>Module Code</th>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Student No</th>
+                  <th>Surname</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let student of requestedInvites">
+                  <td>{{ student.moduleCode }}</td>
+                  <td>{{ student.email }}</td>
+                  <td>{{ student.name }}</td>
+                  <td><span class="status-badge">{{ student.status }}</span></td>
+                  <td>{{ student.studentNumber }}</td>
+                  <td>{{ student.surname }}</td>
+                  <td class="action-buttons">
+                    <ion-button color="success" (click)="approveStudent(student)">Approve</ion-button>
+                    <ion-button color="danger" (click)="declineStudent(student)">Decline</ion-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="no-data" *ngIf="requestedInvites.length === 0">No pending requests found.</p>
         </div>
-        <p *ngIf="requestedInvites.length === 0">No pending requests found.</p>
       </ion-col>
     </ion-row>
   </ion-grid>

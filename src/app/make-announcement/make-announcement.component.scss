@@ -1,21 +1,74 @@
-ion-header, ion-toolbar {
+/* Header styling */
+ion-header ion-toolbar {
   --background: #EECC8C;
 }
 
-.header-icon, .header-title, .label, ion-input, ion-textarea {
-  color: white;
+.header-icon {
+  font-size: 1.4rem;
+  margin-right: 8px;
+  color: #4A3500;
 }
 
-ion-content.announcement-content {
-  --background: #ff9800;
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4A3500;
 }
 
-.submit-button {
-  --background: blue;
-  --color: white;
+.close-icon {
+  font-size: 1.4rem;
+  color: #4A3500;
+}
+
+/* Content styling */
+.announcement-content {
+  --background: #FFF5E6;
+}
+
+.announcement-form {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
+}
+
+.form-item {
+  --background: transparent;
+  --border-color: #FFB74D;
+  --highlight-color-focused: #FF9800;
+  margin-bottom: 16px;
+}
+
+.label {
+  color: #4A3500;
+  font-weight: 500;
 }
 
 ion-input, ion-textarea {
-  --background: transparent;
-  --color: white;
+  --color: #5D4037;
+  --placeholder-color: #8D6E63;
+  font-size: 0.95rem;
+}
+
+.submit-button {
+  --background: #FF9800;
+  --background-activated: #F57C00;
+  --color: #FFFFFF;
+  margin-top: 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Focus styles */
+ion-input:focus, ion-textarea:focus {
+  --background: #FFF8E1;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .announcement-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
 }
