@@ -51,7 +51,7 @@ export class DeptAnPage implements OnInit {
   }
 
   loadLecturers() {
-    this.firestore.collection('/registered staff/').valueChanges().subscribe((staff: any[]) => {
+    this.firestore.collection('/staff/').valueChanges().subscribe((staff: any[]) => {
       this.lecturers = staff.filter(staffMember => staffMember.position === 'lecturer');
       this.loadDataWithDelay(this.lecturers, this.currentLecturerPage, this.lecturersPageSize, (data) => {
         this.displayedLecturers = data;
@@ -60,7 +60,7 @@ export class DeptAnPage implements OnInit {
   }
 
   loadStudents() {
-    this.firestore.collection('/registeredStudents/').valueChanges().subscribe((students: any[]) => {
+    this.firestore.collection('/students/').valueChanges().subscribe((students: any[]) => {
       this.students = students.map(student => ({
         ...student,
         fullName: `${student.name} ${student.surname}`
@@ -131,7 +131,7 @@ export class DeptAnPage implements OnInit {
     if (this.searchStaffNumber.trim() !== '') {
       this.currentLecturerPage = 1; 
 
-      this.firestore.collection('registered staff', ref => ref
+      this.firestore.collection('staff', ref => ref
         .where('staffNumber', '>=', this.searchStaffNumber)
         .where('staffNumber', '<=', this.searchStaffNumber + '\uf8ff')) // This ensures partial matching
         .valueChanges()
@@ -151,7 +151,7 @@ export class DeptAnPage implements OnInit {
   searchStudents() {
     if (this.searchStudentNumber.trim() !== '') {
       // Use Firestore query with '>=', '==' and limit for partial matches
-      this.firestore.collection('registeredStudents', ref => ref
+      this.firestore.collection('students', ref => ref
         .where('studentNumber', '>=', this.searchStudentNumber)
         .where('studentNumber', '<=', this.searchStudentNumber + '\uf8ff')) // Ensures partial matching
         .valueChanges()
@@ -172,7 +172,7 @@ export class DeptAnPage implements OnInit {
   }  
 
   updateLecturer(lecturer: any) {
-    this.firestore.collection('/registered staff/').doc(lecturer.staffNumber).update({
+    this.firestore.collection('/staff/').doc(lecturer.staffNumber).update({
       fullName: lecturer.fullName,
       email: lecturer.email,
       position: lecturer.position,
@@ -185,7 +185,7 @@ export class DeptAnPage implements OnInit {
 
   deleteLecturer(staffNumber: string) {
     // alert(staffNumber);
-    this.firestore.collection('registered staff')
+    this.firestore.collection('staff')
       .ref.where('staffNumber', '==', staffNumber)
       .get()
       .then(querySnapshot => {
@@ -200,7 +200,7 @@ export class DeptAnPage implements OnInit {
   }
 
   updateStudent(student: any) {
-    this.firestore.collection('/registeredStudents/').doc(student.studentNumber).update({
+    this.firestore.collection('/students/').doc(student.studentNumber).update({
       name: student.name,
       email: student.email,
       surname: student.surname
@@ -212,7 +212,7 @@ export class DeptAnPage implements OnInit {
 
   deleteStudent(studentNumber: string) {
     // alert(studentNumber);
-    this.firestore.collection('registeredStudents')
+    this.firestore.collection('students')
       .ref.where('studentNumber', '==', studentNumber)
       .get()
       .then(querySnapshot => {

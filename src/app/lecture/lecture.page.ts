@@ -75,7 +75,7 @@ export class LecturePage implements OnInit {
 
   getUserData(userEmail: string) {
     this.db
-      .collection('registered staff', (ref) => ref.where('email', '==', userEmail))
+      .collection('staff', (ref) => ref.where('email', '==', userEmail))
       .snapshotChanges()
       .subscribe((data) => {
         if (data.length > 0) {
@@ -148,7 +148,7 @@ export class LecturePage implements OnInit {
 
   async fetchRegisteredStudents() {
     try {
-      const snapshot = await this.db.collection('registeredStudents').get().toPromise();
+      const snapshot = await this.db.collection('students').get().toPromise();
       if (snapshot) {
         this.registeredStudents = snapshot.docs
           .map(doc => ({
