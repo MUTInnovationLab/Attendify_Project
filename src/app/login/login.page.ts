@@ -106,7 +106,7 @@ export class LoginPage implements OnInit {
   }
 
   async getStudentData(): Promise<student | null> {
-    const studentEmailQuerySnapshot = await this.db.collection('registeredStudents')
+    const studentEmailQuerySnapshot = await this.db.collection('students')
       .ref.where('email', '==', this.username)
       .get();
 
@@ -114,7 +114,7 @@ export class LoginPage implements OnInit {
       return studentEmailQuerySnapshot.docs[0].data() as student;
     }
 
-    const studentNumberQuerySnapshot = await this.db.collection('registeredStudents')
+    const studentNumberQuerySnapshot = await this.db.collection('students')
       .ref.where('studentNumber', '==', this.username)
       .get();
     
