@@ -5,7 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app'; // Import firebase app
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { MakeAnnouncementComponent } from '../make-announcement/make-announcement.component'; // Import the component
 
 
@@ -23,7 +23,7 @@ export class LecturePage implements OnInit {
   contact_email: string = '';
   contact_sujet: string = '';
   contact_message: string = '';
-
+  selectedFaculty: string = '';
   moduleName: any;
   moduleCode: any;
   moduleLevel: any;
@@ -287,48 +287,75 @@ export class LecturePage implements OnInit {
     });
     await toast.present();
   }
-  async addModule() {
-    // Validate fields
-    if (!this.moduleName || !this.moduleCode || !this.moduleLevel) {
-      alert('Please fill in all fields before submitting.');
-      return; // Exit the function if any field is empty
-    }
-  
-    const loader = await this.loadingController.create({
-      message: 'Submitting...',
-      cssClass: 'custom-loader-class',
-    });
-    await loader.present();
-  
-    try {
-      const user = firebase.auth().currentUser;
-  
-      if (user && user.email) {
-        await this.db.collection('modules').add({
-          moduleName: this.moduleName,
-          moduleCode: this.moduleCode,
-          moduleLevel: this.moduleLevel,
-          userEmail: user.email,
-        });
-  
-        // Clear the form fields after successful submission
-        this.moduleName = '';
-        this.moduleCode = '';
-        this.moduleLevel = '';
-  
-        loader.dismiss();
-        alert('Module successfully saved');
-        this.getData(user.email); // Refresh the module list
-      } else {
-        loader.dismiss();
-        alert('User not logged in or email is null.');
-      }
-    } catch (error) {
-      loader.dismiss();
-      console.error('Error saving module:', error);
-      alert('An error occurred while saving the module.');
-    }
+
+
+
+ 
+
+async addModule() {
+  // Validate fields
+  if (!this.moduleName || !this.moduleCode || !this.moduleLevel) {
+    alert('Please fill in all fields before submitting.');
+    return; // Exit the function if any field is empty
   }
+
+  const loader = await this.loadingController.create({
+    message: 'Submitting...',
+    cssClass: 'custom-loader-class',
+  });
+  await loader.present();
+
+  try {
+    const user = firebase.auth().currentUser;
+
+    // Assume you fetch or store the staff number somewhere in your app (user.staffNumber).
+    const staffNumber = '123456'; // Replace with actual logic to get staff number
+
+    if (user && user.email && staffNumber) {
+      const staffDocRef = this.db.collection('assignedLecturers').doc(staffNumber);
+
+      // Fetch the staff document snapshot using firstValueFrom to handle the observable
+      const staffDoc = await firstValueFrom(staffDocRef.get());
+
+      // Prepare the module data to add
+      const moduleData = {
+        moduleName: this.moduleName,
+        moduleCode: this.moduleCode,
+        moduleLevel: this.moduleLevel,
+        userEmail: user.email,
+      };
+
+      if (staffDoc.exists) {
+        // Update the existing document by adding the module to the 'modules' array
+        await staffDocRef.update({
+          modules: firebase.firestore.FieldValue.arrayUnion(moduleData),
+        });
+      } else {
+        // Create the document with the first module entry
+        await staffDocRef.set({
+          modules: [moduleData],
+        });
+      }
+
+      // Clear the form fields after successful submission
+      this.moduleName = '';
+      this.moduleCode = '';
+      this.moduleLevel = '';
+
+      loader.dismiss();
+      alert('Module successfully saved');
+      this.getData(user.email); // Refresh the module list
+    } else {
+      loader.dismiss();
+      alert('User not logged in or staff number is missing.');
+    }
+  } catch (error) {
+    loader.dismiss();
+    console.error('Error saving module:', error);
+    alert('An error occurred while saving the module.');
+  }
+}
+
   
 
   async deleteModule() {
@@ -413,9 +440,8 @@ export class LecturePage implements OnInit {
     this.router.navigate(['/view-students']);
   }
 
-  selectedFaculty()
 
-{}
+  
   getData(userEmail: string) {
     this.db
       .collection('modules', (ref) => ref.where('userEmail', '==', userEmail))

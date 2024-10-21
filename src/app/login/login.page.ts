@@ -126,7 +126,7 @@ export class LoginPage implements OnInit {
   }
 
   async getStaffData(): Promise<staff | null> {
-    const staffEmailQuerySnapshot = await this.db.collection(' staff')
+    const staffEmailQuerySnapshot = await this.db.collection('staff')
       .ref.where('email', '==', this.username)
       .get();
 
