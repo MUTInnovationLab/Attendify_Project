@@ -392,7 +392,7 @@ export class LecturePage implements OnInit {
     // Update the table selection
     this.updateTableSelection();
   }
-
+ 
   updateTableSelection() {
     const rows = document.querySelectorAll('tbody tr');
     rows.forEach((row) => {

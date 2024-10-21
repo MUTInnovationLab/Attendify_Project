@@ -39,18 +39,20 @@ export class AdminPage implements OnInit {
     await loader.present();
 
     this.auth.createUserWithEmailAndPassword(this.email, this.staffNumber)
-      .then(userCredential => {
-        this.firestore.collection('registered staff').add({
-          email: this.email,
-          fullName: this.fullName,
-          staffNumber: this.staffNumber,
-          position: this.position,
-          department: this.department,
-        });
-        loader.dismiss();
-        this.router.navigateByUrl("/login");
-        this.presentToast("successfully registered!");
-      })
+  .then(userCredential => {
+    // Use staffNumber as the document ID in the Firestore collection
+    this.firestore.collection('staff').doc(this.staffNumber).set({
+      staffNumber: this.staffNumber,
+      email: this.email,
+      fullName: this.fullName,
+      position: this.position,
+      department: this.department,
+    });
+    loader.dismiss();
+    this.router.navigateByUrl("/login");
+    this.presentToast("Successfully registered!");
+  })
+  
       .catch(error => {
         loader.dismiss();
         let errorMessage = error.message;

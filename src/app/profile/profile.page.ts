@@ -205,7 +205,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateEmailInFirestore(newEmail: string) {
-    const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'registeredStudents'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -244,7 +244,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateStudentNumber(newStudentNumber: string) {
-    const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'registeredStudents'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
