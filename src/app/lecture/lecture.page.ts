@@ -413,8 +413,9 @@ export class LecturePage implements OnInit {
     this.router.navigate(['/view-students']);
   }
 
+  selectedFaculty()
 
-  
+{}
   getData(userEmail: string) {
     this.db
       .collection('modules', (ref) => ref.where('userEmail', '==', userEmail))

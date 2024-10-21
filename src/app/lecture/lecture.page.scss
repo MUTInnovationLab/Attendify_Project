@@ -62,7 +62,7 @@
   margin-bottom: 20px;
   position: relative;
 }
-.module-form input {
+.module-form input  {
   width: 100%;
   padding: 12px;
   border: 2px solid #EECC8C;
@@ -92,6 +92,17 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #FFB74D;
+  border-radius: 6px;
+  background-color: transparent;
+  font-size: 1rem;
+  color: #4A3500;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
 .submit-wrapper button:hover {
   background: #F57C00;
 }
@@ -109,12 +120,13 @@
   background: #EECC8C;
   color: #4A3500;
   padding: 12px;
-  text-align: left;
+  text-align: center;
 }
 .modules-table td {
   padding: 12px;
   border-bottom: 1px solid #FFE0B2;
   color: #5D4037;
+  text-align: center;
 }
 .modules-table tr:hover {
   background: #FFF8E1;

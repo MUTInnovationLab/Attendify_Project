@@ -11,8 +11,8 @@ ion-title {
 }
 .custom-searchbar {
   --background: #FFFFFF;
-  --box-shadow: none;
-  --border-radius: 8px;
+  --color: #4A3500;
+  --placeholder-color: #8D6E63;
   margin-bottom: 16px;
 }
 .module-list {
@@ -74,12 +74,9 @@ ion-card-subtitle {
   font-size: 0.9rem;
 }
 .submit-button {
+  margin: 16px;
   --background: #FF9800;
   --background-activated: #F57C00;
-  --background-disabled: #FFE0B2;
-  --color: #FFFFFF;
-  margin: 16px 0;
-  font-weight: 600;
 }
 .module-item:hover {
   --background: #FFF8E1;
