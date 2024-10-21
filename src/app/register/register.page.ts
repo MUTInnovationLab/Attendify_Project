@@ -13,23 +13,22 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 })
 export class RegisterPage implements OnInit {
 
-  email: string="";
-  name: string="";
-  surname: string="";
-  studentNumber: string="";
-  password: string="";
+  email: string = "";
+  name: string = "";
+  surname: string = "";
+  studentNumber: string = "";
+  department: string = ""; // Assuming this is captured in your form
+  password: string = "";
 
-  
   constructor(private alertController: AlertController, 
-    private loadingController: LoadingController,
-    private router: Router, 
-    private auth: AngularFireAuth, 
-    private toastController: ToastController,
-    private navCtrl: NavController, 
-    private firestore: AngularFirestore){}
+  private loadingController: LoadingController,
+  private router: Router, 
+  private auth: AngularFireAuth, 
+  private toastController: ToastController,
+  private navCtrl: NavController, 
+  private firestore: AngularFirestore) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   goToPage() {
     this.navCtrl.navigateForward("/login");
@@ -37,69 +36,67 @@ export class RegisterPage implements OnInit {
 
   async register() {
     if (this.email === "") {
-      alert("Please enter your email.");
+      this.presentToast('Please enter your email.', 'danger');
       return;
     }
     if (this.password === "") {
-      alert("Please enter your password.");
+      this.presentToast('Please enter your password.', 'danger');
       return;
     }
-  
+
     // Simple regex for email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(this.email)) {
-      alert("Please enter a valid email address.");
+      this.presentToast('Please enter a valid email address.', 'danger');
       return;
     }
-  
+
     const loader = await this.loadingController.create({
-      message: 'Signing up',
+      message: 'Signing up...',
       cssClass: 'custom-loader-class'
     });
     await loader.present();
-  
+
     this.auth.createUserWithEmailAndPassword(this.email, this.password)
       .then(userCredential => {
-        this.firestore.collection('registeredStudents').add({
+        // Save the student's data using studentNumber as the document ID
+        this.firestore.collection('students').doc(this.studentNumber).set({
           email: this.email,
           name: this.name,
           surname: this.surname,
           studentNumber: this.studentNumber,
+          department: this.department  // Assuming this is captured in your form
         });
         loader.dismiss();
+        this.presentToast('Successfully registered!', 'success');
         this.router.navigateByUrl("/login");
-        this.presentToast();
       })
       .catch(error => {
         loader.dismiss();
         const errorMessage = error.message;
-  
-        if (errorMessage === "Firebase: Error (auth/missing-email).") {
-          alert("Email is missing.");
-        } else if (errorMessage === "Firebase: The email address is badly formatted. (auth/invalid-email).") {
-          alert("The email address is badly formatted.");
-        } else if (errorMessage === "Firebase: The email address is already in use by another account. (auth/email-already-in-use).") {
-          alert("This email is already in use.");
-        } else if (errorMessage === "Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found).") {
-          alert("Invalid email.");
+
+        if (errorMessage.includes('auth/missing-email')) {
+          this.presentToast('Email is missing.', 'danger');
+        } else if (errorMessage.includes('auth/invalid-email')) {
+          this.presentToast('The email address is badly formatted.', 'danger');
+        } else if (errorMessage.includes('auth/email-already-in-use')) {
+          this.presentToast('This email is already in use.', 'danger');
+        } else if (errorMessage.includes('auth/user-not-found')) {
+          this.presentToast('Invalid email.', 'danger');
         } else {
-          alert(errorMessage);
+          this.presentToast(errorMessage, 'danger');
         }
       });
   }
-  
 
-
-
-
-  async presentToast() {
+  async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
-      message: 'successfully registered!',
+      message: message,
       duration: 1500,
-      position: 'top'
+      position: 'top',
+      color: color
     });
-
+    toast.present();
   }
-
 
 }
