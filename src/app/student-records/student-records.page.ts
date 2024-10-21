@@ -4,9 +4,20 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Router } from '@angular/router';
 
-interface EnrolledModule {
-  email: string;
-  moduleCode: string[];
+// interface EnrolledModule {
+//   email: string;
+//   moduleCode: string[];
+// }
+
+interface EnrolledStudent {
+  studentNumber: string;
+  status: string;
+}
+
+interface ModuleData {
+  Enrolled?: {
+    [key: string]: EnrolledStudent;
+  };
 }
 
 interface StudentData {
@@ -72,7 +83,7 @@ export class StudentRecordsPage implements OnInit {
       if (user) {
         console.log('User signed in:', user.email);
         this.firestore
-          .collection('enrolledModules', (ref) =>
+          .collection('students', (ref) =>
             ref.where('email', '==', user.email)
           )
           .get()
@@ -84,6 +95,7 @@ export class StudentRecordsPage implements OnInit {
                 querySnapshot.forEach((doc) => {
                   this.currentUser = doc.data() as StudentData;
                   console.log('Current User:', this.currentUser);
+                  this.loadChartData(); // Call loadChartData after getting user data
                 });
               }
             },
@@ -99,41 +111,46 @@ export class StudentRecordsPage implements OnInit {
 
   async loadChartData() {
     try {
-      if (!this.studentEmail) {
-        console.error('Student email is not set');
-        return;
-      }
-  
-      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules', ref => ref.where('email', '==', this.studentEmail)).get().toPromise();
-  
-      if (!enrolledModulesSnapshot || enrolledModulesSnapshot.empty) {
-        console.error('No enrolled modules found for student');
+      if (!this.currentUser.studentNumber) {
+        console.error('Student number is not set');
         return;
       }
   
       const modules: string[] = [];
       const attendanceCounts: number[] = [];
       let maxAttendanceCount = 0;
+      this.totalAttendance = 0;
+      this.totalRequiredAttendance = 0;
+  
+      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules').get().toPromise();
+  
+      if (!enrolledModulesSnapshot || enrolledModulesSnapshot.empty) {
+        console.error('No enrolled modules found');
+        return;
+      }
   
       for (const moduleDoc of enrolledModulesSnapshot.docs) {
-        const moduleData = moduleDoc.data() as EnrolledModule;
-        const moduleCodes = moduleData.moduleCode;
+        const moduleId = moduleDoc.id;
+        const moduleData = moduleDoc.data() as ModuleData;
   
-        if (moduleCodes && Array.isArray(moduleCodes)) {
-          for (const moduleId of moduleCodes) {
-            if (typeof moduleId === 'string' && moduleId.trim() !== '') {
-              const attendanceCount = await this.getAttendanceCount(moduleId);
-              const scannerOpenCount = await this.getScannerOpenCount(moduleId);
+        if (moduleData && moduleData.Enrolled) {
+          const enrolledStudents = Object.values(moduleData.Enrolled);
+          const isEnrolled = enrolledStudents.some(student => 
+            student.studentNumber === this.currentUser.studentNumber && student.status === 'Enrolled'
+          );
   
-              modules.push(moduleId);
-              attendanceCounts.push(attendanceCount);
+          if (isEnrolled) {
+            const attendanceCount = await this.getAttendanceCount(moduleId);
+            const scannerOpenCount = await this.getScannerOpenCount(moduleId);
   
-              this.totalAttendance += attendanceCount;
-              this.totalRequiredAttendance += scannerOpenCount;
+            modules.push(moduleId);
+            attendanceCounts.push(attendanceCount);
   
-              if (attendanceCount > maxAttendanceCount) {
-                maxAttendanceCount = attendanceCount;
-              }
+            this.totalAttendance += attendanceCount;
+            this.totalRequiredAttendance += scannerOpenCount;
+  
+            if (attendanceCount > maxAttendanceCount) {
+              maxAttendanceCount = attendanceCount;
             }
           }
         }
@@ -172,7 +189,7 @@ export class StudentRecordsPage implements OnInit {
   }
 
   async getScannerOpenCount(moduleId: string): Promise<number> {
-    const modulesSnapshot = await this.firestore.collection('modules', ref => ref.where('moduleCode', '==', moduleId)).get().toPromise();
+    const modulesSnapshot = await this.firestore.collection('assignedLectures', ref => ref.where('moduleCode', '==', moduleId)).get().toPromise();
     if (modulesSnapshot && !modulesSnapshot.empty) {
       const moduleDoc = modulesSnapshot.docs[0];
       const moduleData = moduleDoc.data() as any;
