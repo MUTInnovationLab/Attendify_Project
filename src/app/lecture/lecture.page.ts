@@ -446,7 +446,7 @@ export class LecturePage implements OnInit {
 
   getData(userEmail: string) {
     this.db
-      .collection('assignedLectures', (ref) => ref.where('usstaffNumber', '==', userEmail))
+      .collection('assignedLectures', (ref) => ref.where('staffNumber', '==', userEmail))
       .snapshotChanges()
       .subscribe((data) => {
         this.userData = data.map((d) => {
@@ -467,4 +467,4 @@ export class LecturePage implements OnInit {
   gotoProfile() {
     this.router.navigate(['profile']);
   }
-}
+}     
