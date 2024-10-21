@@ -387,7 +387,7 @@ export class LecturePage implements OnInit {
     // Update the table selection
     this.updateTableSelection();
   }
-
+ 
   updateTableSelection() {
     const rows = document.querySelectorAll('tbody tr');
     rows.forEach((row) => {
@@ -408,8 +408,9 @@ export class LecturePage implements OnInit {
     this.router.navigate(['/view-students']);
   }
 
+  selectedFaculty()
 
-  
+{}
   getData(userEmail: string) {
     this.db
       .collection('modules', (ref) => ref.where('userEmail', '==', userEmail))

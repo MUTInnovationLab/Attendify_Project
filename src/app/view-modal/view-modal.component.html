@@ -11,11 +11,20 @@
 </ion-header>
 
 <ion-content class="module-selection-content">
+  
+  <ion-button expand="block" (click)="submitSelection()" 
+     [disabled]="selectedModules.length === 0" class="submit-button">
+     <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+      Request to Join Selected Modules ({{ selectedModules.length }})
+  </ion-button>
+
   <div class="search-container">
     <ion-searchbar [(ngModel)]="searchQuery" 
                    (ionInput)="filterModules()" 
                    placeholder="Search modules"
-                   class="custom-searchbar">
+                   class="custom-searchbar"
+                   animated="true"
+                   debounce="300">
     </ion-searchbar>
   </div>
 
@@ -52,10 +61,10 @@
     </ion-card>
   </div>
 
-  <ion-button expand="full" 
+  <!-- <ion-button expand="full" 
               (click)="submitSelection()" 
               [disabled]="selectedModules.length === 0"
               class="submit-button">
     Request to Join Selected Modules ({{ selectedModules.length }})
-  </ion-button>
+  </ion-button> -->
 </ion-content>

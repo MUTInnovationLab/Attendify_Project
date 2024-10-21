@@ -40,8 +40,25 @@
           <label for="contact_sujet">LEVEL</label>
         </div>
         <div class="input-wrapper">
-          <input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet">
-          <label for="contact_sujet">FACULTY</label>
+          <select name="faculty" [(ngModel)]="selectedFaculty" id="faculty">
+            <option value="">Select a Department</option>
+            <option value="agriculture">Agriculture</option>
+            <option value="biomedicalSciences">Biomedical Sciences</option>
+            <option value="buildingAndConstruction">Building and Construction</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="civilEngineering">Civil Engineering</option>
+            <option value="civilEngineeringAndSurvey">Civil Engineering and Survey</option>
+            <option value="communityExtension">Community Extension</option>
+            <option value="electricalEngineering">Electrical Engineering</option>
+            <option value="environmentalHealth">Environmental Health</option>
+            <option value="humanResourceManagement">Human Resource Management</option>
+            <option value="marketing">Marketing</option>
+            <option value="mechanicalEngineering">Mechanical Engineering</option>
+            <option value="natureConservation">Nature Conservation</option>
+            <option value="officeManagementAndTechnology">Office Management and Technology</option>
+            <option value="publicAdministrationAndEconomics">Public Administration and Economics</option>
+          </select>
+          <label for="department">DEPARTMENT</label>
         </div>
         <div class="submit-wrapper">
           <button type="submit" (click)="addModule()">SUBMIT</button>
@@ -55,38 +72,35 @@
       <thead>
         <tr>
           <th>CLASSES</th>
-          <th>VIEW CLASS</th>
+          <th>ACTIONS</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let module of tableData" (click)="selectModule(module.id)" [attr.data-id]="module.id" 
             [class.selected]="module.id === selectedModuleId">
           <td>{{ module.moduleCode }}</td>
-          <td class="view-cell" (click)="gotoQRscan(module.moduleCode)">
-            <span class="view-button">View</span>
+          <td class="actions-cell">
+            <ion-button fill="clear" size="medium" (click)="gotoQRscan(module.moduleCode)">
+              <ion-icon name="eye-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" size="medium" color="danger" (click)="deleteModule()">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" size="medium" color="secondary" (click)="openAddStudentsModal()">
+              <ion-icon name="people-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" size="medium" color="secondary" (click)="openAnnouncementModal()">
+              <ion-icon name="megaphone-outline" slot="icon-only"></ion-icon>
+            </ion-button>
           </td>
         </tr>
       </tbody>
     </table>
-
+  
     <div class="action-buttons">
-      <ion-button fill="outline" color="danger" (click)="deleteModule()" class="delete-btn">
-        <ion-icon name="trash-outline" slot="start"></ion-icon>
-        Delete
-      </ion-button>
-      <ion-button fill="solid" (click)="showAddCard = true" class="add-btn">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Add
-      </ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAddStudentsModal()" 
-                  [disabled]="!selectedModuleId" class="add-students-btn">
-        <ion-icon name="people-outline" slot="start"></ion-icon>
-        Add Students
-      </ion-button>
-      <ion-button fill="solid" color="secondary" (click)="openAnnouncementModal()" 
-                  [disabled]="!selectedModuleId" class="announcement-btn">
-        <ion-icon name="megaphone-outline" slot="start"></ion-icon>
-        Announcement
+      <ion-button fill="solid" (click)="showAddCard = !showAddCard" class="add-btn">
+        <ion-icon [name]="showAddCard ? 'close-outline' : 'add-outline'" slot="start"></ion-icon>
+        {{ showAddCard ? 'Close' : 'Add' }}
       </ion-button>
       <ion-button fill="solid" color="primary" (click)="viewStudents()" class="view-students-btn">
         <ion-icon name="people-circle-outline" slot="start"></ion-icon>
