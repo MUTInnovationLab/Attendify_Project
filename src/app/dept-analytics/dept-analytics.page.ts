@@ -221,4 +221,5 @@ export class DeptAnalyticsPage implements AfterViewInit {
       console.error('Failed to get the 2D context for lecturer attendance bar chart');
     }
   }
+  
 }
