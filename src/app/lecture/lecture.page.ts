@@ -193,7 +193,7 @@ export class LecturePage implements OnInit {
 
   async confirmAddStudents() {
     const selectedStudents = this.filteredStudents.filter(student => student.selected);
-    
+  
     if (selectedStudents.length === 0) {
       alert('Please select at least one student.');
       return;
@@ -201,13 +201,10 @@ export class LecturePage implements OnInit {
   
     try {
       const batch = firebase.firestore().batch();
-      const moduleRef = firebase.firestore().collection('allModules').doc(this.selectedModule.moduleCode);
-      const studentsRef = moduleRef.collection(this.selectedModule.moduleName);
-  
       const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(this.selectedModule.moduleCode);
   
       for (const student of selectedStudents) {
-        const studentDocRef = studentsRef.doc(student.id);
+        const studentDocRef = enrolledModulesRef.collection(this.selectedModule.moduleName).doc(student.id);
         batch.set(studentDocRef, {
           email: student.email,
           name: student.name,
@@ -216,11 +213,11 @@ export class LecturePage implements OnInit {
           moduleCode: this.selectedModule.moduleCode
         });
   
-        // Update the enrolledModules collection
+        // Update the enrolledModules collection with student status
         batch.set(enrolledModulesRef, {
           Enrolled: firebase.firestore.FieldValue.arrayUnion({
             status: "Enrolled",
-            sstudentNumber: student.studentNumber
+            studentNumber: student.studentNumber
           })
         }, { merge: true });
       }
@@ -233,6 +230,7 @@ export class LecturePage implements OnInit {
       alert('An error occurred while adding students to the module.');
     }
   }
+  
   
 
   
@@ -280,6 +278,8 @@ export class LecturePage implements OnInit {
     });
     await toast.present();
   }
+
+
   async addModule() {
     // Validate fields
     if (!this.moduleName || !this.moduleCode || !this.moduleLevel) {
@@ -297,7 +297,7 @@ export class LecturePage implements OnInit {
       const user = firebase.auth().currentUser;
   
       if (user && user.email) {
-        await this.db.collection('modules').add({
+        await this.db.collection('assignedLectures').add({
           moduleName: this.moduleName,
           moduleCode: this.moduleCode,
           moduleLevel: this.moduleLevel,
@@ -322,6 +322,8 @@ export class LecturePage implements OnInit {
       alert('An error occurred while saving the module.');
     }
   }
+  
+
   
 
   async deleteModule() {

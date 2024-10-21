@@ -5,18 +5,19 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
-
 export interface Student {
-  studentNumber: number; // Ensure studentNumber is of type number
+  studentNumber: string;
   name: string;
   surname: string;
   email: string;
 }
 
 export interface EnrolledModule {
-  moduleCode: string[]; // Array of module codes
+  Enrolled: Array<{
+    status: string;
+    studentNumber: string;
+  }>;
 }
-
 
 @Component({
   selector: 'app-view-students',
@@ -27,8 +28,8 @@ export class ViewStudentsPage implements OnInit {
   students: Student[] = [];
   filteredStudents: Student[] = [];
   selectedStudent: Student | null = null;
-  studentModules: string[] = []; // To store modules for the selected student
-  searchTerm: string = ''; // To hold the search term
+  studentModules: string[] = [];
+  searchTerm: string = '';
   currentPage: number = 1;
   pageSize: number = 9;
   totalPages: number = 1;
@@ -62,7 +63,7 @@ export class ViewStudentsPage implements OnInit {
         (students: Student[]) => {
           console.log('Fetched students:', students);
           this.students = students;
-          this.filteredStudents = students; // Initialize filteredStudents
+          this.filteredStudents = students;
           this.updatePagination();
         },
         error => {
@@ -71,54 +72,50 @@ export class ViewStudentsPage implements OnInit {
       );
   }
 
-
   clearSelection() {
     this.selectedStudent = null;
   }
-  
 
-
-  async fetchModulesForStudent(studentNumber: number): Promise<string[]> {
+  async fetchModulesForStudent(studentNumber: string): Promise<string[]> {
     const modules: string[] = [];
     
     try {
-      const studentNumberStr = studentNumber.toString();
-      const docRef = this.firestore.collection<EnrolledModule>('enrolledModules').doc(studentNumberStr);
-      const docSnapshot = await docRef.get().toPromise();
+      const querySnapshot = await this.firestore.collection('enrolledModules').get().toPromise();
       
-      // Check if docSnapshot exists and is not undefined
-      if (docSnapshot && docSnapshot.exists) {
-        const data = docSnapshot.data() as EnrolledModule | undefined;
-        
-        // Ensure data is defined and has the correct structure
-        if (data && Array.isArray(data.moduleCode)) {
-          data.moduleCode.forEach((code: string) => {
-            if (code && !modules.includes(code)) {
-              modules.push(code);
-            }
-          });
+      if (querySnapshot) {
+        querySnapshot.forEach(doc => {
+          const moduleData = doc.data() as EnrolledModule;
           
-          console.log('Modules for student:', modules);
-        } else {
-          console.log('No moduleCode field found or it is not an array.');
-        }
-      } else {
-        console.log('No document found for student number:', studentNumber);
+          // Check if Enrolled array exists and is an array
+          if (Array.isArray(moduleData.Enrolled)) {
+            const isEnrolled = moduleData.Enrolled.some(entry => 
+              entry && typeof entry === 'object' &&
+              entry.studentNumber === studentNumber && 
+              entry.status === 'Enrolled'
+            );
+            
+            if (isEnrolled) {
+              modules.push(doc.id); // doc.id is the module code
+            }
+          } else {
+            console.warn(`Document ${doc.id} does not have a valid Enrolled array`);
+          }
+        });
       }
       
+      console.log('Modules for student:', modules);
       return modules;
     } catch (error) {
       console.error('Error fetching modules for student:', error);
-      return []; // Return an empty array on exception
+      return [];
     }
   }
-  
-  
+
   async onStudentClick(student: Student) {
     console.log('Clicked student object:', JSON.stringify(student, null, 2));
     this.selectedStudent = student;
 
-    if (student && student.studentNumber !== undefined) {
+    if (student && student.studentNumber) {
       console.log('Fetching modules for student number:', student.studentNumber);
       try {
         const modules = await this.fetchModulesForStudent(student.studentNumber);
@@ -135,11 +132,11 @@ export class ViewStudentsPage implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/lecture']); // Navigate to the lazy loaded module path
+    this.router.navigate(['/lecture']);
   }
 
   dismiss() {
-    this.router.navigate(['/lecture']); // Navigate to LecturePage
+    this.router.navigate(['/lecture']);
   }
 
   filterStudents() {
@@ -148,34 +145,34 @@ export class ViewStudentsPage implements OnInit {
     } else {
       this.filteredStudents = this.students.filter(student =>
         student.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        student.studentNumber.toString().includes(this.searchTerm.toLowerCase())
+        student.studentNumber.includes(this.searchTerm.toLowerCase())
       );
     }
-    this.currentPage = 1; // Reset to first page when filtering
+    this.currentPage = 1;
     this.updatePagination();
   }
-    // New pagination methods
-    updatePagination() {
-      this.totalPages = Math.ceil(this.filteredStudents.length / this.pageSize);
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredStudents.length / this.pageSize);
+  }
+
+  getPaginatedStudents(): Student[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.filteredStudents.slice(startIndex, endIndex);
+  }
+
+  changePage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalPages) {
+      this.currentPage = newPage;
     }
-  
-    getPaginatedStudents(): Student[] {
-      const startIndex = (this.currentPage - 1) * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
-      return this.filteredStudents.slice(startIndex, endIndex);
-    }
-  
-    changePage(newPage: number) {
-      if (newPage >= 1 && newPage <= this.totalPages) {
-        this.currentPage = newPage;
-      }
-    }
-  
-    nextPage() {
-      this.changePage(this.currentPage + 1);
-    }
-  
-    previousPage() {
-      this.changePage(this.currentPage - 1);
-    }
+  }
+
+  nextPage() {
+    this.changePage(this.currentPage + 1);
+  }
+
+  previousPage() {
+    this.changePage(this.currentPage - 1);
+  }
 }
