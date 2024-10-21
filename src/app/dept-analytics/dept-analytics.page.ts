@@ -48,7 +48,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
 
   async fetchLecturers() {
     try {
-      const lecturersSnapshot = await this.firestore.collection<Lecturer>('registered staff', ref => 
+      const lecturersSnapshot = await this.firestore.collection<Lecturer>('staff', ref => 
         ref.where('position', '==', 'lecturer')
       ).get().toPromise();
 
@@ -66,7 +66,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
   async fetchAttendedStudents() {
     try {
       // Step 1: Fetch all registered students
-      const studentsSnapshot = await this.firestore.collection('registeredStudents').get().toPromise();
+      const studentsSnapshot = await this.firestore.collection('students').get().toPromise();
       
       if (studentsSnapshot && !studentsSnapshot.empty) {
         this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
