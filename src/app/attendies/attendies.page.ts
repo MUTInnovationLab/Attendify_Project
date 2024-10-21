@@ -86,12 +86,6 @@ interface AttendanceRecord {
   }[];
 }
 
-interface StudentData {
-  email: string;
-  name: string;
-  surname: string;
-}
-
 interface ModuleData {
   enrolledStudents?: string[];
   attendedStudents?: string[];
@@ -155,7 +149,7 @@ totalPages: number = 1;
 
         // Fetch pending requests for modules
         for (const module of this.modules) {
-          await this.fetchPendingRequests(module.moduleCode);
+          await this.fetchPendingRequests(module.moduleCode, module.moduleName);
         }
       }
     } catch (error) {
@@ -165,7 +159,7 @@ totalPages: number = 1;
 
   async fetchModulesForLecturer() {
     try {
-      const lecturerDoc = await this.firestore.collection('staff', ref =>
+      const lecturerDoc = await this.firestore.collection('registered staff', ref =>
         ref.where('email', '==', this.currentLecturerEmail)
       ).get().toPromise();
   
@@ -186,7 +180,7 @@ totalPages: number = 1;
           lecturerDetails.forEach((lecturer: any) => {
             this.moduleName = lecturer.moduleName.trim(); 
             console.log('Set Module Name:', this.moduleName);
-            this.fetchPendingRequests(lecturer.moduleCode);
+            this.fetchPendingRequests(lecturer.moduleCode, lecturer.moduleName);
           });
         } else {
           console.log('No modules found for the lecturer.');
@@ -311,80 +305,65 @@ totalPages: number = 1;
   }
 
   
-  async fetchPendingRequests(moduleCode: string) {
-    if (!moduleCode) {
-        console.warn('Module code is missing.');
-        return;
+  async fetchPendingRequests(moduleCode: string, moduleName: string) {
+    if (!moduleCode || !moduleName) {
+      console.warn('Module code or module name is missing.');
+      return;
     }
-
+  
     try {
-        console.log(`Fetching pending requests for module: ${moduleCode}`);
-
-        // Fetch students with pending status from the Enrolled sub-collection within the specific module
-        const requestsSnapshot = await this.firestore.collection('enrolledModules')
-            .doc(moduleCode)
-            .collection('Enrolled', ref => ref.where('status', '==', 'pending'))
-            .get()
-            .toPromise();
-
-        if (requestsSnapshot && !requestsSnapshot.empty) {
-            const batch = this.firestore.firestore.batch();
-
-            for (const doc of requestsSnapshot.docs) {
-                const data = doc.data();
-                const studentNumber = data['studentNumber'];
-
-                // Fetch additional student details from the 'students' collection using studentNumber
-                const studentDoc = await this.firestore.collection('students')
-                    .doc(studentNumber)
-                    .get()
-                    .toPromise();
-
-                // Check if studentDoc exists
-                if (studentDoc && studentDoc.exists) {
-                    const studentData = studentDoc.data() as StudentData | undefined; // Use undefined type for safety
-
-                    // Check if studentData is defined
-                    if (studentData) {
-                        const studentEmail = studentData.email;
-                        const studentName = studentData.name;
-                        const studentSurname = studentData.surname;
-
-                        const id = doc.id;
-                        this.requestedInvites.push({ id, studentNumber, studentEmail, studentName, studentSurname });
-
-                        // Reference to the student's document in enrolledModules (optional, if you need to update anything here)
-                        const studentRef = this.firestore.collection('enrolledModules').doc(studentNumber).ref;
-
-                        // Update enrolledModules collection (optional, if further updates are needed)
-                        batch.set(studentRef, {
-                            moduleCode: firebase.firestore.FieldValue.arrayUnion(moduleCode)
-                        }, { merge: true });
-                    } else {
-                        console.warn(`No student data found for student number: ${studentNumber}`);
-                    }
-                } else {
-                    console.warn(`No student document found for student number: ${studentNumber}`);
-                }
-            }
-
-            // Commit the batch if any updates are made
-            await batch.commit();
-
-            console.log('Pending requests data:', this.requestedInvites);
-        } else {
-            console.log(`No pending requests found for module ${moduleCode}.`);
+      console.log(`Fetching pending requests for module: ${moduleCode}, module name: ${moduleName}`);
+  
+      const correctModuleName = this.moduleName || moduleName;
+  
+      const requestsSnapshot = await this.firestore.collection('allModules')
+        .doc(moduleCode)
+        .collection(correctModuleName, ref => ref.where('status', '==', 'pending'))
+        .get()
+        .toPromise();
+  
+      if (requestsSnapshot && !requestsSnapshot.empty) {
+        const batch = this.firestore.firestore.batch();
+  
+        for (const doc of requestsSnapshot.docs) {
+          const data = doc.data();
+          const studentNumber = data['studentNumber'];
+          const studentEmail = data['email'];
+          const studentName = data['name'];
+          const studentSurname = data['surname'];
+          const id = doc.id;
+  
+          this.requestedInvites.push({ id, ...data });
+  
+          // Reference to the student's document in enrolledModules
+          const studentRef = this.firestore.collection('enrolledModules').doc(studentEmail).ref;
+  
+          // Update enrolledModules collection
+          batch.set(studentRef, {
+            email: studentEmail,
+            name: studentName,
+            surname: studentSurname,
+            studentNumber: studentNumber,
+            moduleCode: firebase.firestore.FieldValue.arrayUnion(moduleCode)
+          }, { merge: true });
         }
-
-        this.showRequestsTable = this.requestedInvites.length > 0;
-
+  
+        // Commit the batch
+        await batch.commit();
+  
+        console.log('Pending requests data:', this.requestedInvites);
+      } else {
+        console.log(`No pending requests data found for module ${moduleCode}.`);
+      }
+  
+      this.showRequestsTable = this.requestedInvites.length > 0;
+  
     } catch (error) {
-        console.error('Error fetching pending requests data:', error);
-        this.requestedInvites = [];
-        this.showRequestsTable = false;
+      console.error('Error fetching pending requests data:', error);
+      this.requestedInvites = [];
+      this.showRequestsTable = false; 
     }
-}
-
+  }
   toggleTable() {
     this.showTable = !this.showTable;
   }

@@ -26,7 +26,7 @@ export class AdminPage implements OnInit {
     private auth: AngularFireAuth,
     private toastController: ToastController,
     private navCtrl: NavController,
-    private firestore: AngularFirestore
+    private firestore: AngularFirestore,
   ) {}
 
   ngOnInit(): void {}

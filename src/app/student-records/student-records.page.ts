@@ -26,7 +26,10 @@ interface StudentData {
   studentNumber: string;
   surname: string;
   moduleCode: string;
+  department?: string;
 }
+
+
 
 interface AttendanceRecord {
   scanDate: string;
