@@ -57,7 +57,7 @@ export class ViewStudentsPage implements OnInit {
   fetchStudents() {
     console.log('Fetching students...');
     
-    this.firestore.collection<Student>('registeredStudents').valueChanges()
+    this.firestore.collection<Student>('students').valueChanges()
       .subscribe(
         (students: Student[]) => {
           console.log('Fetched students:', students);

@@ -9,6 +9,22 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { MakeAnnouncementComponent } from '../make-announcement/make-announcement.component'; // Import the component
 
 
+interface StaffMember {
+  email: string;
+  fullName: string;
+}
+
+interface ModuleData {
+  moduleCode: string;
+  moduleLevel: string;
+  department: string;
+  scannerOpenCount: number;
+}
+
+interface AssignedLectures {
+  [key: string]: ModuleData;
+}
+
 @Component({
   selector: 'app-lecture',
   templateUrl: './lecture.page.html',
@@ -61,14 +77,20 @@ export class LecturePage implements OnInit {
 
 
   ngOnInit() {
+    console.log('ngOnInit called');
+    
     this.auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', user);
+      
       if (user && user.email) {
+        console.log('User is logged in with email:', user.email);
         this.userEmail = user.email;
         this.getUserData(user.email);
         this.getData(user.email);
       } else {
-        console.log('User not logged in or email is null.');
-        this.userName = 'Guest'; // Set a default name for non-logged in users
+        console.log('No user logged in');
+        this.userName = 'Guest';
+        this.tableData = [];
       }
     });
   }
@@ -309,7 +331,7 @@ async addModule() {
     const user = firebase.auth().currentUser;
 
     // Assume you fetch or store the staff number somewhere in your app (user.staffNumber).
-    const staffNumber = '123456'; // Replace with actual logic to get staff number
+    const staffNumber = ' '; // Replace with actual logic to get staff number
 
     if (user && user.email && staffNumber) {
       const staffDocRef = this.db.collection('assignedLecturers').doc(staffNumber);
@@ -442,22 +464,94 @@ async addModule() {
 
 
   
-  getData(userEmail: string) {
-    this.db
-      .collection('modules', (ref) => ref.where('userEmail', '==', userEmail))
-      .snapshotChanges()
-      .subscribe((data) => {
-        this.userData = data.map((d) => {
-          const id = d.payload.doc.id;
-          const docData = d.payload.doc.data() as any;
-          return { id, ...docData };
-        });
-        console.log(this.userData);
-        this.tableData = this.userData;
-        // Update the table selection after data is loaded
-        this.updateTableSelection();
+  async getData(userEmail: string) {
+    console.log('getData called with email:', userEmail);
+  
+    if (!userEmail) {
+      console.error('No email provided to getData');
+      return;
+    }
+  
+    try {
+      const currentUser = await this.auth.currentUser;
+      if (!currentUser) {
+        console.error('No authenticated user found');
+        return;
+      }
+  
+      console.log('Querying staff collection for email:', userEmail);
+      
+      const staffQuery = await this.db.collection<StaffMember>('staff').get().toPromise();
+      
+      if (!staffQuery || staffQuery.empty) {
+        console.error('No staff found with email:', userEmail);
+        this.tableData = [];
+        return;
+      }
+  
+      const staffDoc = staffQuery.docs.find(doc => {
+        const data = doc.data();
+        return data.email === userEmail;
       });
-  }gotoQRscan(moduleCode: string) {
+  
+      if (!staffDoc) {
+        console.error('Staff document not found for email:', userEmail);
+        return;
+      }
+  
+      const staffNumber = staffDoc.id;
+      console.log('Found staff number:', staffNumber);
+  
+      const assignedLecturesRef = this.db
+        .collection<AssignedLectures>('assignedLectures')
+        .doc(staffNumber);
+  
+      const docSnapshot = await assignedLecturesRef.get().toPromise();
+      
+      if (!docSnapshot?.exists) {
+        console.log('No assignedLectures document exists for staff number:', staffNumber);
+        await assignedLecturesRef.set({});
+      }
+  
+      assignedLecturesRef.snapshotChanges().subscribe(
+        (docSnapshot) => {
+          if (docSnapshot.payload.exists) {
+            const lectureData = docSnapshot.payload.data() as AssignedLectures;
+            console.log('Raw lecture data:', lectureData);
+  
+            // Check if 'modules' exists and is an array
+            if (Array.isArray(lectureData['modules'])) {
+              // Extract moduleCode from each module in the array
+              this.tableData = lectureData['modules'].map((module: any) => ({
+                moduleCode: module.moduleCode
+              }));
+            } else {
+              console.error('modules is not an array or does not exist');
+              this.tableData = [];
+            }
+  
+            console.log('Processed moduleCodes:', this.tableData);
+            this.updateTableSelection();
+          } else {
+            console.log('Document exists but is empty for staff number:', staffNumber);
+            this.tableData = [];
+          }
+        },
+        error => {
+          console.error('Error in assignedLectures subscription:', error);
+          this.tableData = [];
+        }
+      );
+  
+    } catch (error) {
+      console.error('Error in getData:', error);
+      this.tableData = [];
+    }
+  }
+  
+  
+  
+  gotoQRscan(moduleCode: string) {
     this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
   }
 
