@@ -3,6 +3,9 @@ import { ModalController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { ToastController } from '@ionic/angular';
+//import * as firebase from 'firebase/compat';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
 interface Module {
   id: string;
@@ -160,33 +163,58 @@ export class ViewModalComponent implements OnInit {
     }
   }
 
-  async addStudentToModule(module: Module) {
-    if (!this.currentStudent) {
-      this.presentToast('Student information not available.', 'danger');
-      return;
-    }
-  
-    try {
-      const moduleRef = this.firestore.collection('allModules').doc(module.moduleCode);
-      const studentsRef = moduleRef.collection(module.moduleName);
-  
-      await studentsRef.doc(this.currentStudent.studentNumber).set({
-        email: this.currentStudent.email,
-        name: this.currentStudent.name,
-        surname: this.currentStudent.surname,
-        studentNumber: this.currentStudent.studentNumber,
-        moduleCode: module.moduleCode,
-        status: 'pending'
-      });
-  
-      this.presentToast(`Successfully requested to join ${module.moduleName}. Pending approval.`, 'success');
-    } catch (error) {
-      console.error('Error adding student to module:', error);
-      this.presentToast(`Failed to request joining ${module.moduleName}.`, 'danger');
-    }
+
+
+async addStudentToModule(module: Module) {
+  if (!this.currentStudent) {
+    this.presentToast('Student information not available.', 'danger');
+    return;
   }
+
+  try {
+    const batch = firebase.firestore().batch();
+    
+    // References to both collections
+    const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
+    const allModulesRef = firebase.firestore().collection('allModules').doc(module.moduleCode);
+    const moduleStudentsRef = allModulesRef.collection(module.moduleName);
+    
+    // Update the enrolledModules collection with "pending" status
+    batch.set(enrolledModulesRef, {
+      Enrolled: firebase.firestore.FieldValue.arrayUnion({
+        status: "pending",
+        studentNumber: this.currentStudent.studentNumber
+      })
+    }, { merge: true });
+    
+    // Add the student to the module in the allModules collection with "pending" status
+    const studentDocRef = moduleStudentsRef.doc(this.currentStudent.studentNumber);
+    batch.set(studentDocRef, {
+      email: this.currentStudent.email,
+      name: this.currentStudent.name,
+      surname: this.currentStudent.surname,
+      studentNumber: this.currentStudent.studentNumber,
+      moduleCode: module.moduleCode,
+      status: "pending"  // Pending status until confirmed
+    });
+
+    // Commit the batch operation
+    await batch.commit();
+    
+    this.presentToast(`Successfully requested to join ${module.moduleName}. Pending approval.`, 'success');
+  } catch (error) {
+    console.error('Error requesting to join module:', error);
+    this.presentToast(`Failed to request joining ${module.moduleName}.`, 'danger');
+  }
+}
+
   
   
+
+
+
+
+
 
   async submitSelection() {
     if (this.selectedModules.length === 0) {

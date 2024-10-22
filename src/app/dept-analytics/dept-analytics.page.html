@@ -11,6 +11,16 @@
 </ion-header>
 
 <ion-content class="analytics-content">
+  <!-- Faculty Dropdown -->
+  <ion-item class="faculty-dropdown">
+    <ion-label>Select Faculty</ion-label>
+    <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange()">
+      <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">
+        {{ faculty }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
   <!-- Summary Cards -->
   <div class="summary-cards">
     <ion-card class="count-card">
