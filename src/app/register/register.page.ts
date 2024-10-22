@@ -65,7 +65,7 @@ export class RegisterPage implements OnInit {
           name: this.name,
           surname: this.surname,
           studentNumber: this.studentNumber,
-          department: this.department  // Assuming this is captured in your form
+          department: this.department  
         });
         loader.dismiss();
         this.presentToast('Successfully registered!', 'success');

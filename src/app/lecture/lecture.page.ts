@@ -5,7 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { MakeAnnouncementComponent } from '../make-announcement/make-announcement.component';
 
 @Component({
@@ -37,6 +37,7 @@ export class LecturePage implements OnInit {
   searchTerm: string = '';
   searchTerms = new Subject<string>();
   existingStudents: Set<string> = new Set();
+  department: any;
 
   constructor(
     private router: Router,
@@ -132,6 +133,8 @@ export class LecturePage implements OnInit {
         if (data.length > 0) {
           const userData = data[0].payload.doc.data() as any;
           this.userName = userData.fullName || 'Staff Member';
+          this.department = userData.department || 'Unknown';  // Fetch department from user data
+          this.selectedFaculty = userData.faculty || 'Unknown'; // Fetch faculty from user data
         } else {
           this.userName = 'Staff Member';
         }
@@ -187,11 +190,6 @@ export class LecturePage implements OnInit {
 
   async fetchExistingStudents() {
     try {
-      // Ensure selectedModule is defined and has valid moduleCode and moduleName
-      if (!this.selectedModule || !this.selectedModule.moduleCode || !this.selectedModule.moduleName) {
-        throw new Error('Invalid module selection. Please ensure a valid module is selected.');
-      }
-  
       const snapshot = await firebase.firestore()
         .collection('enrolledModules')
         .doc(this.selectedModule.moduleCode)
@@ -201,10 +199,9 @@ export class LecturePage implements OnInit {
       this.existingStudents = new Set(snapshot.docs.map(doc => doc.id));
     } catch (error) {
       console.error('Error fetching existing students:', error);
-      alert('An error occurred while fetching existing students: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
-  
+
   async fetchRegisteredStudents() {
     try {
       const snapshot = await this.db.collection('students').get().toPromise();
@@ -215,7 +212,7 @@ export class LecturePage implements OnInit {
             ...(doc.data() as { email: string; name: string; surname: string; studentNumber: string }),
             selected: false
           }))
-          .filter(student => !this.existingStudents.has(student.id));
+          .filter(student => !this.existingStudents.has(student.id)); // Filter out existing students
         this.filteredStudents = [...this.registeredStudents];
       } else {
         this.registeredStudents = [];
@@ -223,9 +220,18 @@ export class LecturePage implements OnInit {
       }
     } catch (error) {
       console.error('Error fetching registered students:', error);
-      alert('An error occurred while fetching registered students: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert('An error occurred while fetching registered students.');
     }
   }
+
+  
+
+
+
+
+
+  
+
   
 
 
@@ -255,8 +261,13 @@ export class LecturePage implements OnInit {
 
 
   async confirmAddStudents() {
-    const selectedStudents = this.filteredStudents.filter(student => student.selected);
+    // Validate inputs
+    if (!this.selectedModule?.moduleCode) {
+      alert('Invalid module selection. Please select a valid module.');
+      return;
+    }
   
+    const selectedStudents = this.filteredStudents.filter(student => student.selected);
     if (selectedStudents.length === 0) {
       alert('Please select at least one student.');
       return;
@@ -266,33 +277,61 @@ export class LecturePage implements OnInit {
       const batch = firebase.firestore().batch();
       const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(this.selectedModule.moduleCode);
   
-      for (const student of selectedStudents) {
-        const studentDocRef = enrolledModulesRef.collection(this.selectedModule.moduleName).doc(student.id);
-        batch.set(studentDocRef, {
-          email: student.email,
-          name: student.name,
-          surname: student.surname,
-          studentNumber: student.studentNumber,
-          moduleCode: this.selectedModule.moduleCode
-        });
+      // Get current enrolled students to avoid duplicates
+      const enrolledDoc = await enrolledModulesRef.get();
+      const currentEnrolled = enrolledDoc.exists ? 
+        (enrolledDoc.data()?.['Enrolled'] || []) : [];
   
-        batch.set(enrolledModulesRef, {
-          Enrolled: firebase.firestore.FieldValue.arrayUnion({
-            status: "Enrolled",
-            studentNumber: student.studentNumber
-          })
-        }, { merge: true });
+      // Filter out already enrolled students
+      const newStudents = selectedStudents.filter(student =>
+        !currentEnrolled.some((enrolled: any) =>
+          enrolled.stud === student.studentNumber
+        )
+      );
+  
+      if (newStudents.length === 0) {
+        alert('All selected students are already enrolled in this module.');
+        return;
       }
   
+      // Create the module document if it doesn't exist
+      if (!enrolledDoc.exists) {
+        batch.set(enrolledModulesRef, {
+          moduleCode: this.selectedModule.moduleCode,
+          Enrolled: []
+        });
+      }
+  
+      // Add all new students to the Enrolled array in a single batch update
+      const newEnrollments = newStudents.map(student => ({
+        status: "Enrolled",
+        studentNumber: student.studentNumber,
+       // email: student.email,
+       // name: student.name,
+        //surname: student.surname
+      }));
+  
+      batch.update(enrolledModulesRef, {
+        Enrolled: firebase.firestore.FieldValue.arrayUnion(...newEnrollments)
+      });
+  
       await batch.commit();
-      alert('Students successfully added to the module.');
+  
+      const toast = await this.toastController.create({
+        message: `Successfully enrolled ${newStudents.length} student(s)`,
+        duration: 2000,
+        position: 'top'
+      });
+      toast.present();
+  
       this.closeAddStudentsModal();
+  
     } catch (error) {
       console.error('Error adding students to module:', error);
-      alert('An error occurred while adding students to the module.');
+      alert('An error occurred while adding students to the module: ' + 
+            (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
-
 
 
 
@@ -343,100 +382,61 @@ export class LecturePage implements OnInit {
 
 
   async addModule() {
-    // Check only for the required fields: department (selectedFaculty), moduleCode, and moduleLevel
-    if (!this.selectedFaculty.trim() || !this.moduleCode.trim() || !this.moduleLevel.trim()) {
-        alert('Please fill in all required fields: Department, Module Code, and Module Level.');
-        return;
+    if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.department) {
+      alert('Please fill in all fields before submitting.');
+      return;
     }
 
     const loader = await this.loadingController.create({
-        message: 'Submitting...',
-        cssClass: 'custom-loader-class',
+      message: 'Submitting...',
+      cssClass: 'custom-loader-class',
     });
     await loader.present();
 
     try {
-        // Assuming you're still using Firebase Auth to get the user
-        const user = firebase.auth().currentUser;
+      const user = firebase.auth().currentUser;
 
-        if (user && user.email) {
-            // Fetch the staff document using the email
-            const userEmail = user.email.toLowerCase();
-            const staffQuerySnapshot = await this.db.collection('staff', ref =>
-                ref.where('email', '==', userEmail)
-            ).get().toPromise();
+      if (user && user.email) {
+        const staffNumber = ' ';  // Replace this with logic to get staff number if needed
 
-            if (!staffQuerySnapshot || staffQuerySnapshot.empty) {
-                throw new Error('No staff document found for this user.');
-            }
+        const staffDocRef = this.db.collection('assignedLecturers').doc(staffNumber);
+        const staffDoc = await firstValueFrom(staffDocRef.get());
 
-            const staffDoc = staffQuerySnapshot.docs[0];
-            const staffData = staffDoc.data() as {
-                staffNumber?: string;
-                department?: string;
-                fullName?: string;
-            };
+        const moduleData = {
+          moduleName: this.moduleName,
+          moduleCode: this.moduleCode,
+          moduleLevel: this.moduleLevel,
+          userEmail: user.email,
+          department: this.department,  // Use the department fetched from the user's data
+          faculty: this.selectedFaculty // Include faculty when saving module
+        };
 
-            // Ensure staffNumber is available
-            const staffNumber = staffData?.staffNumber;
-            if (!staffNumber) {
-                throw new Error('Staff number is required to save the module.');
-            }
-
-            // Use the staffNumber as the document ID
-            const moduleRef = this.db.collection('assignedLectures').doc(staffNumber);
-
-            // Retrieve the document data if it exists
-            const docSnapshot = await moduleRef.get().toPromise();
-
-            let existingModules: any[] = []; // Ensure modules is initialized as an array
-            if (docSnapshot?.exists) {
-                const data = docSnapshot.data() as { modules?: any[] };
-                if (data && data.modules) {
-                    existingModules = data.modules; // Retrieve existing modules array if it exists
-                }
-            }
-
-            // Create a new module object
-            const newModule = {
-                moduleCode: this.moduleCode,
-                department: this.selectedFaculty,
-                moduleLevel: this.moduleLevel,
-                scannerOpenCount: 0,
-            };
-
-            // Add the new module to the array
-            existingModules.push(newModule);
-
-            // Update the document with the new modules array
-            await moduleRef.set(
-                { modules: existingModules },
-                { merge: true }
-            );
-
-            // Reset form fields
-            this.moduleCode = '';
-            this.moduleLevel = '';
-            this.selectedFaculty = '';
-
-            loader.dismiss();
-            alert('Module successfully saved');
+        if (staffDoc.exists) {
+          await staffDocRef.update({
+            modules: firebase.firestore.FieldValue.arrayUnion(moduleData),
+          });
         } else {
-            loader.dismiss();
-            alert('User not logged in or email is null.');
+          await staffDocRef.set({
+            modules: [moduleData],
+          });
         }
-    } catch (error) {
+
+        this.moduleName = '';
+        this.moduleCode = '';
+        this.moduleLevel = '';
         loader.dismiss();
-        if (error instanceof Error) {
-            console.error('Error saving module:', error);
-            alert(`An error occurred while saving the module: ${error.message}`);
-        } else {
-            console.error('Unexpected error:', error);
-            alert('An unexpected error occurred.');
-        }
+        alert('Module successfully saved');
+        this.getData(user.email); 
+      } else {
+        loader.dismiss();
+        alert('User not logged in or staff number is missing.');
+      }
+    } catch (error) {
+      loader.dismiss();
+      console.error('Error saving module:', error);
+      alert('An error occurred while saving the module.');
     }
-}
-
+  }
 
 
 

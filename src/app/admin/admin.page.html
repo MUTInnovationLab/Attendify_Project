@@ -17,7 +17,8 @@
 <ion-content [fullscreen]="true">
   <form (ngSubmit)="submitForm()" class="form">
     <p class="title">Attendify</p>
-    <p class="message">Add Lecturer to  Attendify app</p>
+    <p class="message">Add Lecturer to Attendify app</p>
+
     <div class="flex">
       <label>
         <input required="" placeholder="" type="text" class="input" [(ngModel)]="fullName" name="fullName">
@@ -39,10 +40,23 @@
       <input required="" placeholder="" type="text" class="input" [(ngModel)]="position" name="position">
       <span>Position</span>
     </label>
+
+    <!-- Faculty Dropdown -->
     <label>
-      <input required="" placeholder="" type="text" class="input" [(ngModel)]="department" name="department">
+      <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange($event)" name="faculty" interface="popover">
+        <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{ faculty }}</ion-select-option>
+      </ion-select>
+      <span>Faculty</span>
+    </label>
+
+    <!-- Department Dropdown (Populated based on selected Faculty) -->
+    <label>
+      <ion-select [(ngModel)]="selectedDepartment" name="department" interface="popover">
+        <ion-select-option *ngFor="let department of departments" [value]="department">{{ department }}</ion-select-option>
+      </ion-select>
       <span>Department</span>
     </label>
+
     <button type="submit" class="submit">Submit</button>
   </form>
 </ion-content>
