@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController, ToastController } from '@ionic/angular'; // Import ToastController
+import { ModalController, ToastController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { AuthService } from '../services/auth.service'; // Adjust the path as necessary
+import { AuthService } from '../services/auth.service';
+import firebase from 'firebase/compat/app';
 
 @Component({
   selector: 'app-make-announcement',
@@ -9,26 +10,27 @@ import { AuthService } from '../services/auth.service'; // Adjust the path as ne
   styleUrls: ['./make-announcement.component.scss']
 })
 export class MakeAnnouncementComponent implements OnInit {
-  @Input() moduleCode: string = ''; // Receive moduleCode as an input
+  @Input() moduleCode: string = '';
   title: string = '';
   content: string = '';
-  moduleDetails: any; // To store the fetched module details
-  showAddStudentsModal: boolean = true; // Flag to control modal visibility
+  moduleDetails: any;
+  showAddStudentsModal: boolean = true;
 
   constructor(
-    private modalController: ModalController, // Inject ModalController
+    private modalController: ModalController,
     private firestore: AngularFirestore,
     private authService: AuthService,
-    private toastController: ToastController // Inject ToastController
+    private toastController: ToastController
   ) {}
 
   async ngOnInit() {
     if (this.moduleCode) {
       try {
-        // Fetch module details using the moduleCode
-        const moduleQuery = this.firestore.collection('modules', ref => ref.where('moduleCode', '==', this.moduleCode));
+        const moduleQuery = this.firestore.collection('modules', ref => 
+          ref.where('moduleCode', '==', this.moduleCode)
+        );
         const moduleSnapshot = await moduleQuery.get().toPromise();
-  
+
         if (moduleSnapshot && !moduleSnapshot.empty) {
           this.moduleDetails = moduleSnapshot.docs[0].data();
           console.log('Module details:', this.moduleDetails);
@@ -41,12 +43,11 @@ export class MakeAnnouncementComponent implements OnInit {
     }
   }
 
-  // Method to show a toast notification
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message: message,
-      duration: 2000, // Duration the toast will be visible (2 seconds)
-      position: 'bottom' // You can change to 'top', 'middle' as per your design needs
+      duration: 2000,
+      position: 'bottom'
     });
     await toast.present();
   }
@@ -64,32 +65,46 @@ export class MakeAnnouncementComponent implements OnInit {
           const announcement = {
             title: this.title,
             content: this.content,
-            moduleCode: this.moduleCode,
             timestamp: timestamp,
             formattedDate: formattedDate,
             userEmail: userEmail
           };
 
-          await this.firestore.collection('announcements').add(announcement);
+          // Get reference to the module's announcements document
+          const moduleAnnouncementsRef = this.firestore.doc(`announcements/${this.moduleCode}`);
+          
+          // Get the current document
+          const docSnapshot = await moduleAnnouncementsRef.get().toPromise();
+          
+          if (docSnapshot?.exists) {
+            // If document exists, update the announcements array using firebase.firestore.FieldValue
+            await moduleAnnouncementsRef.update({
+              announcements: firebase.firestore.FieldValue.arrayUnion(announcement)
+            });
+          } else {
+            // If document doesn't exist, create it with initial announcement
+            await moduleAnnouncementsRef.set({
+              moduleCode: this.moduleCode,
+              announcements: [announcement]
+            });
+          }
+
           console.log('Announcement submitted:', announcement);
 
           // Reset the form fields
           this.title = '';
           this.content = '';
 
-          // Show success message via toast
           this.presentToast('Announcement added successfully!');
         } else {
           console.error('User email is not available!');
         }
       } catch (error) {
         console.error('Error submitting announcement:', error);
-        // Show error message via toast
         this.presentToast('Failed to add the announcement. Please try again.');
       }
     } else {
       console.error('Title, content, and module code are required!');
-      // Show error message via toast
       this.presentToast('All fields are required!');
     }
   }

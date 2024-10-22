@@ -205,7 +205,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateEmailInFirestore(newEmail: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'registeredStudents'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -219,21 +219,7 @@ export class ProfilePage implements OnInit {
       });
     }
 
-    // Update in allModules collection for each module the student is enrolled in
-    if (this.currentUser.moduleCode) {
-      for (const moduleCode of this.currentUser.moduleCode) {
-        const moduleRef = this.firestore.collection('allModules').doc(moduleCode);
-        const studentsRef = moduleRef.collection(moduleCode);
-
-        const studentQuerySnapshot = await studentsRef.ref.where('email', '==', this.currentUser.email).get();
-        
-        if (!studentQuerySnapshot.empty) {
-          studentQuerySnapshot.docs.forEach((doc) => {
-            batch.update(doc.ref, { email: newEmail });
-          });
-        }
-      }
-    }
+  
 
     // Commit the batch
     await batch.commit();
@@ -244,7 +230,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateStudentNumber(newStudentNumber: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'registeredStudents'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -274,22 +260,7 @@ export class ProfilePage implements OnInit {
       });
     }
 
-    // Update in allModules collection for each module the student is enrolled in
-    if (this.currentUser.moduleCode) {
-      for (const moduleCode of this.currentUser.moduleCode) {
-        const moduleRef = this.firestore.collection('allModules').doc(moduleCode);
-        const studentsRef = moduleRef.collection(moduleCode);
-
-        const studentQuerySnapshot = await studentsRef.ref.where('email', '==', this.currentUser.email).get();
-        
-        if (!studentQuerySnapshot.empty) {
-          studentQuerySnapshot.docs.forEach((doc) => {
-            batch.update(doc.ref, { studentNumber: newStudentNumber });
-          });
-        }
-      }
-    }
-
+ 
     // Commit the batch
     await batch.commit();
 
