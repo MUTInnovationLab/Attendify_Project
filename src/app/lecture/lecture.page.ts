@@ -56,12 +56,13 @@ export class LecturePage implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.auth.onAuthStateChanged((user) => {
       if (user && user.email) {
         this.userEmail = user.email;
         this.getUserData(user.email);
-        this.getData(user.email);
+        // Get staff number first, then get modules
+        this.getStaffNumberAndModules(user.email);
       } else {
         console.log('User not logged in or email is null.');
         this.userName = 'Guest';
