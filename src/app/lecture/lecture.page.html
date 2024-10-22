@@ -40,26 +40,11 @@
           <label for="contact_sujet">LEVEL</label>
         </div>
         <div class="input-wrapper">
-          <select name="faculty" [(ngModel)]="selectedFaculty" id="faculty">
-            <option value="">Select a Department</option>
-            <option value="agriculture">Agriculture</option>
-            <option value="biomedicalSciences">Biomedical Sciences</option>
-            <option value="buildingAndConstruction">Building and Construction</option>
-            <option value="chemistry">Chemistry</option>
-            <option value="civilEngineering">Civil Engineering</option>
-            <option value="civilEngineeringAndSurvey">Civil Engineering and Survey</option>
-            <option value="communityExtension">Community Extension</option>
-            <option value="electricalEngineering">Electrical Engineering</option>
-            <option value="environmentalHealth">Environmental Health</option>
-            <option value="humanResourceManagement">Human Resource Management</option>
-            <option value="marketing">Marketing</option>
-            <option value="mechanicalEngineering">Mechanical Engineering</option>
-            <option value="natureConservation">Nature Conservation</option>
-            <option value="officeManagementAndTechnology">Office Management and Technology</option>
-            <option value="publicAdministrationAndEconomics">Public Administration and Economics</option>
-          </select>
-          <label for="department">DEPARTMENT</label>
+          <input type="text" [value]="department" disabled>
+          <label>DEPARTMENT</label>
         </div>
+
+        
         <div class="submit-wrapper">
           <button type="submit" (click)="addModule()">SUBMIT</button>
         </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
+import { FacultyDepartmentService } from '../services/faculty-department.service';
 
 @Component({
   selector: 'app-super-analytics',
@@ -22,9 +23,32 @@ export class SuperAnalyticsPage implements OnInit {
     'Faculty of Applied and Health Science'
   ];
 
-  constructor(private firestore: AngularFirestore, private toastController: ToastController) {}
+  // Map faculties to their respective departments
+  facultyDepartments: { [key: string]: string[] } = {
+    'Faculty of Management Science': [' Accounting and Law', 'Human Resource Management', 'Marketing', 'Office Mangement and Technology', 'Public Administration and Economics'],
+    'Faculty of Engineering': ['Civil Engineering  and Survey', 'Electrical Engineering', 'Mechanical Engineering','Chemical Engineering','Building and Construction' ],
+    'Faculty of Applied and Health Science': ['Agriculture', 'Biomedical Sciences', 'Chemistry',' Community Extension', 'Environmental Health', 'Information and Communication Technology', 'Nature Conservation']
+  };
+
+  // List of departments based on the selected faculty
+  departments: string[] = [];
+
+  constructor(private firestore: AngularFirestore, private toastController: ToastController,
+    private facultyDepartmentService: FacultyDepartmentService
+  ) {}
+
   ngOnInit(): void {
-    throw new Error('Method not implemented.');
+    // Initialize component, if needed
+    this.faculties = this.facultyDepartmentService.getFaculties();
+  }
+
+  onFacultyChange() {
+    // Get the departments from the service based on the selected faculty
+    if (this.facultyName) {
+      this.departments = this.facultyDepartmentService.getDepartments(this.facultyName);
+    } else {
+      this.departments = [];
+    }
   }
 
   async addModule() {
@@ -53,7 +77,7 @@ export class SuperAnalyticsPage implements OnInit {
               }
             ]
           };
-      
+
           facultyDocRef.set(newFacultyData).then(() => {
             this.showToast('Faculty created and module added successfully');
           }).catch(error => {
@@ -61,8 +85,6 @@ export class SuperAnalyticsPage implements OnInit {
           });
         }
       });
-      
-      
     } else {
       this.showToast('Please fill in all fields');
     }
@@ -76,31 +98,30 @@ export class SuperAnalyticsPage implements OnInit {
     toast.present();
   }
 
-
-  processFacultyDocument(facultyDocRef:any, facultyData: any) {
+  processFacultyDocument(facultyDocRef: any, facultyData: any) {
     let departmentData = facultyData['Departments'] || [];
-  
+
     const departmentIndex = departmentData.findIndex((dep: { name: string; }) => dep.name === this.departmentName);
     if (departmentIndex !== -1) {
       const department = departmentData[departmentIndex];
-      
+
       if (!department.streams) {
         department.streams = {};
       }
-      
+
       if (!department.streams[this.streamName]) {
         department.streams[this.streamName] = [];
       }
-      
+
       // Add the new module to the stream
       department.streams[this.streamName].push({
         module: this.moduleName,
         credits: this.credits,
         year: this.year
       });
-  
+
       departmentData[departmentIndex] = department;
-  
+
       // Update the faculty document
       facultyDocRef.update({ Departments: departmentData }).then(() => {
         this.showToast('Module added successfully');
@@ -121,7 +142,7 @@ export class SuperAnalyticsPage implements OnInit {
           ]
         }
       });
-  
+
       // Update faculty document with new department and streams
       facultyDocRef.update({ Departments: departmentData }).then(() => {
         this.showToast('Department and module added successfully');

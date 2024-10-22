@@ -73,13 +73,10 @@ export class QrScanPage implements OnInit {
 
 
 
-
-
-
   // Firestore function to increment the scanner open count
 incrementScannerOpenCount() {
   // Query Firestore to find the module document by moduleCode
-  const moduleCollectionRef = this.firestore.collection<Module>('assignedLecturers', ref => ref.where('moduleCode', '==', this.moduleCode));
+  const moduleCollectionRef = this.firestore.collection<Module>('assignedLectures', ref => ref.where('moduleCode', '==', this.moduleCode));
 
   moduleCollectionRef.get().subscribe(snapshot => {
     if (snapshot.empty) {
