@@ -566,22 +566,6 @@ async deleteModule() {
     this.router.navigate(['/view-students']);
   }
 
- /* getData(userEmail: string) {
-    this.db
-      .collection('assignedLectures', (ref) => ref.where('staffNumber', '==', userEmail))
-      .snapshotChanges()
-      .subscribe((data) => {
-        this.userData = data.map((d) => {
-          const id = d.payload.doc.id;
-          const docData = d.payload.doc.data() as any;
-          return { id, ...docData };
-        });
-        console.log(this.userData);
-        this.tableData = this.userData;
-        this.updateTableSelection();
-      });
-  }*/
-
   gotoQRscan(moduleCode: string) {
     this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
   }

@@ -30,7 +30,7 @@
 
   <ion-list class="module-list">
     <ion-item *ngFor="let module of filteredModules" class="module-item">
-      <ion-label>{{ module.moduleName }}</ion-label>
+      <ion-label>{{ module.moduleCode }}</ion-label>
       <ion-checkbox slot="end"
                    [checked]="isModuleSelected(module)"
                    (ionChange)="toggleModuleSelection(module)">
@@ -41,13 +41,11 @@
   <div class="selected-modules">
     <ion-card *ngFor="let module of selectedModules" class="selected-module-card">
       <ion-card-header>
-        <ion-card-title>{{ module.moduleName }}</ion-card-title>
-        <ion-card-subtitle>{{ module.moduleCode }}</ion-card-subtitle>
+        <ion-card-title>{{ module.moduleCode }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <p class="module-detail"><strong>Module Level:</strong> {{ module.moduleLevel }}</p>
-        <p class="module-detail"><strong>User Email:</strong> {{ module.userEmail }}</p>
-        <p *ngIf="module.place" class="module-detail"><strong>Place:</strong> {{ module.place }}</p>
+        <p class="module-detail"><strong>Staff Number:</strong> {{ module.staffNumber }}</p>
       </ion-card-content>
       <div class="card-actions">
         <ion-button fill="clear" 
@@ -60,11 +58,4 @@
       </div>
     </ion-card>
   </div>
-
-  <!-- <ion-button expand="full" 
-              (click)="submitSelection()" 
-              [disabled]="selectedModules.length === 0"
-              class="submit-button">
-    Request to Join Selected Modules ({{ selectedModules.length }})
-  </ion-button> -->
 </ion-content>
