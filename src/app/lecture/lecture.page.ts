@@ -190,11 +190,6 @@ export class LecturePage implements OnInit {
 
   async fetchExistingStudents() {
     try {
-      // Ensure selectedModule is defined and has valid moduleCode and moduleName
-      if (!this.selectedModule || !this.selectedModule.moduleCode || !this.selectedModule.moduleName) {
-        throw new Error('Invalid module selection. Please ensure a valid module is selected.');
-      }
-  
       const snapshot = await firebase.firestore()
         .collection('enrolledModules')
         .doc(this.selectedModule.moduleCode)
@@ -204,10 +199,9 @@ export class LecturePage implements OnInit {
       this.existingStudents = new Set(snapshot.docs.map(doc => doc.id));
     } catch (error) {
       console.error('Error fetching existing students:', error);
-      alert('An error occurred while fetching existing students: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
-  
+
   async fetchRegisteredStudents() {
     try {
       const snapshot = await this.db.collection('students').get().toPromise();
@@ -226,9 +220,10 @@ export class LecturePage implements OnInit {
       }
     } catch (error) {
       console.error('Error fetching registered students:', error);
-      alert('An error occurred while fetching registered students: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert('An error occurred while fetching registered students.');
     }
   }
+
   
 
 
