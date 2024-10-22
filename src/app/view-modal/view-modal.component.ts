@@ -71,7 +71,7 @@ export class ViewModalComponent implements OnInit {
   async fetchAvailableModules() {
     console.log('Fetching available modules...');
     try {
-      const modulesSnapshot = await this.firestore.collection('modules').ref.get();
+      const modulesSnapshot = await this.firestore.collection('assignedLectures').ref.get();
       if (modulesSnapshot.empty) {
         console.log('No modules found.');
         this.presentToast('No modules available.', 'warning');
