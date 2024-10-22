@@ -3,28 +3,10 @@ import { NavController, LoadingController, AlertController, ToastController, Mod
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
-import firebase from 'firebase/compat/app'; // Import firebase app
+import firebase from 'firebase/compat/app';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { firstValueFrom, Subject } from 'rxjs';
-import { MakeAnnouncementComponent } from '../make-announcement/make-announcement.component'; // Import the component
-
-
-interface StaffMember {
-  email: string;
-  fullName: string;
-  faculty: string;
-}
-
-interface ModuleData {
-  moduleCode: string;
-  moduleLevel: string;
-  department: string;
-  scannerOpenCount: number;
-}
-
-interface AssignedLectures {
-  [key: string]: ModuleData;
-}
+import { Subject } from 'rxjs';
+import { MakeAnnouncementComponent } from '../make-announcement/make-announcement.component';
 
 @Component({
   selector: 'app-lecture',
@@ -32,23 +14,22 @@ interface AssignedLectures {
   styleUrls: ['./lecture.page.scss'],
 })
 export class LecturePage implements OnInit {
-
   showAddCard: boolean = false;
-  userName: string = ''; // Store the user's name
-  userEmail: string = ''; // Store the user's email
+  userName: string = '';
+  userEmail: string = '';
+  selectedFaculty: string = '';
   contact_nom: string = '';
   contact_email: string = '';
   contact_sujet: string = '';
   contact_message: string = '';
-  selectedFaculty: string = '';
-  moduleName: any;
-  moduleCode: any;
-  moduleLevel: any;
+
+  moduleName: string = '';
+  moduleCode: string = '';
+  moduleLevel: string = '';
   userData: any;
   tableData: any[] = [];
-  selectedModuleId: string | null = null; // Store selected module ID
-  navController: NavController;
-   
+  selectedModuleId: string | null = null;
+
   showAddStudentsModal: boolean = false;
   registeredStudents: any[] = [];
   filteredStudents: any[] = [];
@@ -56,7 +37,6 @@ export class LecturePage implements OnInit {
   searchTerm: string = '';
   searchTerms = new Subject<string>();
   existingStudents: Set<string> = new Set();
-  department: string = '';
 
   constructor(
     private router: Router,
@@ -68,7 +48,6 @@ export class LecturePage implements OnInit {
     private toastController: ToastController,
     private modalController: ModalController
   ) {
-    this.navController = navCtrl;
     this.searchTerms.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -77,25 +56,73 @@ export class LecturePage implements OnInit {
     });
   }
 
-
-  ngOnInit() {
-    console.log('ngOnInit called');
-    
+  async ngOnInit() {
     this.auth.onAuthStateChanged((user) => {
-      console.log('Auth state changed:', user);
-      
       if (user && user.email) {
-        console.log('User is logged in with email:', user.email);
         this.userEmail = user.email;
         this.getUserData(user.email);
-        this.getData(user.email);
+        // Get staff number first, then get modules
+        this.getStaffNumberAndModules(user.email);
       } else {
-        console.log('No user logged in');
+        console.log('User not logged in or email is null.');
         this.userName = 'Guest';
-        this.tableData = [];
       }
     });
   }
+
+  async getStaffNumberAndModules(userEmail: string) {
+    try {
+      // First get the staff document to get the staff number
+      const staffSnapshot = await this.db.collection('staff')
+        .ref.where('email', '==', userEmail)
+        .get();
+
+      if (!staffSnapshot.empty) {
+        const staffDoc = staffSnapshot.docs[0];
+        const staffData = staffDoc.data() as { staffNumber: string };
+        const staffNumber = staffData.staffNumber;
+
+        // Now get the modules using the staff number
+        this.getData(staffNumber);
+      } else {
+        console.error('Staff document not found for email:', userEmail);
+      }
+    } catch (error) {
+      console.error('Error getting staff number:', error);
+    }
+  }
+
+
+    async getData(staffNumber: string) {
+    // Get the specific document using staffNumber
+    this.db.collection('assignedLectures').doc(staffNumber)
+      .snapshotChanges()
+      .subscribe((docSnapshot) => {
+        if (docSnapshot.payload.exists) {
+          const data = docSnapshot.payload.data() as { modules: any[] };
+          if (data && data.modules) {
+            // Transform the modules array into the format expected by the template
+            this.tableData = data.modules.map((module, index) => ({
+              id: `${index}`, // Generate an ID for selection purposes
+              moduleCode: module.moduleCode,
+              department: module.department,
+              moduleLevel: module.moduleLevel,
+              scannerOpenCount: module.scannerOpenCount
+            }));
+          } else {
+            this.tableData = [];
+          }
+        } else {
+          console.log('No modules found for staff number:', staffNumber);
+          this.tableData = [];
+        }
+        this.updateTableSelection();
+      }, error => {
+        console.error('Error fetching modules:', error);
+      });
+  }
+
+
 
   getUserData(userEmail: string) {
     this.db
@@ -105,8 +132,6 @@ export class LecturePage implements OnInit {
         if (data.length > 0) {
           const userData = data[0].payload.doc.data() as any;
           this.userName = userData.fullName || 'Staff Member';
-          this.department = userData.department || 'Unknown'; 
-          this.selectedFaculty = userData.faculty || 'Unknown';
         } else {
           this.userName = 'Staff Member';
         }
@@ -129,15 +154,13 @@ export class LecturePage implements OnInit {
     const modal = await this.modalController.create({
       component: MakeAnnouncementComponent,
       componentProps: {
-        moduleCode: selectedModule.moduleCode, // Use the actual module code like "CIV100"
+        moduleCode: selectedModule.moduleCode,
       }
     });
   
     await modal.present();
   }
-  
 
-  
   async openAddStudentsModal() {
     if (!this.selectedModuleId) {
       alert('Please select a module first.');
@@ -158,10 +181,19 @@ export class LecturePage implements OnInit {
     this.existingStudents.clear();
   }
 
+
+
+
+
   async fetchExistingStudents() {
     try {
+      // Ensure selectedModule is defined and has valid moduleCode and moduleName
+      if (!this.selectedModule || !this.selectedModule.moduleCode || !this.selectedModule.moduleName) {
+        throw new Error('Invalid module selection. Please ensure a valid module is selected.');
+      }
+  
       const snapshot = await firebase.firestore()
-        .collection('allModules')
+        .collection('enrolledModules')
         .doc(this.selectedModule.moduleCode)
         .collection(this.selectedModule.moduleName)
         .get();
@@ -169,9 +201,10 @@ export class LecturePage implements OnInit {
       this.existingStudents = new Set(snapshot.docs.map(doc => doc.id));
     } catch (error) {
       console.error('Error fetching existing students:', error);
+      alert('An error occurred while fetching existing students: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
-
+  
   async fetchRegisteredStudents() {
     try {
       const snapshot = await this.db.collection('students').get().toPromise();
@@ -182,7 +215,7 @@ export class LecturePage implements OnInit {
             ...(doc.data() as { email: string; name: string; surname: string; studentNumber: string }),
             selected: false
           }))
-          .filter(student => !this.existingStudents.has(student.id)); // Filter out existing students
+          .filter(student => !this.existingStudents.has(student.id));
         this.filteredStudents = [...this.registeredStudents];
       } else {
         this.registeredStudents = [];
@@ -190,9 +223,14 @@ export class LecturePage implements OnInit {
       }
     } catch (error) {
       console.error('Error fetching registered students:', error);
-      alert('An error occurred while fetching registered students.');
+      alert('An error occurred while fetching registered students: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
+  
+
+
+
+
 
   searchStudents(term: string) {
     this.searchTerm = term;
@@ -212,9 +250,13 @@ export class LecturePage implements OnInit {
     this.searchTerms.next(event.target.value);
   }
 
+
+
+
+
   async confirmAddStudents() {
     const selectedStudents = this.filteredStudents.filter(student => student.selected);
-    
+  
     if (selectedStudents.length === 0) {
       alert('Please select at least one student.');
       return;
@@ -222,13 +264,10 @@ export class LecturePage implements OnInit {
   
     try {
       const batch = firebase.firestore().batch();
-      const moduleRef = firebase.firestore().collection('allModules').doc(this.selectedModule.moduleCode);
-      const studentsRef = moduleRef.collection(this.selectedModule.moduleName);
-  
-      const enrolledmodulesRef = firebase.firestore().collection('enrolledModules');
+      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(this.selectedModule.moduleCode);
   
       for (const student of selectedStudents) {
-        const studentDocRef = studentsRef.doc(student.id);
+        const studentDocRef = enrolledModulesRef.collection(this.selectedModule.moduleName).doc(student.id);
         batch.set(studentDocRef, {
           email: student.email,
           name: student.name,
@@ -237,30 +276,12 @@ export class LecturePage implements OnInit {
           moduleCode: this.selectedModule.moduleCode
         });
   
-        // Use studentNumber as document ID in 'enrolledmodules'
-        const enrolledStudentDocRef = enrolledmodulesRef.doc(student.studentNumber.toString());
-        const enrolledStudentDoc = await enrolledStudentDocRef.get();
-        
-        if (enrolledStudentDoc.exists) {
-          // Student exists, update the moduleCode array
-          const enrolledStudentData = enrolledStudentDoc.data();
-          if (enrolledStudentData) {
-            const existingModuleCodes = enrolledStudentData['moduleCode'] || [];
-            if (!existingModuleCodes.includes(this.selectedModule.moduleCode)) {
-              existingModuleCodes.push(this.selectedModule.moduleCode);
-              batch.update(enrolledStudentDocRef, { moduleCode: existingModuleCodes });
-            }
-          }
-        } else {
-          // Student does not exist, create a new document
-          batch.set(enrolledStudentDocRef, {
-            email: student.email,
-            name: student.name,
-            surname: student.surname,
-            studentNumber: student.studentNumber,
-            moduleCode: [this.selectedModule.moduleCode]
-          });
-        }
+        batch.set(enrolledModulesRef, {
+          Enrolled: firebase.firestore.FieldValue.arrayUnion({
+            status: "Enrolled",
+            studentNumber: student.studentNumber
+          })
+        }, { merge: true });
       }
   
       await batch.commit();
@@ -271,8 +292,11 @@ export class LecturePage implements OnInit {
       alert('An error occurred while adding students to the module.');
     }
   }
-  
-  
+
+
+
+
+
   async presentConfirmationAlert() {
     const alert = await this.alertController.create({
       header: 'Confirmation',
@@ -292,7 +316,7 @@ export class LecturePage implements OnInit {
             this.auth
               .signOut()
               .then(() => {
-                this.navController.navigateForward('/login');
+                this.navCtrl.navigateForward('/login');
                 this.presentToast();
               })
               .catch((error) => {
@@ -316,124 +340,209 @@ export class LecturePage implements OnInit {
 
 
 
- 
+
 
   async addModule() {
-    if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.department) {
-      alert('Please fill in all fields before submitting.');
-      return;
+    // Check only for the required fields: department (selectedFaculty), moduleCode, and moduleLevel
+    if (!this.selectedFaculty.trim() || !this.moduleCode.trim() || !this.moduleLevel.trim()) {
+        alert('Please fill in all required fields: Department, Module Code, and Module Level.');
+        return;
     }
 
     const loader = await this.loadingController.create({
-      message: 'Submitting...',
-      cssClass: 'custom-loader-class',
+        message: 'Submitting...',
+        cssClass: 'custom-loader-class',
     });
     await loader.present();
 
     try {
-      const user = firebase.auth().currentUser;
+        // Assuming you're still using Firebase Auth to get the user
+        const user = firebase.auth().currentUser;
 
-      if (user && user.email) {
-        const staffNumber = ' ';  // Replace this with logic to get staff number if needed
+        if (user && user.email) {
+            // Fetch the staff document using the email
+            const userEmail = user.email.toLowerCase();
+            const staffQuerySnapshot = await this.db.collection('staff', ref =>
+                ref.where('email', '==', userEmail)
+            ).get().toPromise();
 
-        const staffDocRef = this.db.collection('assignedLecturers').doc(staffNumber);
-        const staffDoc = await firstValueFrom(staffDocRef.get());
-
-        const moduleData = {
-          moduleName: this.moduleName,
-          moduleCode: this.moduleCode,
-          moduleLevel: this.moduleLevel,
-          userEmail: user.email,
-          department: this.department,
-          faculty: this.selectedFaculty,  // Use the department fetched from the user's data
-        };
-
-        if (staffDoc.exists) {
-          await staffDocRef.update({
-            modules: firebase.firestore.FieldValue.arrayUnion(moduleData),
-          });
-        } else {
-          await staffDocRef.set({
-            modules: [moduleData],
-          });
-        }
-
-        this.moduleName = '';
-        this.moduleCode = '';
-        this.moduleLevel = '';
-        loader.dismiss();
-        alert('Module successfully saved');
-        this.getData(user.email); 
-      } else {
-        loader.dismiss();
-        alert('User not logged in or staff number is missing.');
-      }
-    } catch (error) {
-      loader.dismiss();
-      console.error('Error saving module:', error);
-      alert('An error occurred while saving the module.');
-    }
-  }
-
-  async deleteModule() {
-    if (!this.selectedModuleId) {
-      alert('No module selected for deletion.');
-      return;
-    }
-  
-    // Creating the confirm alert
-    const confirmAlert = await this.alertController.create({
-      header: 'Confirm Deletion',
-      message: 'Are you sure you want to delete this module?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'secondary',
-          handler: () => {
-            console.log('Delete operation canceled');
-          },
-        },
-        {
-          text: 'Delete',
-          handler: async () => {
-            const loader = await this.loadingController.create({
-              message: 'Deleting...',
-              cssClass: 'custom-loader-class',
-            });
-            await loader.present();
-  
-            try {
-              // Ensure selectedModuleId is a string and not null
-              if (this.selectedModuleId) {
-                await this.db.collection('modules').doc(this.selectedModuleId).delete();
-                alert('Module successfully deleted');
-                this.selectedModuleId = null; // Clear the selected module
-  
-                const user = firebase.auth().currentUser;
-                if (user && user.email) {
-                  this.getData(user.email); // Refresh the module list
-                }
-              }
-              loader.dismiss();
-            } catch (error) {
-              loader.dismiss();
-              console.error('Error deleting module:', error);
-              alert('An error occurred while deleting the module.');
+            if (!staffQuerySnapshot || staffQuerySnapshot.empty) {
+                throw new Error('No staff document found for this user.');
             }
-          },
-        },
-      ],
-    });
-  
-    // Present the confirmation alert
-    await confirmAlert.present();
-  }
-  
 
+            const staffDoc = staffQuerySnapshot.docs[0];
+            const staffData = staffDoc.data() as {
+                staffNumber?: string;
+                department?: string;
+                fullName?: string;
+            };
+
+            // Ensure staffNumber is available
+            const staffNumber = staffData?.staffNumber;
+            if (!staffNumber) {
+                throw new Error('Staff number is required to save the module.');
+            }
+
+            // Use the staffNumber as the document ID
+            const moduleRef = this.db.collection('assignedLectures').doc(staffNumber);
+
+            // Retrieve the document data if it exists
+            const docSnapshot = await moduleRef.get().toPromise();
+
+            let existingModules: any[] = []; // Ensure modules is initialized as an array
+            if (docSnapshot?.exists) {
+                const data = docSnapshot.data() as { modules?: any[] };
+                if (data && data.modules) {
+                    existingModules = data.modules; // Retrieve existing modules array if it exists
+                }
+            }
+
+            // Create a new module object
+            const newModule = {
+                moduleCode: this.moduleCode,
+                department: this.selectedFaculty,
+                moduleLevel: this.moduleLevel,
+                scannerOpenCount: 0,
+            };
+
+            // Add the new module to the array
+            existingModules.push(newModule);
+
+            // Update the document with the new modules array
+            await moduleRef.set(
+                { modules: existingModules },
+                { merge: true }
+            );
+
+            // Reset form fields
+            this.moduleCode = '';
+            this.moduleLevel = '';
+            this.selectedFaculty = '';
+
+            loader.dismiss();
+            alert('Module successfully saved');
+        } else {
+            loader.dismiss();
+            alert('User not logged in or email is null.');
+        }
+    } catch (error) {
+        loader.dismiss();
+        if (error instanceof Error) {
+            console.error('Error saving module:', error);
+            alert(`An error occurred while saving the module: ${error.message}`);
+        } else {
+            console.error('Unexpected error:', error);
+            alert('An unexpected error occurred.');
+        }
+    }
+}
+
+
+
+
+
+
+
+async deleteModule() {
+  if (!this.selectedModuleId) {
+    alert('No module selected for deletion.');
+    return;
+  }
+
+  const confirmAlert = await this.alertController.create({
+    header: 'Confirm Deletion',
+    message: 'Are you sure you want to delete this module?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel',
+        cssClass: 'secondary',
+        handler: () => {
+          console.log('Delete operation canceled');
+        },
+      },
+      {
+        text: 'Delete',
+        handler: async () => {
+          const loader = await this.loadingController.create({
+            message: 'Deleting...',
+            cssClass: 'custom-loader-class',
+          });
+          await loader.present();
+
+          try {
+            // Get current user
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) {
+              throw new Error('No user logged in');
+            }
+
+            // Specify the structure of the documents we're working with
+            interface StaffDoc {
+              staffNumber: string;
+            }
+
+            // Get staff number from staff collection
+            const staffQuerySnapshot = await this.db
+              .collection('staff')
+              .ref.where('email', '==', user.email)
+              .get() as firebase.firestore.QuerySnapshot<StaffDoc>;  // Fixing the unknown type
+
+            if (staffQuerySnapshot.empty) {
+              throw new Error('Staff document not found');
+            }
+
+            const staffNumber = staffQuerySnapshot.docs[0].data().staffNumber;
+
+            // Get the document reference
+            const docRef = this.db.collection('assignedLectures').doc(staffNumber);
+
+            // Get current document data
+            const doc = await docRef.get().toPromise();
+
+            if (doc && doc.exists) {
+              const data = doc.data() as { modules: any[] };
+              if (!data || !data.modules) {
+                throw new Error('No modules found in document');
+              }
+
+              // Find the module to delete based on selectedModuleId (which is the index)
+              const moduleIndex = parseInt(this.selectedModuleId as string);  // Ensure selectedModuleId is string
+              const modules = [...data.modules];
+
+              // Remove the module at the specified index
+              modules.splice(moduleIndex, 1);
+
+              // Update the document with the new modules array
+              await docRef.update({ modules: modules });
+
+              this.selectedModuleId = null;
+              alert('Module successfully deleted');
+            } else {
+              throw new Error('Document not found');
+            }
+
+          } catch (error) {
+            console.error('Error deleting module:', error);
+            alert('An error occurred while deleting the module: ' + 
+                  (error instanceof Error ? error.message : 'Unknown error'));
+          } finally {
+            loader.dismiss();
+          }
+        },
+      },
+    ],
+  });
+
+  await confirmAlert.present();
+}
+
+
+
+
+  
   selectModule(moduleId: string) {
     this.selectedModuleId = moduleId;
-    // Update the table selection
     this.updateTableSelection();
   }
  
@@ -457,96 +566,22 @@ export class LecturePage implements OnInit {
     this.router.navigate(['/view-students']);
   }
 
-
-  
-  async getData(userEmail: string) {
-    console.log('getData called with email:', userEmail);
-  
-    if (!userEmail) {
-      console.error('No email provided to getData');
-      return;
-    }
-  
-    try {
-      const currentUser = await this.auth.currentUser;
-      if (!currentUser) {
-        console.error('No authenticated user found');
-        return;
-      }
-  
-      console.log('Querying staff collection for email:', userEmail);
-      
-      const staffQuery = await this.db.collection<StaffMember>('staff').get().toPromise();
-      
-      if (!staffQuery || staffQuery.empty) {
-        console.error('No staff found with email:', userEmail);
-        this.tableData = [];
-        return;
-      }
-  
-      const staffDoc = staffQuery.docs.find(doc => {
-        const data = doc.data();
-        return data.email === userEmail;
+ /* getData(userEmail: string) {
+    this.db
+      .collection('assignedLectures', (ref) => ref.where('staffNumber', '==', userEmail))
+      .snapshotChanges()
+      .subscribe((data) => {
+        this.userData = data.map((d) => {
+          const id = d.payload.doc.id;
+          const docData = d.payload.doc.data() as any;
+          return { id, ...docData };
+        });
+        console.log(this.userData);
+        this.tableData = this.userData;
+        this.updateTableSelection();
       });
-  
-      if (!staffDoc) {
-        console.error('Staff document not found for email:', userEmail);
-        return;
-      }
-  
-      const staffNumber = staffDoc.id;
-      console.log('Found staff number:', staffNumber);
-  
-      const assignedLecturesRef = this.db
-        .collection<AssignedLectures>('assignedLectures')
-        .doc(staffNumber);
-  
-      const docSnapshot = await assignedLecturesRef.get().toPromise();
-      
-      if (!docSnapshot?.exists) {
-        console.log('No assignedLectures document exists for staff number:', staffNumber);
-        await assignedLecturesRef.set({});
-      }
-  
-      assignedLecturesRef.snapshotChanges().subscribe(
-        (docSnapshot) => {
-          if (docSnapshot.payload.exists) {
-            const lectureData = docSnapshot.payload.data() as AssignedLectures;
-            console.log('Raw lecture data:', lectureData);
-  
-            // Check if 'modules' exists and is an array
-            if (Array.isArray(lectureData['modules'])) {
-              // Extract moduleCode from each module in the array
-              this.tableData = lectureData['modules'].map((module: any) => ({
-                moduleCode: module.moduleCode
-              }));
-            } else {
-              console.error('modules is not an array or does not exist');
-              this.tableData = [];
-            }
-  
-            console.log('Processed moduleCodes:', this.tableData);
-            this.updateTableSelection();
-          } else {
-            console.log('Document exists but is empty for staff number:', staffNumber);
-            this.tableData = [];
-          }
-        },
-        error => {
-          console.error('Error in assignedLectures subscription:', error);
-          this.tableData = [];
-        }
-      );
-  
-    } catch (error) {
-      console.error('Error in getData:', error);
-      this.tableData = [];
-    }
-  }
-  
+  }*/
 
-  
-  
   gotoQRscan(moduleCode: string) {
     this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
   }
@@ -554,5 +589,4 @@ export class LecturePage implements OnInit {
   gotoProfile() {
     this.router.navigate(['profile']);
   }
-
-}
+}     

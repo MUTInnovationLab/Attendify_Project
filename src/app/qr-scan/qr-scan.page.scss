@@ -1,3 +1,12 @@
+ion-toolbar {
+  --background: #EECC8C;
+}
+.back-button {
+  font-size: 24px;
+  color: #4A3500;
+  margin-left: 8px;
+  cursor: pointer;
+}
 .qr-code-content {
   --background: #FFF5E6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
