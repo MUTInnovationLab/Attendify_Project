@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Router } from '@angular/router';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { FacultyDepartmentService } from '../services/faculty-department.service'; 
 
 @Component({
   selector: 'app-admin',
@@ -17,7 +18,12 @@ export class AdminPage implements OnInit {
   staffNumber: string = '';
   email: string = '';
   position: string = '';
-  department: string = '';
+  // department: string = '';
+  faculties: string[] = [];
+  departments: string[] = [];
+  
+  selectedFaculty: string = '';
+  selectedDepartment: string = '';
 
   constructor(
     private alertController: AlertController,
@@ -27,10 +33,20 @@ export class AdminPage implements OnInit {
     private toastController: ToastController,
     private navCtrl: NavController,
     private firestore: AngularFirestore,
+    private facultyDepartmentService: FacultyDepartmentService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.faculties = this.facultyDepartmentService.getFaculties();
+  }
 
+
+  onFacultyChange(event: any) {
+    const selectedFaculty = event.detail.value;
+    this.departments = this.facultyDepartmentService.getDepartments(selectedFaculty);
+  }
+
+  
   async submitForm() {
     const loader = await this.loadingController.create({
       message: 'Signing up',
@@ -46,7 +62,7 @@ export class AdminPage implements OnInit {
       email: this.email,
       fullName: this.fullName,
       position: this.position,
-      department: this.department,
+      //department: this.department,
     });
     loader.dismiss();
     this.router.navigateByUrl("/login");
