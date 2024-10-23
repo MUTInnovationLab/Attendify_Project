@@ -64,31 +64,54 @@ export class ProfilePage implements OnInit {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('User signed in:', user.email);
-        this.firestore
-          .collection('enrolledModules', ref => ref.where('email', '==', user.email))
+  
+        // Step 1: Fetch the studentNumber from Firestore using user.uid or email
+        this.firestore.collection('students')
+          .doc(user.uid)  // Assuming 'users' collection maps user UID to student data
           .get()
           .subscribe(
-            (querySnapshot) => {
-              if (querySnapshot.empty) {
-                console.log('No user found with this email');
+            (docSnapshot: firebase.firestore.DocumentSnapshot<unknown>) => {
+              if (docSnapshot.exists) {
+                // Assuming the 'studentNumber' is stored in this document
+                const data = docSnapshot.data() as { studentNumber: string };  // Type assertion
+                const studentNumber = data.studentNumber;
+                console.log('Student Number:', studentNumber);
+  
+                // Step 2: Use studentNumber to query the enrolledModules collection
+                this.firestore
+                  .collection('enrolledModules', ref => ref.where('studentNumber', '==', studentNumber))
+                  .get()
+                  .subscribe(
+                    (querySnapshot) => {
+                      if (querySnapshot.empty) {
+                        console.log('No user found with this student number');
+                      } else {
+                        querySnapshot.forEach((doc) => {
+                          this.currentUser = doc.data() as StudentData;
+                          console.log('Current User:', this.currentUser);
+                          this.checkPendingEmailUpdate();
+                        });
+                      }
+                    },
+                    (error) => {
+                      console.error('Error fetching user data:', error);
+                    }
+                  );
               } else {
-                querySnapshot.forEach((doc) => {
-                  this.currentUser = doc.data() as StudentData;
-                  console.log('Current User:', this.currentUser);
-                  this.checkPendingEmailUpdate();
-                });
+                console.log('No user data found in Firestore for this UID');
               }
             },
             (error) => {
-              console.error('Error fetching user data:', error);
+              console.error('Error fetching student number:', error);
             }
           );
+  
       } else {
         console.log('No user is signed in');
       }
     });
   }
-
+  
 
   async editUserInfo() {
     const alert = await this.alertController.create({
@@ -205,7 +228,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateEmailInFirestore(newEmail: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students','assignedLectures'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -292,7 +315,7 @@ export class ProfilePage implements OnInit {
   }
   
   async updateUserInfo(data: any) {
-    const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents', 'allModules'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
     const batch = this.firestore.firestore.batch();
   
     for (const collectionName of collectionsToUpdate) {
@@ -310,7 +333,7 @@ export class ProfilePage implements OnInit {
         };
   
         // If it's the enrolledModules collection, handle it differently
-        if (collectionName !== 'registeredStudents') {
+        if (collectionName !== 'students') {
           const currentData = doc.data() as StudentData;
           if (currentData.moduleCode) {
             updatedData.moduleCode = currentData.moduleCode;
@@ -321,35 +344,40 @@ export class ProfilePage implements OnInit {
       });
     }
   
-    // Update in allModules collection for each module the student is enrolled in
-    if (this.currentUser.moduleCode) {
-      for (const moduleCode of this.currentUser.moduleCode) {
-        const moduleRef = this.firestore.collection('allModules').doc(moduleCode);
-        const studentsRef = moduleRef.collection(moduleCode);
-  
-        const studentQuerySnapshot = await studentsRef.ref.where('email', '==', this.currentUser.email).get();
-        
-        if (!studentQuerySnapshot.empty) {
-          studentQuerySnapshot.docs.forEach((doc) => {
-            batch.update(doc.ref, {
-              name: data.name,
-              surname: data.surname,
-              studentNumber: data.studentNumber,
-              email: data.email // Update the email field in modules
-            });
-          });
-        }
-      }
+  // Update in allModules collection for each module the student is enrolled in
+if (this.currentUser.moduleCode) {
+  for (const moduleCode of this.currentUser.moduleCode) {
+    const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
+    const studentsRef = moduleRef.collection(moduleCode);
+
+    // Query using studentNumber instead of email
+    const studentQuerySnapshot = await studentsRef.ref
+      .where('studentNumber', '==', this.currentUser.studentNumber)
+      .get();
+    
+    if (!studentQuerySnapshot.empty) {
+      studentQuerySnapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, {
+          name: data.name,
+          surname: data.surname,
+          studentNumber: data.studentNumber, // Update studentNumber in all modules if changed
+          email: data.email // Update the email field in modules (optional, if email changed)
+        });
+      });
     }
-  
-    // Commit the batch
-    await batch.commit();
-  
-    // Update local user object
-    this.currentUser = { ...this.currentUser, ...data };
-    console.log('User information updated successfully in Firestore');
   }
-  
+}
+
+// Commit the batch
+await batch.commit();
+
+// Update local user object
+this.currentUser = { ...this.currentUser, ...data };
+console.log('User information updated successfully in Firestore');
+
+  }
+
+
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
