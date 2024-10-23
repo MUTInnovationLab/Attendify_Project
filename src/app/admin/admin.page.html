@@ -5,58 +5,144 @@
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="custom-title"></ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">
-        <ion-icon name="close-outline" class="close-icon"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <form (ngSubmit)="submitForm()" class="form">
-    <p class="title">Attendify</p>
-    <p class="message">Add Lecturer to Attendify app</p>
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <div class="dashboard-container">
+    <div class="dashboard-cards">
+      <!-- Lecturer Card -->
+      <div class="dashboard-card" (click)="openLecturerModal()">
+        <ion-icon name="person-add-outline" class="card-icon"></ion-icon>
+        <h2>Add Lecturer</h2>
+        <p>Add new lecturers to the system</p>
+      </div>
 
-    <div class="flex">
-      <label>
-        <input required="" placeholder="" type="text" class="input" [(ngModel)]="fullName" name="fullName">
-        <span>Full Name</span>
-      </label>
-
-      <label>
-        <input required="" placeholder="" type="text" class="input" [(ngModel)]="staffNumber" name="staffNumber">
-        <span>Staff Number</span>
-      </label>
+      <!-- Module Card -->
+      <div class="dashboard-card" (click)="openModuleModal()">
+        <ion-icon name="book-outline" class="card-icon"></ion-icon>
+        <h2>Add Module</h2>
+        <p>Add new modules to departments</p>
+      </div>
     </div>
+  </div>
 
-    <label>
-      <input required="" placeholder="" type="email" class="input" [(ngModel)]="email" name="email">
-      <span>Email</span>
-    </label>
+  
+  <!-- Lecturer Modal -->
+  <ion-modal [isOpen]="isLecturerModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="closeLecturerModal()">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-title>Add Lecturer</ion-title>
+        </ion-toolbar>
+      </ion-header>
 
-    <label>
-      <input required="" placeholder="" type="text" class="input" [(ngModel)]="position" name="position">
-      <span>Position</span>
-    </label>
+      <ion-content class="modal-content">
+        <form (ngSubmit)="submitForm()" class="form">
+          <p class="title">Attendify</p>
+          <p class="message">Add Lecturer to Attendify app</p>
 
-    <!-- Faculty Dropdown -->
-    <label>
-      <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange($event)" name="faculty" interface="popover">
-        <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{ faculty }}</ion-select-option>
-      </ion-select>
-      <span>Faculty</span>
-    </label>
+          <div class="flex">
+            <label class="form-label">
+              <input required placeholder="" type="text" class="input" [(ngModel)]="fullName" name="fullName">
+              <span>Full Name</span>
+            </label>
 
-    <!-- Department Dropdown (Populated based on selected Faculty) -->
-    <label>
-      <ion-select [(ngModel)]="selectedDepartment" name="department" interface="popover">
-        <ion-select-option *ngFor="let department of departments" [value]="department">{{ department }}</ion-select-option>
-      </ion-select>
-      <span>Department</span>
-    </label>
+            <label class="form-label">
+              <input required placeholder="" type="text" class="input" [(ngModel)]="staffNumber" name="staffNumber">
+              <span>Staff Number</span>
+            </label>
+          </div>
 
-    <button type="submit" class="submit">Submit</button>
-  </form>
+          <label class="form-label">
+            <input required placeholder="" type="email" class="input" [(ngModel)]="email" name="email">
+            <span>Email</span>
+          </label>
+
+          <label class="form-label">
+            <input required placeholder="" type="text" class="input" [(ngModel)]="position" name="position">
+            <span>Position</span>
+          </label>
+
+          <div class="select-container">
+            <label class="select-label">Faculty</label>
+            <ion-select 
+              [(ngModel)]="selectedFaculty" 
+              (ionChange)="onFacultyChange($event)" 
+              name="faculty" 
+              interface="popover" 
+              class="custom-select"
+              placeholder="Select Faculty">
+              <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{ faculty }}</ion-select-option>
+            </ion-select>
+          </div>
+      
+          <div class="select-container">
+            <label class="select-label">Department</label>
+            <ion-select 
+              [(ngModel)]="selectedDepartment" 
+              name="department" 
+              interface="popover" 
+              class="custom-select"
+              placeholder="Select Department">
+              <ion-select-option *ngFor="let department of departments" [value]="department">{{ department }}</ion-select-option>
+            </ion-select>
+          </div>
+
+          <button type="submit" class="submit">Submit</button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Module Modal -->
+  <ion-modal [isOpen]="isModuleModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="closeModuleModal()">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-title>Add Module</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="modal-content">
+        <form class="module-form">
+          <div class="input-wrapper">
+            <input type="text" name="contact_nom" [(ngModel)]="moduleName" id="contact_nom">
+            <label for="contact_nom">MODULE</label>
+          </div>
+          <div class="input-wrapper">
+            <input type="text" name="contact_email" [(ngModel)]="moduleCode" id="contact_email">
+            <label for="contact_email">CODE</label>
+          </div>
+          <div class="input-wrapper">
+            <input type="text" name="contact_sujet" [(ngModel)]="moduleLevel" id="contact_sujet">
+            <label for="contact_sujet">LEVEL</label>
+          </div>
+          <div class="input-wrapper">
+            <input type="text" name="contact_dept" [(ngModel)]="department" id="contact_dept">
+            <label for="contact_dept">DEPARTMENT</label>
+          </div>
+          <!-- <div class="input-wrapper">
+            <input type="text" [value]="department" >
+            <label>DEPARTMENT</label>
+          </div> -->
+          
+          <div class="submit-wrapper">
+            <button type="submit" (click)="addModule()">SUBMIT</button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

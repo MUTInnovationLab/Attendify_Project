@@ -1,58 +1,213 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Add Module</ion-title>
+    <ion-title>
+      <ion-icon name="book-outline"></ion-icon>
+      <span>Add Module</span>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card>
+<ion-content class="ion-padding">
+  <ion-card class="module-form-card">
     <ion-card-header>
-      <ion-card-title>Add New Module</ion-card-title>
+      <ion-card-title>
+        <ion-icon name="add-circle-outline"></ion-icon>
+        Add New Module
+      </ion-card-title>
     </ion-card-header>
 
     <ion-card-content>
       <!-- Faculty Dropdown -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="business-outline" slot="start"></ion-icon>
         <ion-label>Faculty Name</ion-label>
-        <ion-select [(ngModel)]="facultyName" (ionChange)="onFacultyChange()" placeholder="Select Faculty">
+        <ion-select [(ngModel)]="facultyName" (ionChange)="onFacultyChange()" placeholder="Select Faculty" interface="action-sheet">
           <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{ faculty }}</ion-select-option>
         </ion-select>
       </ion-item>
 
       <!-- Department Dropdown -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="git-branch-outline" slot="start"></ion-icon>
         <ion-label>Department Name</ion-label>
-        <ion-select [(ngModel)]="departmentName" placeholder="Select Department">
+        <ion-select [(ngModel)]="departmentName" placeholder="Select Department" interface="action-sheet">
           <ion-select-option *ngFor="let department of departments" [value]="department">{{ department }}</ion-select-option>
         </ion-select>
       </ion-item>
 
       <!-- Stream Input -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="trail-sign-outline" slot="start"></ion-icon>
         <ion-label position="floating">Stream</ion-label>
-        <ion-input [(ngModel)]="streamName" placeholder="Enter Stream"></ion-input>
+        <ion-input [(ngModel)]="streamName" placeholder="Enter Stream" class="custom-input"></ion-input>
       </ion-item>
 
       <!-- Module Name Input -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
         <ion-label position="floating">Module Name</ion-label>
-        <ion-input [(ngModel)]="moduleName" placeholder="Enter Module Name"></ion-input>
+        <ion-input [(ngModel)]="moduleName" placeholder="Enter Module Name" class="custom-input"></ion-input>
       </ion-item>
 
       <!-- Credits Input -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="star-outline" slot="start"></ion-icon>
         <ion-label position="floating">Credits</ion-label>
-        <ion-input [(ngModel)]="credits" type="number" placeholder="Enter Module Credits"></ion-input>
+        <ion-input [(ngModel)]="credits" type="number" placeholder="Enter Module Credits" class="custom-input"></ion-input>
       </ion-item>
 
       <!-- Year Input -->
-      <ion-item>
+      <ion-item class="form-item">
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
         <ion-label position="floating">Year</ion-label>
-        <ion-input [(ngModel)]="year" placeholder="Enter Year"></ion-input>
+        <ion-input [(ngModel)]="year" placeholder="Enter Year" class="custom-input"></ion-input>
       </ion-item>
 
       <!-- Add Module Button -->
-      <ion-button expand="full" (click)="addModule()">Add Module</ion-button>
+      <ion-button expand="full" class="submit-button">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add Module
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>
+
+<style>
+/* Header styling */
+ion-header ion-toolbar {
+  --background: #EECC8C;
+}
+
+ion-toolbar ion-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4A3500;
+  font-weight: 600;
+}
+
+/* Content styling */
+ion-content {
+  --background: #FFF5E6;
+}
+
+.module-form-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  margin: 16px;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
+}
+
+/* Card header styling */
+ion-card-header {
+  background: #FFE0B2;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+ion-card-title {
+  color: #4A3500;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form items styling */
+.form-item {
+  --background: transparent;
+  --border-color: #FFE0B2;
+  margin: 16px 0;
+  border-radius: 8px;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.form-item ion-icon[slot="start"] {
+  color: #FF9800;
+  font-size: 1.2rem;
+  margin-right: 12px;
+  margin-inline-end: 12px;
+}
+
+/* Label styling */
+.form-item ion-label {
+  color: #4A3500;
+  font-weight: 500;
+}
+
+ion-item.form-item ion-label[position="floating"] {
+  margin-left: 36px;  /* Adjusted to align with input text */
+}
+
+/* Input styling */
+.custom-input {
+  --padding-start: 36px;  /* Aligns with the floating label */
+  --padding-top: 8px;     /* Space between label and input text */
+  --padding-bottom: 8px;  /* Space below input text */
+  margin-top: 8px;        /* Additional space when label floats */
+}
+
+ion-input, ion-select {
+  --color: #5D4037;
+  --placeholder-color: #8D6E63;
+  --placeholder-opacity: 0.7;
+}
+
+/* Select specific styling */
+ion-select {
+  padding-left: 36px;     /* Aligns with input fields */
+  padding-top: 8px;       /* Matches input padding */
+  padding-bottom: 8px;    /* Matches input padding */
+}
+
+/* Button styling */
+.submit-button {
+  margin-top: 24px;
+  --background: #FF9800;
+  --background-hover: #F57C00;
+  --background-activated: #FF9800;
+  --border-radius: 8px;
+  font-weight: 600;
+  height: 48px;  /* Increased touch target */
+}
+
+/* Select styling */
+ion-select::part(text) {
+  color: #5D4037;
+}
+
+ion-select::part(icon) {
+  color: #FF9800;
+  opacity: 1;
+}
+
+/* Hover states */
+.form-item:hover {
+  --background: #FFF8E1;
+}
+
+/* Focus states */
+.form-item.item-has-focus {
+  --highlight-background: #FF9800;
+}
+
+/* Error states - if needed */
+.form-item.ion-invalid.ion-touched {
+  --border-color: #FF5722;
+}
+
+/* Floating label animation */
+.form-item.item-has-focus ion-label[position="floating"],
+.form-item.item-has-value ion-label[position="floating"] {
+  transform: translateY(-12px) scale(0.85);  /* Adjusted for better spacing */
+}
+
+/* Placeholder transition */
+.form-item.item-has-focus .custom-input::placeholder,
+.form-item.item-has-value .custom-input::placeholder {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+</style>

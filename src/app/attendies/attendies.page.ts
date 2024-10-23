@@ -15,11 +15,13 @@ interface Module {
   userEmail: string;
   place?: string;
   selected?: boolean;
+  scannerOpenCount: number;
+  
 }
 
-interface AttendanceData {
-  [key: string]: string[]; // scanDate as key and array of emails as value
-}
+// interface AttendanceData {
+//   [key: string]: string[]; // scanDate as key and array of emails as value
+// }
 
 interface AttendedStudent {
   email: string;
@@ -45,12 +47,12 @@ interface GroupedStudent {
   }[];
 }
 
-interface Student {
-  email: string;
-  name: string;
-  studentNumber: string;
-  surname: string;
-}
+// interface Student {
+//   email: string;
+//   name: string;
+//   studentNumber: string;
+//   surname: string;
+// }
 
 interface GroupedByDate {
   date: string;
@@ -86,9 +88,26 @@ interface AttendanceRecord {
   }[];
 }
 
+// interface ModuleData {
+//   enrolledStudents?: string[];
+//   attendedStudents?: string[];
+// }
+
+interface LecturerData {
+  staffNumber: string;
+  email: string;
+  // Add other properties as needed
+}
+
 interface ModuleData {
-  enrolledStudents?: string[];
-  attendedStudents?: string[];
+  moduleCode: string;
+  moduleLevel: string;
+  department: string;
+  scannerOpenCount: number;
+}
+
+interface AssignedLectures {
+  modules: ModuleData[]; // Assuming modules is an array of ModuleData
 }
 
 @Component({
@@ -135,6 +154,28 @@ totalPages: number = 1;
     private afAuth: AngularFireAuth
   ) {}
 
+  // async ngOnInit() {
+  //   try {
+  //     const user = await this.afAuth.currentUser;
+  //     if (user) {
+  //       this.currentLecturerEmail = user.email || '';
+        
+  //       // Fetch modules associated with the current lecturer
+  //       await this.fetchModulesForLecturer();
+        
+  //       // Fetch attendance data for modules
+  //       await this.fetchAttendedStudents();
+
+  //       // Fetch pending requests for modules
+  //       for (const module of this.modules) {
+  //         await this.fetchPendingRequests(module.moduleCode);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching lecturer details:', error);
+  //   }
+  // }
+
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
@@ -143,103 +184,120 @@ totalPages: number = 1;
         
         // Fetch modules associated with the current lecturer
         await this.fetchModulesForLecturer();
-        
+  
         // Fetch attendance data for modules
         await this.fetchAttendedStudents();
-
+  
         // Fetch pending requests for modules
         for (const module of this.modules) {
-          await this.fetchPendingRequests(module.moduleCode, module.moduleName);
+          await this.fetchPendingRequests(module.moduleCode);
         }
       }
     } catch (error) {
       console.error('Error fetching lecturer details:', error);
     }
   }
+  
+// Fetch modules for lecturer
+async fetchModulesForLecturer() {
+  try {
+    // Step 1: Fetch lecturer details using email
+    const lecturerDoc = await this.firestore.collection<LecturerData>('staff', ref =>
+      ref.where('email', '==', this.currentLecturerEmail)
+    ).get().toPromise();
 
-  async fetchModulesForLecturer() {
-    try {
-      const lecturerDoc = await this.firestore.collection('registered staff', ref =>
-        ref.where('email', '==', this.currentLecturerEmail)
-      ).get().toPromise();
-  
-      if (lecturerDoc && !lecturerDoc.empty) {
-        const lecturerData = lecturerDoc.docs[0].data();
-        console.log('Lecturer data:', lecturerData);
-  
-        const lecturerModules = await this.firestore.collection('modules', ref =>
-          ref.where('userEmail', '==', this.currentLecturerEmail)
-        ).get().toPromise();
-  
-        if (lecturerModules && !lecturerModules.empty) {
-          const lecturerDetails = lecturerModules.docs.map(doc => doc.data());
-  
-          // Log module details
-          console.log('Lecturer Modules:', lecturerDetails);
-  
-          lecturerDetails.forEach((lecturer: any) => {
-            this.moduleName = lecturer.moduleName.trim(); 
-            console.log('Set Module Name:', this.moduleName);
-            this.fetchPendingRequests(lecturer.moduleCode, lecturer.moduleName);
+    if (lecturerDoc && !lecturerDoc.empty) {
+      const lecturerData = lecturerDoc.docs[0].data();
+      const staffNumber = lecturerData.staffNumber; // Get staffNumber from lecturer data
+      console.log('Lecturer data:', lecturerData);
+      console.log('Staff Number:', staffNumber);
+
+      // Step 2: Fetch modules assigned to the lecturer using staffNumber as the document ID
+      const lecturerModulesDoc = await this.firestore.collection('assignedLectures').doc(staffNumber).get().toPromise();
+
+      // Check if lecturerModulesDoc is defined and exists
+      if (lecturerModulesDoc && lecturerModulesDoc.exists) {
+        const lecturerDetails = lecturerModulesDoc.data() as AssignedLectures; // Cast to AssignedLectures
+        console.log('Lecturer Modules:', lecturerDetails);
+
+        // Check if modules exist and iterate over them
+        if (lecturerDetails && lecturerDetails.modules) {
+          // Clear existing modules before fetching new ones
+          this.modules = [];
+          lecturerDetails.modules.forEach((module: ModuleData) => {
+            // Add each module to the modules array
+            this.modules.push({
+              moduleCode: module.moduleCode,
+              moduleLevel: module.moduleLevel,
+              scannerOpenCount: module.scannerOpenCount,
+              id: '',
+              moduleName: '',
+              userEmail: ''
+            });
+            console.log('Added Module:', module.moduleCode);
           });
         } else {
           console.log('No modules found for the lecturer.');
         }
       } else {
-        console.log('Lecturer details not found.');
+        console.log('No assigned lectures found for the lecturer with staffNumber:', staffNumber);
       }
-    } catch (error) {
-      console.error('Error fetching modules for lecturer:', error);
+    } else {
+      console.log('Lecturer details not found.');
     }
+  } catch (error) {
+    console.error('Error fetching modules for lecturer:', error);
   }
+}
 
 
-  
-  async fetchAttendedStudents() {
-    try {
-      const attendedCollection = await this.firestore.collection('Attended').get().toPromise();
-      if (attendedCollection) {
-        const records: AttendanceRecord[] = [];
-        const modulesSet = new Set<string>();
+// Fetch attended students
+async fetchAttendedStudents() {
+  try {
+    // Check if modules exist
+    if (this.modules.length === 0) {
+      console.log('No modules found for the lecturer.');
+      return;
+    }
 
-        attendedCollection.forEach(doc => {
-          const moduleCode = doc.id;
-          modulesSet.add(moduleCode);
-          const data = doc.data() as { [key: string]: any };
+    const records: AttendanceRecord[] = [];
 
-          Object.keys(data).forEach(date => {
-            const attendances = data[date];
-            records.push({
-              date,
-              module: { moduleCode },
-              attendances: attendances.map((a: any) => ({
-                scanTime: a.scanTime,
-                studentNumber: a.studentNumber
-              }))
-            });
+    // Iterate through each module to fetch attendance
+    for (const module of this.modules) {
+      const attendedDoc = await this.firestore.collection('Attended').doc(module.moduleCode).get().toPromise();
+
+      // Check if the document exists and handle the possibility of undefined
+      if (attendedDoc && attendedDoc.exists) {
+        const data = attendedDoc.data() as { [key: string]: any };
+
+        // Iterate over dates and map attendance data
+        Object.keys(data).forEach(date => {
+          const attendances = data[date];
+          records.push({
+            date,
+            module: { moduleCode: module.moduleCode },
+            attendances: attendances.map((a: any) => ({
+              scanTime: a.scanTime,
+              studentNumber: a.studentNumber
+            }))
           });
         });
-
-        this.attendanceRecords = records.sort((a, b) => b.date.localeCompare(a.date));
-        this.dates = [...new Set(records.map(r => r.date))].sort((a, b) => b.localeCompare(a));
-        
-        // Update this part to create proper Module objects
-        this.modules = [...modulesSet].map(moduleCode => ({
-          id: moduleCode,
-          moduleCode,
-          moduleLevel: '', 
-          moduleName: '', 
-          userEmail: this.currentLecturerEmail || ''
-        })).sort((a, b) => a.moduleCode.localeCompare(b.moduleCode));
-        
-        console.log('Attendance records:', this.attendanceRecords);
-        console.log('Dates:', this.dates);
-        console.log('Modules:', this.modules);
+      } else {
+        console.log(`No attendance records found for module: ${module.moduleCode}`);
       }
-    } catch (error) {
-      console.error('Error fetching attendance data:', error);
     }
+
+    // Sort attendance records by date
+    this.attendanceRecords = records.sort((a, b) => b.date.localeCompare(a.date));
+    this.dates = [...new Set(records.map(r => r.date))].sort((a, b) => b.localeCompare(a));
+
+    console.log('Attendance records:', this.attendanceRecords);
+    console.log('Dates:', this.dates);
+  } catch (error) {
+    console.error('Error fetching attendance data:', error);
   }
+}
+  
 
   selectDate(date: string) {
     this.selectedDate = this.selectedDate === date ? null : date;
@@ -309,46 +367,47 @@ totalPages: number = 1;
 
 
 
-  async fetchPendingRequests(moduleCode: string, moduleName: string) {
+  async fetchPendingRequests(moduleCode: string) {
     if (!moduleCode) {
-      console.warn('Module code is missing.');
-      return;
+        console.warn('Module code is missing.');
+        return;
     }
-  
+
     try {
-      console.log(`Fetching pending requests for module: ${moduleCode}`);
-  
-      const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules').doc(moduleCode).get().toPromise();
-  
-      if (enrolledModulesSnapshot && enrolledModulesSnapshot.exists) {
-        const enrolledData = enrolledModulesSnapshot.data() as { Enrolled?: any[] };
-        const pendingRequests = enrolledData.Enrolled?.filter(student => student.status === 'pending') || [];
-  
-        const newRequests = pendingRequests.map(student => ({
-          id: student.studentNumber,
-          studentNumber: student.studentNumber,
-          status: student.status,
-          moduleCode: moduleCode,
-          email: student.email || '',
-          name: student.name || '',
-          surname: student.surname || ''
-        }));
-  
-        // Concatenate new requests with existing ones
-        this.requestedInvites = [...this.requestedInvites, ...newRequests];
-  
-        console.log('Updated pending requests data:', this.requestedInvites);
-      } else {
-        console.log(`No enrolled students found for module ${moduleCode}.`);
-      }
-  
+        console.log(`Fetching pending requests for module: ${moduleCode}`);
+
+        const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules').doc(moduleCode).get().toPromise();
+
+        if (enrolledModulesSnapshot && enrolledModulesSnapshot.exists) {
+            const enrolledData = enrolledModulesSnapshot.data() as { Enrolled?: any[] };
+            const pendingRequests = enrolledData.Enrolled?.filter(student => student.status === 'pending') || [];
+            console.log('Pending Requests:', pendingRequests); // Log pending requests
+
+            const newRequests = pendingRequests.map(student => ({
+                id: student.studentNumber,
+                studentNumber: student.studentNumber,
+                status: student.status,
+                moduleCode: moduleCode,
+                // email: student.email || '',
+                // name: student.name || '',
+                // surname: student.surname || ''
+            }));
+
+            // Concatenate new requests with existing ones
+            this.requestedInvites = [...this.requestedInvites, ...newRequests];
+
+            console.log('Updated pending requests data:', this.requestedInvites); // Log final invites
+        } else {
+            console.log(`No enrolled students found for module ${moduleCode}.`);
+        }
     } catch (error) {
-      console.error('Error fetching pending requests data:', error);
+        console.error('Error fetching pending requests data:', error);
     }
-  
-    // Always set showRequestsTable to true after fetching, even if there are no pending requests
+
+    // Always set showRequestsTable to true after fetching
     this.showRequestsTable = true;
-  }
+}
+
   toggleTable() {
     this.showTable = !this.showTable;
   }
@@ -393,7 +452,7 @@ totalPages: number = 1;
         }
 
         // Refresh the pending requests
-        await this.fetchPendingRequests(request.moduleCode, '');
+        await this.fetchPendingRequests(request.moduleCode);
       } else {
         await this.presentToast('Module not found.', 'danger');
       }
