@@ -3,19 +3,15 @@ import { ModalController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { ToastController } from '@ionic/angular';
-//import * as firebase from 'firebase/compat';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 
-interface Module {
-  id: string;
-  moduleCode: string;
-  moduleLevel: string;
-  moduleName: string;
-  userEmail: string;
-  place?: string;
-  selected?: boolean;
-}
+// interface Module {
+//   moduleCode: string;
+//   moduleLevel: string;
+//   department: string;
+//   staffNumber?: string;  // Add staffNumber to the Module interface
+// }
 
 interface Student {
   email: string;
@@ -23,13 +19,24 @@ interface Student {
   surname: string;
   studentNumber: string;
   moduleCode: string;
-  moduleName: string;
   status: string;
 }
 
-// Define interfaces for your data
+// Define types for your module and assignedLectures
+interface Module {
+  department: string;
+  moduleCode: string;
+  moduleLevel: string;
+  scannerOpenCount: number;
+  staffNumber?: string; 
+}
+
+interface AssignedLectures {
+  modules: Module[];
+}
+
 export interface Lecturer {
-  id?: string; // Firestore document ID
+  id?: string;
   fullName: string;
   email: string;
   position: string;
@@ -37,18 +44,19 @@ export interface Lecturer {
   department: string;
 }
 
-
 @Component({
   selector: 'app-view-modal',
   templateUrl: './view-modal.component.html',
   styleUrls: ['./view-modal.component.scss'],
 })
 export class ViewModalComponent implements OnInit {
-  availableModules: Module[] = [];
-  filteredModules: Module[] = [];
+  // availableModules: Module[] = [];
+  // filteredModules: Module[] = [];
   searchQuery: string = '';
   selectedModules: Module[] = [];
   currentStudent: Student | null = null;
+  availableModules: any[] = [];
+  filteredModules: any[] = [];
 
   constructor(
     private modalController: ModalController,
@@ -71,25 +79,43 @@ export class ViewModalComponent implements OnInit {
   async fetchAvailableModules() {
     console.log('Fetching available modules...');
     try {
-      const modulesSnapshot = await this.firestore.collection('modules').ref.get();
+      const modulesSnapshot = await this.firestore.collection('assignedLectures').ref.get();
       if (modulesSnapshot.empty) {
         console.log('No modules found.');
-        this.presentToast('No modules available.', 'warning');
+        this.presentToast('No modules available.', 'warning'); // Check this
         return;
       }
-      
-      this.availableModules = modulesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...(doc.data() as Omit<Module, 'id'>),
-        selected: false
-      }));
+
+      this.availableModules = await Promise.all(
+        modulesSnapshot.docs.map((doc) => {
+          const data = doc.data() as AssignedLectures;
+          if (!data || !data.modules) {
+            console.error('Document data is missing modules:', doc.id, data);
+            this.presentToast(`Document ${doc.id} has no modules`, 'warning'); // Check this
+            return [];
+          }
+          const staffNumber = doc.id;
+          return data.modules.map((module: Module) => ({
+            ...module,
+            staffNumber,
+          }));
+        })
+      ).then((modules) => modules.flat());
+
       this.filteredModules = [...this.availableModules];
       console.log('Modules fetched:', this.availableModules);
     } catch (error) {
-      console.error('Error fetching modules:', error);
-      this.presentToast('Failed to load modules. Please try again.', 'danger');
+      if (error instanceof Error) {
+        console.error('Error fetching modules:', error.message);
+        this.presentToast('Failed to load modules. Please try again.', 'danger');
+      } else {
+        console.error('Unexpected error:', error);
+        this.presentToast('An unexpected error occurred.', 'danger');
+      }
     }
   }
+
+  
 
   async fetchCurrentStudent() {
     console.log('Fetching current student information...');
@@ -101,7 +127,7 @@ export class ViewModalComponent implements OnInit {
 
         if (userEmail) {
           const studentQuerySnapshot = await this.firestore
-            .collection('registeredStudents', ref => ref.where('email', '==', userEmail))
+            .collection('students', ref => ref.where('email', '==', userEmail))
             .get()
             .toPromise();
 
@@ -137,14 +163,13 @@ export class ViewModalComponent implements OnInit {
       this.filteredModules = [...this.availableModules];
     } else {
       this.filteredModules = this.availableModules.filter(module =>
-        module.moduleName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         module.moduleCode.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
   }
 
   toggleModuleSelection(module: Module) {
-    const index = this.selectedModules.findIndex(m => m.id === module.id);
+    const index = this.selectedModules.findIndex(m => m.moduleCode === module.moduleCode);
     if (index > -1) {
       this.selectedModules.splice(index, 1);
     } else {
@@ -153,68 +178,57 @@ export class ViewModalComponent implements OnInit {
   }
 
   isModuleSelected(module: Module): boolean {
-    return this.selectedModules.some(m => m.id === module.id);
+    return this.selectedModules.some(m => m.moduleCode === module.moduleCode);
   }
 
   cancelSelection(module: Module) {
-    const index = this.selectedModules.findIndex(m => m.id === module.id);
+    const index = this.selectedModules.findIndex(m => m.moduleCode === module.moduleCode);
     if (index > -1) {
       this.selectedModules.splice(index, 1);
     }
   }
 
+  async addStudentToModule(module: Module) {
+    if (!this.currentStudent) {
+      this.presentToast('Student information not available.', 'danger');
+      return;
+    }
 
+    try {
+      const batch = firebase.firestore().batch();
 
-async addStudentToModule(module: Module) {
-  if (!this.currentStudent) {
-    this.presentToast('Student information not available.', 'danger');
-    return;
+      // References to both collections
+      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
+      const moduleStudentsRef = enrolledModulesRef.collection('students');
+
+      // Update the enrolledModules collection with "pending" status
+      batch.set(enrolledModulesRef, {
+        Enrolled: firebase.firestore.FieldValue.arrayUnion({
+          status: "pending",
+          studentNumber: this.currentStudent.studentNumber
+        })
+      }, { merge: true });
+
+      // Add the student to the module in the students collection with "pending" status
+      const studentDocRef = moduleStudentsRef.doc(this.currentStudent.studentNumber);
+      batch.set(studentDocRef, {
+        email: this.currentStudent.email,
+        name: this.currentStudent.name,
+        surname: this.currentStudent.surname,
+        studentNumber: this.currentStudent.studentNumber,
+        moduleCode: module.moduleCode,
+        status: "pending"  // Pending status until confirmed
+      });
+
+      // Commit the batch operation
+      await batch.commit();
+
+      this.presentToast(`Successfully requested to join ${module.moduleCode}. Pending approval.`, 'success');
+    } catch (error) {
+      console.error('Error requesting to join module:', error);
+      this.presentToast(`Failed to request joining ${module.moduleCode}.`, 'danger');
+    }
   }
-
-  try {
-    const batch = firebase.firestore().batch();
-    
-    // References to both collections
-    const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
-    const allModulesRef = firebase.firestore().collection('allModules').doc(module.moduleCode);
-    const moduleStudentsRef = allModulesRef.collection(module.moduleName);
-    
-    // Update the enrolledModules collection with "pending" status
-    batch.set(enrolledModulesRef, {
-      Enrolled: firebase.firestore.FieldValue.arrayUnion({
-        status: "pending",
-        studentNumber: this.currentStudent.studentNumber
-      })
-    }, { merge: true });
-    
-    // Add the student to the module in the allModules collection with "pending" status
-    const studentDocRef = moduleStudentsRef.doc(this.currentStudent.studentNumber);
-    batch.set(studentDocRef, {
-      email: this.currentStudent.email,
-      name: this.currentStudent.name,
-      surname: this.currentStudent.surname,
-      studentNumber: this.currentStudent.studentNumber,
-      moduleCode: module.moduleCode,
-      status: "pending"  // Pending status until confirmed
-    });
-
-    // Commit the batch operation
-    await batch.commit();
-    
-    this.presentToast(`Successfully requested to join ${module.moduleName}. Pending approval.`, 'success');
-  } catch (error) {
-    console.error('Error requesting to join module:', error);
-    this.presentToast(`Failed to request joining ${module.moduleName}.`, 'danger');
-  }
-}
-
-  
-  
-
-
-
-
-
 
   async submitSelection() {
     if (this.selectedModules.length === 0) {
@@ -244,5 +258,4 @@ async addStudentToModule(module: Module) {
       console.error('Error dismissing modal:', err);
     });
   }
-  
 }

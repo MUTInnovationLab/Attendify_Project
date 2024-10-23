@@ -1,98 +1,203 @@
+/* Header styling */
 ion-toolbar {
-  --background: #EECC8C; 
+  --background: #EECC8C;
 }
-.close-icon {
+
+ion-title {
   color: #4A3500;
-  cursor: pointer;
-  position: left;
+  font-weight: 600;
 }
-ion-content {
-    --ion-background-color: #FFF5E6;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    font-family: 'Poppins', sans-serif;
-  
-    .form {
-      width: 90%;
-      max-width: 500px;
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin: 100px auto; 
-  
-      .title {
-        font-size: 24px;
-        font-weight: 600;
-        color: #ff9800;
-        text-align: center;
-        margin-bottom: 10px;
-      }
-  
-      .message {
-        font-size: 14px;
-        color: #666666;
-        text-align: center;
-        margin-bottom: 30px;
-      }
-  
-      .flex {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-  
-      label {
-        display: block;
-        position: relative;
-        margin-bottom: 20px;
-  
-        .input {
-          width: 100%;
-          padding: 15px 20px;
-          border: 1px solid #e0e0e0;
-          border-radius: 5px;
-          font-size: 16px;
-          color: #333333;
-          transition: border-color 0.3s ease;
-  
-          &:focus {
-            outline: none;
-            border-color: #ff9800;
-            box-shadow: 0 0 5px rgba(142, 36, 170, 0.2);
-          }
-        }
-  
-        span {
-          position: absolute;
-          top: -10px;
-          left: 15px;
-          background-color: #ffffff;
-          padding: 0 5px;
-          font-size: 14px;
-          color: #ff9800;
-        }
-      }
-  
-      .submit {
-        width: 100%;
-        padding: 15px;
-        background-color: #ff9800;
-        color: #ffffff;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-  
-        &:hover {
-          background-color: #ff9800;
-        }
-      }
-    }
+
+/* Dashboard content */
+.dashboard-content {
+  --background: #FFF5E6;
+  padding: 20px;
+}
+
+/* Container for vertical centering */
+.dashboard-container {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+/* Cards container */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(250px, 300px));
+  gap: 40px;
+  justify-content: center;
+  max-width: 800px;
+  width: 100%;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 600px) {
+  .dashboard-cards {
+    grid-template-columns: minmax(250px, 300px);
+    gap: 20px;
   }
+}
+
+.dashboard-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  border-left: 4px solid #FF9800;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  background-color: #FFF8E1;
+  box-shadow: 0 6px 12px rgba(238, 204, 140, 0.3);
+}
+
+.card-icon {
+  font-size: 48px;
+  color: #FF9800;
+  margin-bottom: 16px;
+}
+
+.dashboard-card h2 {
+  color: #4A3500;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.dashboard-card p {
+  color: #8D6E63;
+  font-size: 0.9rem;
+  margin: 0;
+}
+/* Modal content */
+.modal-content {
+  --background: #FFF5E6;
+}
+
+/* Form styling */
+.form, .module-form {
+  background: #FFFFFF;
+  padding: 24px;
+  border-radius: 12px;
+  margin: 16px;
+  box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
+}
+
+.title {
+  color: #FF6F00;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.message {
+  color: #8D6E63;
+  margin-bottom: 24px;
+}
+
+.form-label, .input-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.input, .input-wrapper input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #EECC8C;
+  border-radius: 6px;
+  background: transparent;
+  margin-top: 6px;
+}
+
+.form-label span, .input-wrapper label {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  color: #8D6E63;
+  font-size: 0.8rem;
+}
+
+.custom-select {
+  width: 100%;
+  --background: #FFFFFF;
+  --border-color: #EECC8C;
+  --border-width: 2px;
+  --border-radius: 6px;
+  --placeholder-color: #8D6E63;
+}
+
+.submit, .submit-wrapper button {
+  background: #FF9800;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  width: 100%;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit:hover, .submit-wrapper button:hover {
+  background: #FF6F00;
+}
+
+.flex {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.select-container {
+  margin: 24px 0;
+  position: relative;
+}
+
+.select-label {
+  display: block;
+  color: #4A3500;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.custom-select {
+  width: 100%;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --background: #FFFFFF;
+  --border-color: #EECC8C;
+  --border-width: 2px;
+  --border-radius: 6px;
+  --placeholder-color: #8D6E63;
+  --placeholder-opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* Style for the select when it's focused */
+.custom-select:focus {
+  --border-color: #FF9800;
+}
+
+/* Style for the select options */
+ion-select-option {
+  --color: #4A3500;
+  font-size: 1rem;
+}
 

@@ -87,6 +87,8 @@ export class DashboardPage {
     this.resetForm();
   }
 
+
+
   async addDeptAdmin() {
     const currentUser = await this.authService.getCurrentUser();
     if (!currentUser) {
@@ -257,6 +259,10 @@ export class DashboardPage {
 
   navigateToEvents() {
     this.navCtrl.navigateForward('/event'); // The path should match your routing setup
+  }
+
+  nabigateToAddModule() {
+    this.navCtrl.navigateForward('/super-analytics'); // The path should match your routing setup
   }
 
   departmentsAnalytics = [
