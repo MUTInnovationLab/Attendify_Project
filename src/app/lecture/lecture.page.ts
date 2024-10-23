@@ -380,66 +380,86 @@ export class LecturePage implements OnInit {
 
 
 
-
   async addModule() {
     if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.department) {
       alert('Please fill in all fields before submitting.');
       return;
     }
-
+  
     const loader = await this.loadingController.create({
       message: 'Submitting...',
       cssClass: 'custom-loader-class',
     });
     await loader.present();
-
+  
     try {
       const user = firebase.auth().currentUser;
-
+  
       if (user && user.email) {
-        const staffNumber = ' ';  // Replace this with logic to get staff number if needed
-
-        const staffDocRef = this.db.collection('assignedLecturers').doc(staffNumber);
-        const staffDoc = await firstValueFrom(staffDocRef.get());
-
+        // First get the staff number from the staff collection
+        const staffSnapshot = await this.db.collection('staff')
+          .ref.where('email', '==', user.email)
+          .get();
+  
+        if (staffSnapshot.empty) {
+          throw new Error('Staff document not found');
+        }
+  
+        const staffDoc = staffSnapshot.docs[0];
+        const staffData = staffDoc.data() as { staffNumber: string };
+        const staffNumber = staffData.staffNumber;
+  
+        if (!staffNumber) {
+          throw new Error('Staff number not found');
+        }
+  
+        // Reference to the assignedLectures document
+        const staffDocRef = this.db.collection('assignedLectures').doc(staffNumber);
+        const staffAssignedDoc = await firstValueFrom(staffDocRef.get());
+  
         const moduleData = {
           moduleName: this.moduleName,
           moduleCode: this.moduleCode,
           moduleLevel: this.moduleLevel,
           userEmail: user.email,
-          department: this.department,  // Use the department fetched from the user's data
-          faculty: this.selectedFaculty // Include faculty when saving module
+          department: this.department,
+          faculty: this.selectedFaculty,
+          scannerOpenCount: 0 // Initialize scanner count
         };
-
-        if (staffDoc.exists) {
+  
+        if (staffAssignedDoc.exists) {
+          // If document exists, add to existing modules array
           await staffDocRef.update({
             modules: firebase.firestore.FieldValue.arrayUnion(moduleData),
           });
         } else {
+          // If document doesn't exist, create new one with modules array
           await staffDocRef.set({
             modules: [moduleData],
           });
         }
-
+  
+        // Clear form fields
         this.moduleName = '';
         this.moduleCode = '';
         this.moduleLevel = '';
+        
         loader.dismiss();
         alert('Module successfully saved');
-        this.getData(user.email); 
+        
+        // Refresh the modules data using the staff number
+        this.getData(staffNumber);
       } else {
         loader.dismiss();
-        alert('User not logged in or staff number is missing.');
+        alert('User not logged in.');
       }
     } catch (error) {
       loader.dismiss();
       console.error('Error saving module:', error);
-      alert('An error occurred while saving the module.');
+      alert('An error occurred while saving the module: ' + 
+            (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
-
-
-
 
 
 
@@ -565,22 +585,6 @@ async deleteModule() {
   viewStudents() {
     this.router.navigate(['/view-students']);
   }
-
- /* getData(userEmail: string) {
-    this.db
-      .collection('assignedLectures', (ref) => ref.where('staffNumber', '==', userEmail))
-      .snapshotChanges()
-      .subscribe((data) => {
-        this.userData = data.map((d) => {
-          const id = d.payload.doc.id;
-          const docData = d.payload.doc.data() as any;
-          return { id, ...docData };
-        });
-        console.log(this.userData);
-        this.tableData = this.userData;
-        this.updateTableSelection();
-      });
-  }*/
 
   gotoQRscan(moduleCode: string) {
     this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });

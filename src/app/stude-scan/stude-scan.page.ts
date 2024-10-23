@@ -22,6 +22,11 @@ interface EnrolledModules {
   // Add any other fields that you expect in this document
 }
 
+interface ModuleData {
+  Enrolled: { studentNumber: string; status: string }[];
+  // Add other properties that your module documents might have
+}
+
 
 
 interface StudentData {
@@ -81,29 +86,49 @@ export class StudeScanPage implements OnInit {
   }
 
   getCurrentUser() {
-    this.auth.onAuthStateChanged((user) => {
+    this.auth.onAuthStateChanged(async (user) => {
       if (user) {
         console.log('User signed in:', user.email);
-        this.firestore
-          .collection('enrolledModules', (ref) =>
-            ref.where('email', '==', user.email)
-          )
+        
+        // First get the student number from students collection using email
+        const studentSnapshot = await this.firestore
+          .collection('students', ref => ref.where('email', '==', user.email))
           .get()
-          .subscribe(
-            (querySnapshot) => {
-              if (querySnapshot.empty) {
-                console.log('No user found with this email');
-              } else {
-                querySnapshot.forEach((doc) => {
-                  this.currentUser = doc.data() as StudentData;
-                  console.log('Current User:', this.currentUser);
-                });
+          .toPromise();
+  
+        if (studentSnapshot && !studentSnapshot.empty) {
+          const studentData = studentSnapshot.docs[0].data() as StudentData; // Cast to StudentData
+          const studentNumber = studentData.studentNumber;
+  
+          // Get all documents from enrolledModules collection
+          const modulesSnapshot = await this.firestore
+            .collection('enrolledModules')
+            .get()
+            .toPromise();
+  
+          // Go through each module document
+          modulesSnapshot?.forEach(moduleDoc => {
+            const moduleData = moduleDoc.data() as ModuleData; // Cast to ModuleData
+            const moduleCode = moduleDoc.id; // This will be CA100, CF100, etc.
+            
+            // Check the Enrolled array for the student number
+            if (moduleData.Enrolled) {
+              const studentEnrollment = moduleData.Enrolled.find(
+                (enrollment: { studentNumber: string; status: string }) => enrollment.studentNumber === studentNumber
+              );
+  
+              if (studentEnrollment && studentEnrollment.status === 'Enrolled') {
+                this.currentUser = {
+                  ...studentData,
+                  moduleCode: moduleCode
+                } as StudentData;
+                console.log('Current User:', this.currentUser);
               }
-            },
-            (error) => {
-              console.error('Error fetching user data:', error);
             }
-          );
+          });
+        } else {
+          console.log('No student found with this email');
+        }
       } else {
         console.log('No user is signed in');
       }

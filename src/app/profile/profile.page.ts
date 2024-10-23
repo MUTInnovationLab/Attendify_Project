@@ -16,6 +16,16 @@ interface StudentData {
   pendingEmail?: string;
 }
 
+interface EnrolledEntry {
+  studentNumber: string;
+  status: string;
+}
+
+interface EnrolledModule {
+  moduleCode: string;  // Assuming there's a field called 'moduleCode'
+  Enrolled: EnrolledEntry[]; // Array of enrolled entries
+}
+
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -60,12 +70,20 @@ export class ProfilePage implements OnInit {
     return await modal.present();
   }
 
+
+
+
+  
+  
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log('User signed in:', user.email);
+        const userEmail = user.email; // Email for user information
+        console.log('User signed in:', userEmail);
+  
+        // First, fetch user information using email
         this.firestore
-          .collection('enrolledModules', ref => ref.where('email', '==', user.email))
+          .collection('students', (ref) => ref.where('email', '==', userEmail))
           .get()
           .subscribe(
             (querySnapshot) => {
@@ -75,7 +93,10 @@ export class ProfilePage implements OnInit {
                 querySnapshot.forEach((doc) => {
                   this.currentUser = doc.data() as StudentData;
                   console.log('Current User:', this.currentUser);
-                  this.checkPendingEmailUpdate();
+  
+                  // After fetching current user, fetch modules using studentNumber
+                  const studentNumber = this.currentUser.studentNumber;
+                  this.fetchUserModules(studentNumber);
                 });
               }
             },
@@ -88,6 +109,49 @@ export class ProfilePage implements OnInit {
       }
     });
   }
+  
+  async fetchUserModules(studentNumber: string): Promise<string[]> {
+    const modules: string[] = [];
+  
+    try {
+      // Fetch the enrolledModules collection
+      const querySnapshot = await this.firestore.collection('enrolledModules').get().toPromise();
+  
+      if (querySnapshot) {
+        // Iterate over each document in the snapshot
+        querySnapshot.forEach(doc => {
+          const moduleData = doc.data() as EnrolledModule;
+  
+          // Check if Enrolled array exists and is an array
+          if (Array.isArray(moduleData.Enrolled)) {
+            const isEnrolled = moduleData.Enrolled.some(entry => 
+              entry && typeof entry === 'object' &&
+              entry.studentNumber === studentNumber && 
+              entry.status === 'Enrolled'
+            );
+  
+            if (isEnrolled) {
+              modules.push(moduleData.moduleCode); // Assuming moduleCode is the field to push
+            }
+          } else {
+            console.warn(`Document ${doc.id} does not have a valid Enrolled array`);
+          }
+        });
+      }
+  
+      console.log('User Modules:', modules);
+      return modules;
+    } catch (error) {
+      console.error('Error fetching user modules:', error);
+      return [];
+    }
+  }
+  
+  
+  
+
+  
+
 
 
   async editUserInfo() {
@@ -166,6 +230,8 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
+
+
   async initiateEmailUpdate(newEmail: string, password: string) {
     const user = await this.auth.currentUser;
     if (!user) {
@@ -205,7 +271,7 @@ export class ProfilePage implements OnInit {
   }
 
   async updateEmailInFirestore(newEmail: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
+    const collectionsToUpdate = [ 'students'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -229,45 +295,102 @@ export class ProfilePage implements OnInit {
     console.log('Email updated successfully in Firestore');
   }
 
-  async updateStudentNumber(newStudentNumber: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
+  
+  async updateStudentNumber(newStudentNumber: string): Promise<boolean> {
     const batch = this.firestore.firestore.batch();
-
-    for (const collectionName of collectionsToUpdate) {
-      const querySnapshot = await this.firestore
-        .collection(collectionName)
-        .ref.where('email', '==', this.currentUser.email)
-        .get();
-
-      querySnapshot.docs.forEach((doc) => {
-        // Update the studentNumber field
-        batch.update(doc.ref, { studentNumber: newStudentNumber });
-
-        // If it's the enrolledModules collection, we need to update the document ID as well
-        if (collectionName === 'enrolledModules') {
-          const oldData = doc.data() as StudentData;
-          const newDocRef = this.firestore.collection('enrolledModules').doc(newStudentNumber);
-          
-          // Set the data in the new document
-          batch.set(newDocRef.ref, {
-            ...oldData,
-            studentNumber: newStudentNumber
-          });
-
-          // Delete the old document
-          batch.delete(doc.ref);
-        }
+  
+    try {
+      // Ensure currentUser has a student number before proceeding
+      const currentStudentNumber = this.currentUser?.studentNumber?.trim();
+      if (!currentStudentNumber) {
+        throw new Error("Current user has no student number");
+      }
+  
+      console.log('Fetching document for student number:', currentStudentNumber);
+  
+      // 1. Update students collection by fetching the document using the student's current number as the document ID
+      const studentRef = this.firestore.collection('students').doc(currentStudentNumber);
+      const studentSnapshot = await studentRef.get().toPromise(); // Convert to promise
+  
+      // Check if the student document exists
+      if (!studentSnapshot || !studentSnapshot.exists) {
+        throw new Error('Student document does not exist for student number: ' + currentStudentNumber);
+      }
+  
+      // Get the current student data
+      const studentData = studentSnapshot.data() as { [key: string]: any };
+  
+      // Create a new document with the new student number
+      const newStudentRef = this.firestore.collection('students').doc(newStudentNumber.trim());
+      batch.set(newStudentRef.ref, {
+        ...studentData, // Copy the existing student data
+        studentNumber: newStudentNumber.trim() // Update the student number
       });
+  
+      // Delete the old document that has the old student number
+      batch.delete(studentRef.ref);
+  
+      // 2. Update enrolledModules collection
+      const modulesSnapshot = await this.firestore.collection('enrolledModules').get().toPromise(); // Convert to promise
+  
+      if (modulesSnapshot && !modulesSnapshot.empty) {
+        for (const moduleDoc of modulesSnapshot.docs) {
+          const moduleData = moduleDoc.data() as { Enrolled: Array<{ studentNumber: string }> };
+  
+          if (moduleData.Enrolled) {
+            const updatedEnrolled = moduleData.Enrolled.map(student => {
+              if (student.studentNumber === currentStudentNumber) {
+                return { ...student, studentNumber: newStudentNumber.trim() };
+              }
+              return student;
+            });
+  
+            // Update the enrolled students with the new student number
+            batch.update(moduleDoc.ref, { Enrolled: updatedEnrolled });
+          }
+        }
+      }
+  
+      // 3. Update Attended collection
+      const attendedSnapshot = await this.firestore.collection('Attended').get().toPromise(); // Convert to promise
+  
+      if (attendedSnapshot && !attendedSnapshot.empty) {
+        for (const attendedDoc of attendedSnapshot.docs) {
+          const attendedData = attendedDoc.data() as { [date: string]: Array<{ studentNumber: string }> };
+  
+          // Loop through each date in the attendance records
+          for (const [date, attendanceArray] of Object.entries(attendedData)) {
+            if (Array.isArray(attendanceArray)) {
+              const updatedAttendance = attendanceArray.map(record => {
+                if (record.studentNumber === currentStudentNumber) {
+                  return { ...record, studentNumber: newStudentNumber.trim() };
+                }
+                return record;
+              });
+  
+              // Update the attendance records for this date
+              batch.update(attendedDoc.ref, { [date]: updatedAttendance });
+            }
+          }
+        }
+      }
+  
+      // Commit the batch updates
+      await batch.commit();
+  
+      // Update the local user object with the new student number
+      this.currentUser.studentNumber = newStudentNumber.trim();
+      console.log('Student number updated successfully in all collections');
+  
+      return true;
+    } catch (error) {
+      console.error('Error updating student number:', error);
+      throw error;
     }
-
- 
-    // Commit the batch
-    await batch.commit();
-
-    // Update local user object
-    this.currentUser.studentNumber = newStudentNumber;
-    console.log('Student number updated successfully in all collections');
   }
+  
+
+  
 
 
   async checkPendingEmailUpdate() {
@@ -291,8 +414,10 @@ export class ProfilePage implements OnInit {
     }
   }
   
+
+
   async updateUserInfo(data: any) {
-    const collectionsToUpdate = ['enrolledModules', 'attendedStudents', 'registeredStudents', 'allModules'];
+    const collectionsToUpdate = ['enrolledModules', 'attended', 'students','assignedLectures'];
     const batch = this.firestore.firestore.batch();
   
     for (const collectionName of collectionsToUpdate) {
@@ -310,7 +435,7 @@ export class ProfilePage implements OnInit {
         };
   
         // If it's the enrolledModules collection, handle it differently
-        if (collectionName !== 'registeredStudents') {
+        if (collectionName !== 'students') {
           const currentData = doc.data() as StudentData;
           if (currentData.moduleCode) {
             updatedData.moduleCode = currentData.moduleCode;
@@ -321,13 +446,13 @@ export class ProfilePage implements OnInit {
       });
     }
   
-    // Update in allModules collection for each module the student is enrolled in
+    // Update in  collection for each module the student is enrolled in
     if (this.currentUser.moduleCode) {
       for (const moduleCode of this.currentUser.moduleCode) {
-        const moduleRef = this.firestore.collection('allModules').doc(moduleCode);
+        const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
         const studentsRef = moduleRef.collection(moduleCode);
   
-        const studentQuerySnapshot = await studentsRef.ref.where('email', '==', this.currentUser.email).get();
+        const studentQuerySnapshot = await studentsRef.ref.where('studentNumber', '==', this.currentUser.studentNumber).get();
         
         if (!studentQuerySnapshot.empty) {
           studentQuerySnapshot.docs.forEach((doc) => {
