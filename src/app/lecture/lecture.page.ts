@@ -458,10 +458,7 @@ export class LecturePage implements OnInit {
   }
 
 
-
-
-
-
+  
 async deleteModule() {
   if (!this.selectedModuleId) {
     alert('No module selected for deletion.');

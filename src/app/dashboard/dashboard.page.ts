@@ -1,6 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { IonModal } from '@ionic/angular';
-import { AlertController, ToastController,  NavController } from '@ionic/angular';
+import { IonModal, AlertController, ToastController, NavController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -8,11 +7,11 @@ import { AuthService } from '../services/auth.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 interface DeptAdmin {
-  id?: string;
+  id?: string; // Optional ID for internal use
   fullName: string;
   email: string;
   position: string;
-  staffNumber: string;
+  staffNumber: string; // This will be used as the document ID
   department: string;
 }
 
@@ -26,7 +25,7 @@ export class DashboardPage {
   @ViewChild('departmentsAnalyticsModal') departmentsAnalyticsModal!: IonModal;
 
   currentUser: { name: string; email: string } | null = null;
-  
+
   deptAdminFullName = '';
   deptAdminEmail = '';
   deptAdminStaffNumber = '';
@@ -34,6 +33,7 @@ export class DashboardPage {
   selectedDeptAdminId: string | null = null;
 
   deptAdmins$: Observable<DeptAdmin[]>;
+
   departments: string[] = [
     'Agriculture',
     'Biomedical Sciences',
@@ -64,19 +64,15 @@ export class DashboardPage {
       .collection<DeptAdmin>('staff', ref => ref.where('position', '==', 'dept-admin'))
       .snapshotChanges()
       .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as DeptAdmin;
-            const id = a.payload.doc.id;
-            return { id, ...data };
-          })
-        )
+        map(actions => actions.map(a => {
+          const data = a.payload.doc.data() as DeptAdmin;
+          const id = a.payload.doc.id;
+          return { id, ...data };
+        }))
       );
   }
 
-  ngOnInit() {
-    
-  }
+  ngOnInit() {}
 
   openAddAdminModal() {
     this.addAdminModal.present();
@@ -86,8 +82,6 @@ export class DashboardPage {
     this.addAdminModal.dismiss();
     this.resetForm();
   }
-
-
 
   async addDeptAdmin() {
     const currentUser = await this.authService.getCurrentUser();
@@ -99,7 +93,7 @@ export class DashboardPage {
     if (this.deptAdminFullName && this.deptAdminEmail && this.deptAdminStaffNumber && this.deptAdminDepartment) {
       // Check if the email already exists
       const emailExists = await this.firestore
-        .collection<DeptAdmin>(' staff', ref => ref.where('email', '==', this.deptAdminEmail))
+        .collection<DeptAdmin>('staff', ref => ref.where('email', '==', this.deptAdminEmail))
         .valueChanges()
         .pipe(take(1))
         .toPromise()
@@ -114,7 +108,7 @@ export class DashboardPage {
         fullName: this.deptAdminFullName,
         email: this.deptAdminEmail,
         position: 'dept-admin',
-        staffNumber: this.deptAdminStaffNumber,
+        staffNumber: this.deptAdminStaffNumber, // This will be used as the document ID
         department: this.deptAdminDepartment,
       };
 
@@ -122,8 +116,8 @@ export class DashboardPage {
         // Create user in Firebase Authentication
         await this.afAuth.createUserWithEmailAndPassword(this.deptAdminEmail, newDeptAdmin.staffNumber);
 
-        // Add Dept-Admin to Firestore
-        await this.firestore.collection(' staff').add(newDeptAdmin);
+        // Add Dept-Admin to Firestore using staffNumber as the document ID
+        await this.firestore.collection('staff').doc(newDeptAdmin.staffNumber).set(newDeptAdmin);
 
         // Optionally, send a password reset email to let the admin set their password
         await this.afAuth.sendPasswordResetEmail(this.deptAdminEmail);
@@ -140,7 +134,7 @@ export class DashboardPage {
   }
 
   editDeptAdmin(deptAdmin: DeptAdmin) {
-    this.selectedDeptAdminId = deptAdmin.id!;
+    this.selectedDeptAdminId = deptAdmin.staffNumber; // Use staffNumber as the ID
     this.deptAdminFullName = deptAdmin.fullName;
     this.deptAdminEmail = deptAdmin.email;
     this.deptAdminStaffNumber = deptAdmin.staffNumber;
@@ -158,7 +152,7 @@ export class DashboardPage {
         department: this.deptAdminDepartment,
       };
       try {
-        await this.firestore.collection(' staff').doc(this.selectedDeptAdminId).update(updatedDeptAdmin);
+        await this.firestore.collection('staff').doc(this.selectedDeptAdminId).update(updatedDeptAdmin);
         this.presentToast('Dept-Admin successfully updated!');
         this.dismissModal();
       } catch (error) {
@@ -168,15 +162,13 @@ export class DashboardPage {
     }
   }
 
-
-
   async deleteDeptAdmin(deptAdminId: string) {
     const currentUser = await this.authService.getCurrentUser();
     if (!currentUser) {
       this.presentToast('You must be logged in to delete a Dept-Admin.');
       return;
     }
-  
+
     const alert = await this.alertController.create({
       header: 'Confirm Deletion',
       message: 'Are you sure you want to delete this Dept-Admin? This action cannot be undone.',
@@ -193,7 +185,8 @@ export class DashboardPage {
           cssClass: 'danger',
           handler: async () => {
             try {
-              await this.firestore.collection(' staff').doc(deptAdminId).delete();
+              // Use the staffNumber as the document ID for deletion
+              await this.firestore.collection('staff').doc(deptAdminId).delete();
               this.presentToast('Dept-Admin successfully deleted!');
             } catch (error) {
               console.error('Error deleting Dept-Admin: ', error);
@@ -203,7 +196,7 @@ export class DashboardPage {
         }
       ]
     });
-  
+
     await alert.present();
   }
 
@@ -252,17 +245,16 @@ export class DashboardPage {
     await alert.present();
   }
 
-
   navigateToDeptAnalytics() {
-    this.navCtrl.navigateForward('/dept-analytics'); // The path should match your routing setup
+    this.navCtrl.navigateForward('/dept-analytics'); 
   }
 
   navigateToEvents() {
-    this.navCtrl.navigateForward('/event'); // The path should match your routing setup
+    this.navCtrl.navigateForward('/event'); 
   }
 
   nabigateToAddModule() {
-    this.navCtrl.navigateForward('/super-analytics'); // The path should match your routing setup
+    this.navCtrl.navigateForward('/super-analytics'); 
   }
 
   departmentsAnalytics = [
@@ -281,9 +273,6 @@ export class DashboardPage {
   }
 
   logout() {
-    // Clear session or authentication data here (if any)
-    
-    // Navigate to the login page
     this.navCtrl.navigateRoot('/login');
   }
 }
