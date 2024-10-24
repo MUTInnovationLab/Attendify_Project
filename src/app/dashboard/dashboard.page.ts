@@ -61,7 +61,7 @@ export class DashboardPage {
     private afAuth: AngularFireAuth
   ) {
     this.deptAdmins$ = this.firestore
-      .collection<DeptAdmin>('registered staff', ref => ref.where('position', '==', 'dept-admin'))
+      .collection<DeptAdmin>('staff', ref => ref.where('position', '==', 'dept-admin'))
       .snapshotChanges()
       .pipe(
         map(actions =>
@@ -99,7 +99,7 @@ export class DashboardPage {
     if (this.deptAdminFullName && this.deptAdminEmail && this.deptAdminStaffNumber && this.deptAdminDepartment) {
       // Check if the email already exists
       const emailExists = await this.firestore
-        .collection<DeptAdmin>('registered staff', ref => ref.where('email', '==', this.deptAdminEmail))
+        .collection<DeptAdmin>(' staff', ref => ref.where('email', '==', this.deptAdminEmail))
         .valueChanges()
         .pipe(take(1))
         .toPromise()
@@ -123,7 +123,7 @@ export class DashboardPage {
         await this.afAuth.createUserWithEmailAndPassword(this.deptAdminEmail, newDeptAdmin.staffNumber);
 
         // Add Dept-Admin to Firestore
-        await this.firestore.collection('registered staff').add(newDeptAdmin);
+        await this.firestore.collection(' staff').add(newDeptAdmin);
 
         // Optionally, send a password reset email to let the admin set their password
         await this.afAuth.sendPasswordResetEmail(this.deptAdminEmail);
@@ -158,7 +158,7 @@ export class DashboardPage {
         department: this.deptAdminDepartment,
       };
       try {
-        await this.firestore.collection('registered staff').doc(this.selectedDeptAdminId).update(updatedDeptAdmin);
+        await this.firestore.collection(' staff').doc(this.selectedDeptAdminId).update(updatedDeptAdmin);
         this.presentToast('Dept-Admin successfully updated!');
         this.dismissModal();
       } catch (error) {
@@ -193,7 +193,7 @@ export class DashboardPage {
           cssClass: 'danger',
           handler: async () => {
             try {
-              await this.firestore.collection('registered staff').doc(deptAdminId).delete();
+              await this.firestore.collection(' staff').doc(deptAdminId).delete();
               this.presentToast('Dept-Admin successfully deleted!');
             } catch (error) {
               console.error('Error deleting Dept-Admin: ', error);

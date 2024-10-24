@@ -89,6 +89,8 @@ export class RegisterPage implements OnInit {
       });
   }
 
+
+ 
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message: message,

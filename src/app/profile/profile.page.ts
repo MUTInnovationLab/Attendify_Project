@@ -12,7 +12,7 @@ interface StudentData {
   name: string;
   studentNumber: string;
   surname: string;
-  enrolledModules?: string[];
+  moduleCode?: string[];
   pendingEmail?: string;
 }
 
@@ -60,12 +60,16 @@ export class ProfilePage implements OnInit {
     return await modal.present();
   }
 
+  
+
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('User signed in:', user.email);
         this.firestore
-          .collection('students', ref => ref.where('email', '==', user.email))
+          .collection('students', (ref) =>
+            ref.where('email', '==', user.email)
+          )
           .get()
           .subscribe(
             (querySnapshot) => {
@@ -75,7 +79,6 @@ export class ProfilePage implements OnInit {
                 querySnapshot.forEach((doc) => {
                   this.currentUser = doc.data() as StudentData;
                   console.log('Current User:', this.currentUser);
-                  this.checkPendingEmailUpdate();
                 });
               }
             },
@@ -88,6 +91,9 @@ export class ProfilePage implements OnInit {
       }
     });
   }
+  
+
+
 
   async editUserInfo() {
     const alert = await this.alertController.create({
@@ -165,6 +171,8 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
+
+
   async initiateEmailUpdate(newEmail: string, password: string) {
     const user = await this.auth.currentUser;
     if (!user) {
@@ -172,21 +180,39 @@ export class ProfilePage implements OnInit {
     }
 
     try {
+      // Re-authenticate user
       const credential = firebase.auth.EmailAuthProvider.credential(user.email!, password);
       await user.reauthenticateWithCredential(credential);
+
+      // Send verification email to the new email address
       await user.verifyBeforeUpdateEmail(newEmail);
+
+      // Store the pending email update in Firestore
       this.currentUser.pendingEmail = newEmail;
       await this.updateUserInfo(this.currentUser);
+
+      // Show an alert to inform the user about the verification email
       await this.showAlert('Email Verification Sent', 'A verification email has been sent to your new email address. Please verify it to complete the email update process.');
+
       console.log('Email verification sent successfully');
     } catch (error: any) {
       console.error('Error initiating email update:', error);
-      this.handleAuthErrors(error);
+      if (error.code === 'auth/requires-recent-login') {
+        throw new Error('For security reasons, please log out and log back in before changing your email.');
+      } else if (error.code === 'auth/email-already-in-use') {
+        throw new Error('This email is already in use by another account.');
+      } else if (error.code === 'auth/invalid-email') {
+        throw new Error('The email address is badly formatted.');
+      } else if (error.code === 'auth/wrong-password') {
+        throw new Error('Incorrect password. Please try again.');
+      } else {
+        throw new Error('Failed to initiate email update. Please try again later.');
+      }
     }
   }
 
   async updateEmailInFirestore(newEmail: string) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students','assignedLectures'];
+    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
     const batch = this.firestore.firestore.batch();
 
     for (const collectionName of collectionsToUpdate) {
@@ -200,20 +226,12 @@ export class ProfilePage implements OnInit {
       });
     }
 
-    if (this.currentUser.enrolledModules) {
-      for (const moduleCode of this.currentUser.enrolledModules) {
-        const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
-        const enrolledArray = moduleRef.get();
-        
-        if (enrolledArray) {
-          enrolledArray.forEach((doc) => {
-            batch.update(doc.ref, { email: newEmail });
-          });
-        }
-      }
-    }
+  
 
+    // Commit the batch
     await batch.commit();
+
+    // Update local user object
     this.currentUser.email = newEmail;
     console.log('Email updated successfully in Firestore');
   }
@@ -229,101 +247,118 @@ export class ProfilePage implements OnInit {
         .get();
 
       querySnapshot.docs.forEach((doc) => {
+        // Update the studentNumber field
         batch.update(doc.ref, { studentNumber: newStudentNumber });
+
+        // If it's the enrolledModules collection, we need to update the document ID as well
+        if (collectionName === 'enrolledModules') {
+          const oldData = doc.data() as StudentData;
+          const newDocRef = this.firestore.collection('enrolledModules').doc(newStudentNumber);
+          
+          // Set the data in the new document
+          batch.set(newDocRef.ref, {
+            ...oldData,
+            studentNumber: newStudentNumber
+          });
+
+          // Delete the old document
+          batch.delete(doc.ref);
+        }
       });
     }
 
-    if (this.currentUser.enrolledModules) {
-      for (const moduleCode of this.currentUser.enrolledModules) {
-        const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
-        const enrolledArray = moduleRef.get();
-
-        if (enrolledArray) {
-          enrolledArray.forEach((doc) => {
-            batch.update(doc.ref, { studentNumber: newStudentNumber });
-          });
-        }
-      }
-    }
-
+ 
+    // Commit the batch
     await batch.commit();
+
+    // Update local user object
     this.currentUser.studentNumber = newStudentNumber;
     console.log('Student number updated successfully in all collections');
   }
+
 
   async checkPendingEmailUpdate() {
     const user = await this.auth.currentUser;
     if (user && this.currentUser.pendingEmail) {
       if (user.email === this.currentUser.pendingEmail) {
+        // Email has been successfully updated in Authentication
         await this.updateEmailInFirestore(this.currentUser.pendingEmail);
+        
+        // Remove pendingEmail field now that it's confirmed
         delete this.currentUser.pendingEmail;
+        
+        // Update Firestore with the new email and removal of pendingEmail
         await this.updateUserInfo({
           ...this.currentUser,
-          email: this.currentUser.pendingEmail
+          email: this.currentUser.pendingEmail // Make sure email is updated
         });
+  
         this.showAlert('Email Updated', 'Your email has been successfully updated.');
       }
     }
   }
+  
 
+  
   async updateUserInfo(data: any) {
-    const collectionsToUpdate = ['enrolledModules', 'Attended', 'students'];
+    const collectionsToUpdate = ['enrolledModules', 'attended', 'students','assignedLectures'];
     const batch = this.firestore.firestore.batch();
-
+  
     for (const collectionName of collectionsToUpdate) {
       const querySnapshot = await this.firestore
         .collection(collectionName)
         .ref.where('email', '==', this.currentUser.email)
         .get();
-
+  
       querySnapshot.docs.forEach((doc) => {
         const updatedData: Partial<StudentData> = {
           name: data.name,
           surname: data.surname,
           studentNumber: data.studentNumber,
-          email: data.email
+          email: data.email // Make sure to update the email field directly
         };
-
+  
+        // If it's the enrolledModules collection, handle it differently
+        if (collectionName !== 'students') {
+          const currentData = doc.data() as StudentData;
+          if (currentData.moduleCode) {
+            updatedData.moduleCode = currentData.moduleCode;
+          }
+        }
+  
         batch.update(doc.ref, updatedData);
       });
     }
-
-    if (this.currentUser.enrolledModules) {
-      for (const moduleCode of this.currentUser.enrolledModules) {
+  
+    // Update in  collection for each module the student is enrolled in
+    if (this.currentUser.moduleCode) {
+      for (const moduleCode of this.currentUser.moduleCode) {
         const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
-        const enrolledArray = moduleRef.get();
+        const studentsRef = moduleRef.collection(moduleCode);
+  
+        const studentQuerySnapshot = await studentsRef.ref.where('studentNumber', '==', this.currentUser.studentNumber).get();
         
-        if (enrolledArray) {
-          enrolledArray.forEach((doc) => {
+        if (!studentQuerySnapshot.empty) {
+          studentQuerySnapshot.docs.forEach((doc) => {
             batch.update(doc.ref, {
+              name: data.name,
+              surname: data.surname,
               studentNumber: data.studentNumber,
-              email: data.email
+              email: data.email // Update the email field in modules
             });
           });
         }
       }
     }
-
+  
+    // Commit the batch
     await batch.commit();
+  
+    // Update local user object
     this.currentUser = { ...this.currentUser, ...data };
-    console.log('User info updated successfully');
+    console.log('User information updated successfully in Firestore');
   }
-
-  handleAuthErrors(error: any) {
-    let errorMessage = '';
-    switch (error.code) {
-      case 'auth/wrong-password':
-        errorMessage = 'Incorrect password. Please try again.';
-        break;
-      case 'auth/email-already-in-use':
-        errorMessage = 'This email is already in use by another account.';
-        break;
-      default:
-        errorMessage = 'An error occurred. Please try again.';
-        break;
-    }
-    this.showAlert('Error', errorMessage);
-  }
+  
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({

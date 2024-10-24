@@ -20,7 +20,7 @@ export class DataService {
   constructor(private firestore: AngularFirestore) {}
 
   getStudentByEmail(email: string): Observable<UserData[]> {
-    return this.firestore.collection("registeredStudents", ref => ref.where('email', '==', email))
+    return this.firestore.collection("students", ref => ref.where('email', '==', email))
       .snapshotChanges()
       .pipe(
         map(actions => actions.map(a => {

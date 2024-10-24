@@ -7,6 +7,7 @@ import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { DataService } from '../services/data.service';
 import { Router } from '@angular/router';
 import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
+import { EnrollmentService } from '../services/enrollment.service';
 
 interface StudentAttendance {
   studentNumber: string;
@@ -17,10 +18,11 @@ interface AttendanceRecord {
   [date: string]: StudentAttendance[]; // Dates are string keys, each holding an array of student attendance
 }
 
-interface EnrolledModules {
-  moduleCode: string[];
-  // Add any other fields that you expect in this document
-}
+// interface EnrolledModules {
+//   enrolled: any[];
+//   moduleCode: string;
+//   // Add any other fields that you expect in this document
+// }
 
 
 
@@ -29,8 +31,16 @@ interface StudentData {
   name: string;
   studentNumber: string;
   surname: string;
-  moduleCode:string;
+  department:string;
 }
+
+// interface EnrolledModule {
+//   enrolled: {
+//     studentNumber: string;
+//   }[];
+// }
+
+
 
 @Component({
   selector: 'app-stude-scan',
@@ -40,7 +50,7 @@ interface StudentData {
 export class StudeScanPage implements OnInit {
 
   showUserInfo = false;
-  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
+  currentUser: StudentData = { department: '' ,email: '', name: '', studentNumber: '', surname: '' };
 
   email: string = "";
   student: any;
@@ -58,17 +68,23 @@ export class StudeScanPage implements OnInit {
     private modalController: ModalController,
     private router: Router,
     private data: DataService,
-    private platform: Platform
+    private platform: Platform,
+    private enrollmentService: EnrollmentService
   ) {
     this.isWeb = !this.platform.is('capacitor'); // Check if running on web
   }
 
   async ngOnInit() {
+
+   
+
     this.getCurrentUser();
+   
     const user = await this.auth.currentUser;
     if (user) {
       this.email = user.email || '';
       this.searchStudent();
+      
     }
   }
 
@@ -80,12 +96,12 @@ export class StudeScanPage implements OnInit {
     this.router.navigate(['/login']); // Navigate to LecturePage
   }
 
-  getCurrentUser() {
-    this.auth.onAuthStateChanged((user) => {
+  async getCurrentUser() {
+    await this.auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('User signed in:', user.email);
         this.firestore
-          .collection('enrolledModules', (ref) =>
+          .collection('students', (ref) =>
             ref.where('email', '==', user.email)
           )
           .get()
@@ -97,6 +113,7 @@ export class StudeScanPage implements OnInit {
                 querySnapshot.forEach((doc) => {
                   this.currentUser = doc.data() as StudentData;
                   console.log('Current User:', this.currentUser);
+                  this.CaptureAttendiesDetails();
                 });
               }
             },
@@ -236,6 +253,7 @@ export class StudeScanPage implements OnInit {
           if (code) {
             console.log("QR code detected:", code.data);
             this.scanResult = code.data;
+
             this.CaptureAttendiesDetails(this.scanResult);
             this.stopScan();
           } else {
@@ -271,97 +289,188 @@ export class StudeScanPage implements OnInit {
     this.isScanning = false;
   }
 
+  
+ 
 
 
-async CaptureAttendiesDetails(moduleCode: string = "") {
-  // Check if student information is available
-  if (!this.student) {
-    console.error('Student information not available.');
-    this.showToast('Student information not available.');
-    return;
-  }
+  async CaptureAttendiesDetails(moduleCode: string = "CA100") {
+    // Check if student information is available
+    alert(moduleCode);
+    if (!this.currentUser.studentNumber) {
+      console.error('Student information not available.');
+      this.showToast('Student information not available.');
+      return;
+    }
+  
+    // Check if the module code is provided
+    if (!moduleCode) {
+      console.error('Module code not provided.');
+      this.showToast('Module code not provided.');
+      return;
+    }
+  
+    
+    try {
 
-  // Check if the module code is provided
-  if (!moduleCode) {
-    console.error('Module code not provided.');
-    this.showToast('Module code not provided.');
-    return;
-  }
 
-  // Check if the student is enrolled in the module
-  const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(this.student.studentNumber.toString());
-  const enrolledDoc = await enrolledModulesRef.get().toPromise();
-
-  // Ensure enrolledDoc is defined before proceeding
-  if (!enrolledDoc || !enrolledDoc.exists) {
-    console.error('Student is not enrolled in any modules.');
-    this.showToast('You are not enrolled in this module.');
-    return;
-  }
-
-  // Cast to EnrolledModules type
-  const enrolledData = enrolledDoc.data() as EnrolledModules;
-  const existingModuleCodes = enrolledData?.moduleCode || [];
-
-  if (!existingModuleCodes.includes(moduleCode)) {
-    console.error('Student is not enrolled in the specified module.');
-    this.showToast('You are not enrolled in this module.');
-    return;
-  }
-
-  // Capture current date and time
-  const date = new Date();
-  const dateString = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-  const scanTime = date.toLocaleTimeString(); // Example: "10:15 AM"
-
-  // Prepare the attendance details object
-  const studentAttendance: StudentAttendance = {
-    studentNumber: this.student.studentNumber,
-    scanTime: scanTime
-  };
-
-  try {
-    const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
-    const doc = await attendanceRef.get().toPromise();
-
-    // Initialize an empty object for existing attendance records
-    let existingData: AttendanceRecord = {};
-
-    // Check if the document for the module exists
-    if (doc && doc.exists) {
-      existingData = doc.data() as AttendanceRecord; // Explicitly cast doc data to AttendanceRecord type
+      const isEnrolled = await this.enrollmentService.checkStudentEnrollment(moduleCode, this.currentUser.studentNumber);
+    if (!isEnrolled) {
+      console.error('Student is not enrolled in the specified module.');
+      this.showToast('You are not enrolled in this module.');
+      return;
     }
 
-    // Check if there are existing records for today's date
-    if (existingData[dateString]) {
-      // Find if the student has already scanned today
-      const alreadyScanned = existingData[dateString].some(attendance => attendance.studentNumber === this.student.studentNumber);
+    console.log('Student is enrolled, capturing attendance...');
+      
 
-      if (alreadyScanned) {
-        console.error('Student has already scanned today.');
-        this.showToast('You have already scanned in for today.');
-        return; // Exit early to prevent duplicate scan
+
+
+      
+      // Capture current date and time
+      const date = new Date();
+      const dateString = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      const scanTime = date.toLocaleTimeString(); // Example: "10:15 AM"
+  
+      // Prepare the attendance details object
+      const studentAttendance: StudentAttendance = {
+        studentNumber: this.currentUser.studentNumber,
+        scanTime: scanTime
+      };
+  
+      // Reference to the attendance document for the module
+      const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
+      const doc = await attendanceRef.get().toPromise();
+  
+      // Initialize an empty object for attendance records
+      let existingData: AttendanceRecord = {};
+  
+      // Check if the document for the module exists
+      if (doc && doc.exists) {
+        existingData = doc.data() as AttendanceRecord;
       }
-
-      // If student hasn't scanned today, add them to the list
-      existingData[dateString].push(studentAttendance);
-    } else {
-      // If no records exist for today, create a new entry
-      existingData[dateString] = [studentAttendance];
+  
+      // Check if there are existing records for today's date
+      if (existingData[dateString]) {
+        // Find if the student has already scanned today
+        const alreadyScanned = existingData[dateString].some((attendance: StudentAttendance) =>
+          attendance.studentNumber === this.currentUser.studentNumber
+        );
+        
+        if (alreadyScanned) {
+          console.error('Student has already scanned today.');
+          this.showToast('You have already scanned in for today.');
+          return; // Exit early to prevent duplicate scan
+        }
+  
+        // If student hasn't scanned today, add them to the list
+        existingData[dateString].push(studentAttendance);
+      } else {
+        // If no records exist for today, create a new entry for today
+        existingData[dateString] = [studentAttendance];
+      }
+      alert('2');
+      // Update the document with the new attendance details (merge: true to avoid overwriting)
+      await attendanceRef.set(existingData, { merge: true });
+      alert('3');
+      console.log('Attendance stored successfully for', moduleCode);
+      this.showToast('Attendance recorded successfully.');
+    } catch (error) {
+      console.error('Error capturing attendance details:', error);
+      this.showToast('Error storing attendance. Please try again.');
     }
-
-    // Update the document with the new details
-    await attendanceRef.set(existingData, { merge: true });
-
-    console.log('Attendance stored successfully for', moduleCode);
-    this.showToast('Attendance recorded successfully.');
-  } catch (error) {
-    console.error('Error storing attendance details:', error);
-    this.showToast('Error storing attendance. Please try again.');
   }
-}
+  
 
 
+  
+  // async CaptureAttendiesDetails(moduleCode: string = "IS100") {
+  //   //Check if student information is available
+  //   alert('here!!!!!!!!!!! MODULE=IS100; USER=22005010');
+
+  //   if (!this.currentUser) {
+  //     console.error('Student information not available.');
+  //     this.showToast('Student information not available.');
+  //     return;
+  //   }
+  
+  //   // Check if the module code is provided
+  //   if (!moduleCode) {
+  //     console.error('Module code not provided.');
+  //     this.showToast('Module code not provided.');
+  //     return;
+  //   }
+  
+  //   try {
+  //     alert('2');
+  //     // Reference to the specific module document using moduleCode
+      
+  //     alert('4');
+     
+  
+  //     if (!this.enrollmentService.checkStudentEnrollment(moduleCode,this.student)) {
+  //       console.error('Student is not enrolled in the specified module.');
+  //       this.showToast('You are not enrolled in this module.');
+  //       return;
+  //     }
+  //     alert('6');
+  //     // Capture current date and time
+  //     const date = new Date();
+  //     const dateString = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+  //     const scanTime = date.toLocaleTimeString(); // Example: "10:15 AM"
+  //     alert('7');
+  //     // Prepare the attendance details object
+  //     const studentAttendance: StudentAttendance = {
+  //       studentNumber: this.student.studentNumber,
+  //       scanTime: scanTime
+  //     };
+  //     alert('8');
+  //     // Reference to the attendance collection for the module
+  //     const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
+  //     const doc = await attendanceRef.get().toPromise();
+  //     alert('10');
+  //     // Initialize an empty object for existing attendance records
+  //     let existingData: AttendanceRecord = {};
+  
+  //     // Check if the document for the module exists
+  //     if (doc && doc.exists) {
+  //       existingData = doc.data() as AttendanceRecord; // Explicitly cast doc data to AttendanceRecord type
+  //       alert('11');
+  //     }
+  
+  //     // Check if there are existing records for today's date
+  //     if (existingData[dateString]) {
+  //       // Find if the student has already scanned today
+  //       const alreadyScanned = existingData[dateString].some(attendance => attendance.studentNumber === this.student.studentNumber);
+  //       alert('12');
+  //       if (alreadyScanned) {
+  //         console.error('Student has already scanned today.');
+  //         this.showToast('You have already scanned in for today.');
+  //         return; // Exit early to prevent duplicate scan
+  //       }
+  //       alert('13');
+  
+  //       // If student hasn't scanned today, add them to the list
+  //       existingData[dateString].push(studentAttendance);
+  //     } else {
+  //       // If no records exist for today, create a new entry
+  //       alert('14');
+  //       existingData[dateString] = [studentAttendance];
+  //     }
+  //     alert('13');
+  //     // Update the document with the new details
+  //     await attendanceRef.set(existingData, { merge: true });
+  
+  //     console.log('Attendance stored successfully for', moduleCode);
+  //     this.showToast('Attendance recorded successfully.');
+  //   } catch (error) {
+  //     console.error('Error capturing attendance details:', error);
+  //     this.showToast('Error storing attendance. Please try again.');
+  //   }
+  // }
+
+
+
+  
 
 // Method to show a toast notification
 async showToast(message: string) {
@@ -373,6 +482,3 @@ async showToast(message: string) {
   toast.present();  // Display the toast
 }
 }
-
-
-

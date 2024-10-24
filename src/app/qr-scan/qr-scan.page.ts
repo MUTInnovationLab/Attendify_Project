@@ -5,11 +5,28 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 // Define the structure of your module document
 interface Module {
+  modules: any;
   moduleCode: string;
   moduleLevel: string;
   moduleName: string;
   userEmail: string;
   scannerOpenCount?: number; // Optional property for tracking scanner opens
+}
+
+interface ModuleItem {
+  department: string;
+  faculty: string;
+  moduleCode: string;
+  moduleLevel: string;
+  moduleName: string;
+  scannerOpenCount?: number;
+  userEmail: string;
+}
+
+// Interface for the document structure
+interface AssignedLectureDoc {
+  modules: ModuleItem[];
+  [key: string]: any; // For any other fields that might exist in the document
 }
 
 @Component({
@@ -74,35 +91,44 @@ export class QrScanPage implements OnInit {
 
 
   // Firestore function to increment the scanner open count
-incrementScannerOpenCount() {
-  // Query Firestore to find the module document by moduleCode
-  const moduleCollectionRef = this.firestore.collection<Module>('assignedLectures', ref => ref.where('moduleCode', '==', this.moduleCode));
-
-  moduleCollectionRef.get().subscribe(snapshot => {
-    if (snapshot.empty) {
-      console.error('No module document found for the provided module code');
-      return;
-    }
-
-    snapshot.forEach(doc => {
-      const data = doc.data(); // Get the existing document data
-      console.log('Existing Document Data:', data); // Log existing document data
-
-      // Get current count or initialize to 0 if not set
-      const currentCount = (data && data.scannerOpenCount) ? data.scannerOpenCount : 0;
-
-      // Increment scannerOpenCount by 1
-      doc.ref.update({
-        scannerOpenCount: currentCount + 1
-      }).then(() => {
-        console.log('Scanner open count incremented');
-      }).catch(error => {
-        console.error('Error incrementing scanner open count:', error);
+  incrementScannerOpenCount() {
+    const moduleCollectionRef = this.firestore.collection<AssignedLectureDoc>('assignedLectures');
+    
+    moduleCollectionRef.get().subscribe(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data() as AssignedLectureDoc;
+        
+        // Check if document has modules array
+        if (data.modules && Array.isArray(data.modules)) {
+          // Find the index of the module with matching moduleCode
+          const moduleIndex = data.modules.findIndex((module: ModuleItem) => 
+            module.moduleCode === this.moduleCode
+          );
+  
+          // If module is found
+          if (moduleIndex !== -1) {
+            // Create the update object using arrayUnion to update the specific module
+            const modules = data.modules;
+            
+            // Get current count or initialize to 0
+            const currentCount = modules[moduleIndex].scannerOpenCount || 0;
+            
+            // Update the count for the specific module
+            modules[moduleIndex].scannerOpenCount = currentCount + 1;
+            
+            // Update the document with the modified modules array
+            doc.ref.update({
+              modules: modules
+            }).then(() => {
+              console.log(`Scanner open count incremented for module ${this.moduleCode}`);
+            }).catch(error => {
+              console.error('Error updating scanner open count:', error);
+            });
+          }
+        }
       });
+    }, error => {
+      console.error('Error fetching documents:', error);
     });
-  }, error => {
-    console.error('Error fetching module documents:', error);
-  });
-}
-
+  }
 }
