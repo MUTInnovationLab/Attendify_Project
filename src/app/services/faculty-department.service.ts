@@ -42,6 +42,10 @@ export class FacultyDepartmentService {
 
   constructor() {}
 
+
+
+
+  
   // Get all faculties
   getFaculties(): string[] {
     return this.faculties;
@@ -51,4 +55,8 @@ export class FacultyDepartmentService {
   getDepartments(facultyName: string): string[] {
     return this.facultyDepartments[facultyName] || [];
   }
+
+
+
+  
 }

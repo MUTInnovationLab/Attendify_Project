@@ -1,0 +1,130 @@
+/* academia-management.page.scss */
+:host {
+    --page-background: #FFE0B2; // Updated
+    --item-background: #ffffff;
+    --primary-color: #4A3500; // Updated
+    --secondary-color: #EECC8C; // Updated
+}
+  
+ion-header ion-toolbar {
+    --background: var(--primary-color);
+    --color: #ffffff;
+}
+  
+ion-content {
+    --background: var(--page-background);
+}
+  
+.form-container {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+  
+.selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+  
+.custom-item {
+    --background: var(--item-background);
+    --border-color: var(--primary-color);
+    --border-width: 1px;
+    --border-radius: 8px;
+    --padding-start: 10px;
+    --padding-end: 10px;
+    margin-bottom: 10px;
+
+    &.item-has-focus {
+        --border-color: var(--secondary-color);
+    }
+
+    ion-label {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    ion-select, ion-input {
+        --padding-start: 0;
+        --padding-end: 0;
+        color: #333333;
+    }
+}
+  
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+
+    ion-button {
+        margin: 0;
+        --border-radius: 8px;
+        font-weight: 500;
+    }
+}
+  
+.input-fields {
+    margin: 20px 0;
+}
+  
+.fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+  
+.crud-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+
+    ion-button {
+        margin: 0;
+        --border-radius: 8px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+}
+  
+/* Responsive Design */
+@media (max-width: 768px) {
+    .selection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .crud-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .fields-row {
+        grid-template-columns: 1fr;
+    }
+}
+  
+/* Animations */
+ion-item {
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+ion-button {
+    transition: all 0.2s ease;
+
+    &:hover {
+        opacity: 0.9;
+    }
+}
