@@ -14,7 +14,7 @@ import { MakeAnnouncementModule } from './make-announcement/make-announcement.mo
 import { AnnouncementsModule } from './view-announcements/view-announcements.module';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 
 @NgModule({
@@ -22,10 +22,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   imports: [
     BrowserModule, 
     FormsModule, 
+    AngularFirestoreModule, 
     
     IonicModule.forRoot(), 
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
+    
     AngularFirestoreModule,
     AngularFireAuthModule,
     AnnouncementsModule,

@@ -53,10 +53,10 @@ export class DeptAnalyticsPage implements AfterViewInit {
 
   async fetchLecturers() {
     try {
-      const lecturersSnapshot = await this.firestore.collection<Lecturer>('staff', ref => 
-        ref.where('position', '==', 'lecturer')
+      const lecturersSnapshot = await this.firestore.collection<Lecturer>('staff', ref =>
+        ref.where('position', 'in', ['lecturer', 'Lecturer'])
       ).get().toPromise();
-
+  
       if (lecturersSnapshot) {
         this.lecturers = lecturersSnapshot.docs.map(doc => doc.data() as Lecturer);
         this.updateLecturerCount();
@@ -67,6 +67,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
       console.error('Error fetching lecturers:', error);
     }
   }
+  
 
   async fetchAttendedStudents() {
     try {

@@ -1,13 +1,52 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>dept-add</ion-title>
+    <ion-title>HOD-ANALYTICS</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dept-add</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Staff Dashboard</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="grid">
+        <div class="grid-item">
+          <p class="label">Name:</p>
+          <p class="value">{{ staffData?.fullName }}</p>
+        </div>
+        <div class="grid-item">
+          <p class="label">Department:</p>
+          <p class="value">{{ staffData?.department }}</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Module Attendance Overview</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="chart-container">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Assigned Modules</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="grid">
+        <ion-item *ngFor="let module of assignedModules">
+          <ion-label>
+            <h2>Module Code: {{ module.moduleCode }}</h2>
+            <p>Level: {{ module.moduleLevel }}</p>
+          </ion-label>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
