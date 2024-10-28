@@ -164,7 +164,10 @@ export class LoginPage implements OnInit {
   }
 
   navigateBasedOnUserType(userType: string) {
-    switch (userType) {
+    // Convert userType to lowercase
+    const normalizedUserType = userType.toLowerCase();
+  
+    switch (normalizedUserType) {
       case 'student':
         this.navController.navigateForward('/profile');
         break;
@@ -172,6 +175,7 @@ export class LoginPage implements OnInit {
         this.navController.navigateForward('/lecture');
         break;
       case 'dept-admin':
+      case 'hod':  // Adding case for HOD
         this.navController.navigateForward('/admin');
         break;
       default:
@@ -179,6 +183,7 @@ export class LoginPage implements OnInit {
         break;
     }
   }
+  
 
   async presentToast(message: string) {
     const toast = await this.toastController.create({

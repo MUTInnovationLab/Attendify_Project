@@ -298,7 +298,7 @@ export class ProfilePage implements OnInit {
     }
   }
   
-
+  
   
   async updateUserInfo(data: any) {
     const collectionsToUpdate = ['enrolledModules', 'attended', 'students','assignedLectures'];

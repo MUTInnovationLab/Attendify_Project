@@ -111,6 +111,10 @@ const routes: Routes = [
   },  {
     path: 'board',
     loadChildren: () => import('./board/board.module').then( m => m.BoardPageModule)
+  },
+  {
+    path: 'faculty-form',
+    loadChildren: () => import('./faculty-form/faculty-form.module').then( m => m.FacultyFormPageModule)
   }
 
 ];

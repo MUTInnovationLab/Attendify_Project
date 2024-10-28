@@ -9,6 +9,10 @@ import { FacultyDepartmentService } from '../services/faculty-department.service
   styleUrls: ['./super-analytics.page.scss'],
 })
 export class SuperAnalyticsPage implements OnInit {
+
+
+
+  
   facultyName: string = '';
   departmentName: string = '';
   streamName: string = '';
