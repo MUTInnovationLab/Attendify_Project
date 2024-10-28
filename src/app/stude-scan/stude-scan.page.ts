@@ -21,15 +21,8 @@ interface StudentAttendance {
 }
 
 interface AttendanceRecord {
-  [date: string]: StudentAttendance[]; // Dates are string keys, each holding an array of student attendance
+  [date: string]: StudentAttendance[];
 }
-
-interface EnrolledModules {
-  moduleCode: string[];
-  // Add any other fields that you expect in this document
-}
-
-
 
 interface StudentData {
   email: string;
@@ -89,42 +82,155 @@ export class StudeScanPage implements OnInit {
     }
   }
 
-  toggleUserInfo() {
-    this.showUserInfo = !this.showUserInfo;
+  getStudentByEmail(email: string) {
+    return this.firestore
+      .collection<StudentData>('students', ref => 
+        ref.where('email', '==', email))
+      .valueChanges();
   }
 
-  dismiss() {
-    this.router.navigate(['/login']); // Navigate to LecturePage
-  }
-
-  getCurrentUser() {
-    this.auth.onAuthStateChanged((user) => {
-      if (user) {
-        console.log('User signed in:', user.email);
-        this.firestore
-          .collection('enrolledModules', (ref) =>
-            ref.where('email', '==', user.email)
-          )
-          .get()
-          .subscribe(
-            (querySnapshot) => {
-              if (querySnapshot.empty) {
-                console.log('No user found with this email');
+  async getCurrentUser() {
+    return new Promise<StudentData | null>((resolve, reject) => {
+      this.auth.onAuthStateChanged((user) => {
+        if (user && user.email) { // Check if both user and email exist
+          console.log('User signed in:', user.email);
+          
+          this.getStudentByEmail(user.email).subscribe({
+            next: (students) => {
+              if (students && students.length > 0) {
+                this.currentUser = students[0];
+                console.log('Current User:', this.currentUser);
+                resolve(this.currentUser);
               } else {
-                querySnapshot.forEach((doc) => {
-                  this.currentUser = doc.data() as StudentData;
-                  console.log('Current User:', this.currentUser);
-                });
+                console.log('No user found with this email');
+                this.showToast('Student record not found');
+                resolve(null);
               }
             },
-            (error) => {
+            error: (error) => {
               console.error('Error fetching user data:', error);
+              this.showToast('Error fetching student data');
+              reject(error);
             }
-          );
-      } else {
-        console.log('No user is signed in');
-      }
+          });
+        } else {
+          const message = user ? 'User has no email' : 'No user is signed in';
+          console.log(message);
+          resolve(null);
+        }
+      });
     });
+  }
+  
+  // For the search method, add similar null checking:
+  searchStudent() {
+    if (this.email?.trim()) { // Using optional chaining and checking for empty strings
+      this.getStudentByEmail(this.email.trim()).subscribe({
+        next: (students) => {
+          if (students && students.length > 0) {
+            this.student = students[0];
+            console.log("Student found:", this.student);
+          } else {
+            console.error("Student not found in database");
+            this.student = null;
+            this.showToast('No student found with this email');
+          }
+        },
+        error: (error) => {
+          console.error("Error fetching student:", error);
+          this.student = null;
+          this.showToast('Error searching for student');
+        }
+      });
+    } else {
+      console.error("Email not provided or empty");
+      this.showToast('Please provide a valid email address');
+      this.student = null;
+    }
+  }
+
+  // Type guard function to verify StudentData structure
+  private isStudentData(data: unknown): data is StudentData {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+    
+    const candidate = data as Record<string, unknown>;
+    
+    return (
+      typeof candidate['email'] === 'string' &&
+      typeof candidate['name'] === 'string' &&
+      typeof candidate['studentNumber'] === 'string' &&
+      typeof candidate['surname'] === 'string' &&
+      typeof candidate['department'] === 'string'
+    );
+  }
+
+  async CaptureAttendiesDetails(moduleCode: string) {
+    try {
+      if (!this.currentUser?.studentNumber) {
+        this.showToast('Student information not available');
+        return;
+      }
+
+      if (!moduleCode) {
+        this.showToast('Invalid module code');
+        return;
+      }
+
+      const isEnrolled = await this.enrollmentService.checkStudentEnrollment(
+        moduleCode,
+        this.currentUser.studentNumber
+      );
+
+      if (!isEnrolled) {
+        this.showToast('You are not enrolled in this module');
+        return;
+      }
+
+      const date = new Date();
+      const dateString = date.toISOString().split('T')[0];
+      const scanTime = date.toLocaleTimeString();
+
+      const attendanceRef = this.firestore.collection('Attended').doc<AttendanceRecord>(moduleCode);
+      const doc = await attendanceRef.get().toPromise();
+
+      let attendanceData: AttendanceRecord = {};
+
+      if (doc?.exists) {
+        const data = doc.data();
+        if (data) {
+          attendanceData = data;
+        }
+      }
+
+      if (attendanceData[dateString]?.some((record) => 
+        record.studentNumber === this.currentUser.studentNumber
+      )) {
+        this.showToast('You have already recorded attendance for today');
+        return;
+      }
+
+      if (!attendanceData[dateString]) {
+        attendanceData[dateString] = [];
+      }
+
+      attendanceData[dateString].push({
+        studentNumber: this.currentUser.studentNumber,
+        scanTime: scanTime
+      });
+
+      await attendanceRef.set(attendanceData, { merge: true });
+      this.showToast('Attendance recorded successfully');
+
+    } catch (error) {
+      console.error('Error recording attendance:', error);
+      this.showToast('Error recording attendance');
+    }
+  }
+
+  toggleUserInfo() {
+    this.showUserInfo = !this.showUserInfo;
   }
   
   async logout() {

@@ -130,7 +130,7 @@ export class ViewModalComponent implements OnInit {
     }
   }
 
-  
+
   async fetchAvailableModules() {
     console.log('Fetching available modules for department:', this.currentStudent?.department);
     try {
@@ -248,41 +248,33 @@ export class ViewModalComponent implements OnInit {
     }
   }
 
+
+
   async addStudentToModule(module: Module) {
     if (!this.currentStudent) {
       this.presentToast('Student information not available.', 'danger');
       return;
     }
-
+  
     // Check if module is already requested
     if (this.requestedModules.has(module.moduleCode)) {
       this.presentToast(`You have already requested to join ${module.moduleCode}`, 'warning');
       return;
     }
-
+  
     try {
       const batch = firebase.firestore().batch();
-
+  
       const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
-      const moduleStudentsRef = enrolledModulesRef.collection('students');
-
+  
+      // Ensure that we are updating the Enrolled array without creating a subcollection
       batch.set(enrolledModulesRef, {
         Enrolled: firebase.firestore.FieldValue.arrayUnion({
-          status: "pending",
+          status: "pending", // Keep status as "pending" when requesting
           studentNumber: this.currentStudent.studentNumber
         })
       }, { merge: true });
-
-      const studentDocRef = moduleStudentsRef.doc(this.currentStudent.studentNumber);
-      batch.set(studentDocRef, {
-        email: this.currentStudent.email,
-        name: this.currentStudent.name,
-        surname: this.currentStudent.surname,
-        studentNumber: this.currentStudent.studentNumber,
-        moduleCode: module.moduleCode,
-        status: "pending"
-      });
-
+  
       await batch.commit();
       
       // Add the module to requested modules set
@@ -294,6 +286,9 @@ export class ViewModalComponent implements OnInit {
       this.presentToast(`Failed to request joining ${module.moduleCode}.`, 'danger');
     }
   }
+  
+
+  
 
   async submitSelection() {
     if (this.selectedModules.length === 0) {
