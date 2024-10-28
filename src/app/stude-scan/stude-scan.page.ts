@@ -1,12 +1,19 @@
+
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { 
+  AngularFirestore, 
+  AngularFirestoreDocument,
+  DocumentData,
+  QueryDocumentSnapshot
+} from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { NavController, ModalController, AlertController, ToastController, Platform } from '@ionic/angular';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { DataService } from '../services/data.service';
 import { Router } from '@angular/router';
-import jsQR from 'jsqr'; // Add jsQR for web QR code scanning
+import jsQR from 'jsqr';
+import { EnrollmentService } from '../services/enrollment.service';
 
 interface StudentAttendance {
   studentNumber: string;
@@ -22,11 +29,6 @@ interface EnrolledModules {
   // Add any other fields that you expect in this document
 }
 
-interface ModuleData {
-  Enrolled: { studentNumber: string; status: string }[];
-  // Add other properties that your module documents might have
-}
-
 
 
 interface StudentData {
@@ -34,8 +36,17 @@ interface StudentData {
   name: string;
   studentNumber: string;
   surname: string;
-  moduleCode:string;
+  department: string;
 }
+
+interface StudentData {
+  department: string;
+  studentNumber: string;
+  name: string;
+  surname: string;
+  email: string;
+}
+
 
 @Component({
   selector: 'app-stude-scan',
@@ -43,15 +54,15 @@ interface StudentData {
   styleUrls: ['./stude-scan.page.scss'],
 })
 export class StudeScanPage implements OnInit {
-
   showUserInfo = false;
-  currentUser: StudentData = { moduleCode: '' ,email: '', name: '', studentNumber: '', surname: '' };
-
+  currentUser: StudentData = { department: '', email: '', name: '', studentNumber: '', surname: '' };
   email: string = "";
   student: any;
   scanResult: string = '';
   isWeb: boolean;
   videoStream: MediaStream | null = null;
+  isScanning: boolean = true;
+
   @ViewChild('scannerPreview', { static: false }) scannerPreview!: ElementRef<HTMLVideoElement>;
 
   constructor(
@@ -63,9 +74,10 @@ export class StudeScanPage implements OnInit {
     private modalController: ModalController,
     private router: Router,
     private data: DataService,
-    private platform: Platform
+    private platform: Platform,
+    private enrollmentService: EnrollmentService
   ) {
-    this.isWeb = !this.platform.is('capacitor'); // Check if running on web
+    this.isWeb = !this.platform.is('capacitor');
   }
 
   async ngOnInit() {
@@ -86,49 +98,29 @@ export class StudeScanPage implements OnInit {
   }
 
   getCurrentUser() {
-    this.auth.onAuthStateChanged(async (user) => {
+    this.auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('User signed in:', user.email);
-        
-        // First get the student number from students collection using email
-        const studentSnapshot = await this.firestore
-          .collection('students', ref => ref.where('email', '==', user.email))
+        this.firestore
+          .collection('enrolledModules', (ref) =>
+            ref.where('email', '==', user.email)
+          )
           .get()
-          .toPromise();
-  
-        if (studentSnapshot && !studentSnapshot.empty) {
-          const studentData = studentSnapshot.docs[0].data() as StudentData; // Cast to StudentData
-          const studentNumber = studentData.studentNumber;
-  
-          // Get all documents from enrolledModules collection
-          const modulesSnapshot = await this.firestore
-            .collection('enrolledModules')
-            .get()
-            .toPromise();
-  
-          // Go through each module document
-          modulesSnapshot?.forEach(moduleDoc => {
-            const moduleData = moduleDoc.data() as ModuleData; // Cast to ModuleData
-            const moduleCode = moduleDoc.id; // This will be CA100, CF100, etc.
-            
-            // Check the Enrolled array for the student number
-            if (moduleData.Enrolled) {
-              const studentEnrollment = moduleData.Enrolled.find(
-                (enrollment: { studentNumber: string; status: string }) => enrollment.studentNumber === studentNumber
-              );
-  
-              if (studentEnrollment && studentEnrollment.status === 'Enrolled') {
-                this.currentUser = {
-                  ...studentData,
-                  moduleCode: moduleCode
-                } as StudentData;
-                console.log('Current User:', this.currentUser);
+          .subscribe(
+            (querySnapshot) => {
+              if (querySnapshot.empty) {
+                console.log('No user found with this email');
+              } else {
+                querySnapshot.forEach((doc) => {
+                  this.currentUser = doc.data() as StudentData;
+                  console.log('Current User:', this.currentUser);
+                });
               }
+            },
+            (error) => {
+              console.error('Error fetching user data:', error);
             }
-          });
-        } else {
-          console.log('No student found with this email');
-        }
+          );
       } else {
         console.log('No user is signed in');
       }
@@ -165,23 +157,6 @@ export class StudeScanPage implements OnInit {
     });
 
     await alert.present();  // Display the alert dialog
-  }
-
-  searchStudent() {
-    if (this.email) {
-      this.data.getStudentByEmail(this.email).subscribe(data => {
-        if (data.length > 0) {
-          this.student = data[0];
-          console.log("Student found:", this.student);
-        } else {
-          console.error("Current user not found in database");
-          this.student = null;
-        }
-      });
-    } else {
-      console.error("Email not found in user profile");
-      this.student = null;
-    }
   }
 
   async startScan() {
@@ -261,6 +236,7 @@ export class StudeScanPage implements OnInit {
           if (code) {
             console.log("QR code detected:", code.data);
             this.scanResult = code.data;
+
             this.CaptureAttendiesDetails(this.scanResult);
             this.stopScan();
           } else {
@@ -278,7 +254,7 @@ export class StudeScanPage implements OnInit {
   }
 
 
-  isScanning: boolean = true;  // Initially scanning is active
+  // isScanning: boolean = true;  // Initially scanning is active
 
   stopScan() {
     if (this.isWeb) {
@@ -296,98 +272,6 @@ export class StudeScanPage implements OnInit {
     this.isScanning = false;
   }
 
-
-
-async CaptureAttendiesDetails(moduleCode: string = "") {
-  // Check if student information is available
-  if (!this.student) {
-    console.error('Student information not available.');
-    this.showToast('Student information not available.');
-    return;
-  }
-
-  // Check if the module code is provided
-  if (!moduleCode) {
-    console.error('Module code not provided.');
-    this.showToast('Module code not provided.');
-    return;
-  }
-
-  // Check if the student is enrolled in the module
-  const enrolledModulesRef = this.firestore.collection('enrolledModules').doc(this.student.studentNumber.toString());
-  const enrolledDoc = await enrolledModulesRef.get().toPromise();
-
-  // Ensure enrolledDoc is defined before proceeding
-  if (!enrolledDoc || !enrolledDoc.exists) {
-    console.error('Student is not enrolled in any modules.');
-    this.showToast('You are not enrolled in this module.');
-    return;
-  }
-
-  // Cast to EnrolledModules type
-  const enrolledData = enrolledDoc.data() as EnrolledModules;
-  const existingModuleCodes = enrolledData?.moduleCode || [];
-
-  if (!existingModuleCodes.includes(moduleCode)) {
-    console.error('Student is not enrolled in the specified module.');
-    this.showToast('You are not enrolled in this module.');
-    return;
-  }
-
-  // Capture current date and time
-  const date = new Date();
-  const dateString = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-  const scanTime = date.toLocaleTimeString(); // Example: "10:15 AM"
-
-  // Prepare the attendance details object
-  const studentAttendance: StudentAttendance = {
-    studentNumber: this.student.studentNumber,
-    scanTime: scanTime
-  };
-
-  try {
-    const attendanceRef = this.firestore.collection('Attended').doc(moduleCode);
-    const doc = await attendanceRef.get().toPromise();
-
-    // Initialize an empty object for existing attendance records
-    let existingData: AttendanceRecord = {};
-
-    // Check if the document for the module exists
-    if (doc && doc.exists) {
-      existingData = doc.data() as AttendanceRecord; // Explicitly cast doc data to AttendanceRecord type
-    }
-
-    // Check if there are existing records for today's date
-    if (existingData[dateString]) {
-      // Find if the student has already scanned today
-      const alreadyScanned = existingData[dateString].some(attendance => attendance.studentNumber === this.student.studentNumber);
-
-      if (alreadyScanned) {
-        console.error('Student has already scanned today.');
-        this.showToast('You have already scanned in for today.');
-        return; // Exit early to prevent duplicate scan
-      }
-
-      // If student hasn't scanned today, add them to the list
-      existingData[dateString].push(studentAttendance);
-    } else {
-      // If no records exist for today, create a new entry
-      existingData[dateString] = [studentAttendance];
-    }
-
-    // Update the document with the new details
-    await attendanceRef.set(existingData, { merge: true });
-
-    console.log('Attendance stored successfully for', moduleCode);
-    this.showToast('Attendance recorded successfully.');
-  } catch (error) {
-    console.error('Error storing attendance details:', error);
-    this.showToast('Error storing attendance. Please try again.');
-  }
-}
-
-
-
 // Method to show a toast notification
 async showToast(message: string) {
   const toast = await this.toastController.create({
@@ -398,6 +282,25 @@ async showToast(message: string) {
   toast.present();  // Display the toast
 }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

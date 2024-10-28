@@ -9,11 +9,12 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { environment } from '../environments/environment';
 import { ViewModalModule } from './view-modal/view-modal.module';
-import { FormsModule } from '@angular/forms';
+
 import { MakeAnnouncementModule } from './make-announcement/make-announcement.module'; // Import the MakeAnnouncementModule
 import { AnnouncementsModule } from './view-announcements/view-announcements.module';
 import { HttpClientModule } from '@angular/common/http';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 
 @NgModule({
@@ -21,12 +22,16 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [
     BrowserModule, 
     FormsModule, 
+    AngularFirestoreModule, 
+    
     IonicModule.forRoot(), 
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
+    
     AngularFirestoreModule,
     AngularFireAuthModule,
     AnnouncementsModule,
+    ReactiveFormsModule,
     HttpClientModule,
     MakeAnnouncementModule // Include MakeAnnouncementModule in the imports array
    
@@ -37,3 +42,7 @@ import { HttpClientModule } from '@angular/common/http';
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+
+
+

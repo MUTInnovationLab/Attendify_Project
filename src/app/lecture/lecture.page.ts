@@ -232,11 +232,6 @@ export class LecturePage implements OnInit {
 
   
 
-  
-
-
-
-
 
   searchStudents(term: string) {
     this.searchTerm = term;
@@ -462,7 +457,7 @@ export class LecturePage implements OnInit {
   }
 
 
-
+  
 async deleteModule() {
   if (!this.selectedModuleId) {
     alert('No module selected for deletion.');
@@ -594,3 +589,5 @@ async deleteModule() {
     this.router.navigate(['profile']);
   }
 }     
+
+

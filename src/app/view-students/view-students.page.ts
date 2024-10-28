@@ -102,6 +102,8 @@ export class ViewStudentsPage implements OnInit {
           }
         });
       }
+
+     
       
       console.log('Modules for student:', modules);
       return modules;

@@ -88,23 +88,28 @@ export class AdminPage implements OnInit {
       this.presentToast('Please fill in all fields');
       return;
     }
-
+  
     const loader = await this.loadingController.create({
       message: 'Signing up',
       cssClass: 'custom-loader-class'
     });
     await loader.present();
-
+  
     this.auth.createUserWithEmailAndPassword(this.email, this.staffNumber)
       .then(userCredential => {
+        // Set position to 'Lecturer' if it's 'lecturer' (case-insensitive)
+        const position = this.position.trim().toLowerCase() === 'lecturer' ? 'Lecturer' : this.position;
+  
+        // Add the new staff member to Firestore
         this.firestore.collection('staff').doc(this.staffNumber).set({
           staffNumber: this.staffNumber,
           email: this.email,
           fullName: this.fullName,
-          position: this.position,
+          position: position,
           faculty: this.selectedFaculty,
           department: this.selectedDepartment
         });
+  
         loader.dismiss();
         this.closeLecturerModal();
         this.presentToast("Successfully registered!");
@@ -112,7 +117,7 @@ export class AdminPage implements OnInit {
       .catch(error => {
         loader.dismiss();
         let errorMessage = error.message;
-
+  
         switch (errorMessage) {
           case "Firebase: The email address is badly formatted. (auth/invalid-email).":
             this.presentToast("Badly formatted email");
@@ -128,7 +133,7 @@ export class AdminPage implements OnInit {
         }
       });
   }
-
+  
   async addModule() {
     if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.selectedDepartment) {
       this.presentToast('Please fill in all fields');
@@ -176,6 +181,6 @@ export class AdminPage implements OnInit {
   }
 
   goBack() {
-    this.navCtrl.navigateBack('/event');
+    this.navCtrl.navigateBack('/dept-add');
   }
 }
