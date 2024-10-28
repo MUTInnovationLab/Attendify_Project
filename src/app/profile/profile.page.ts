@@ -415,26 +415,15 @@ export class ProfilePage implements OnInit {
           studentNumber: data.studentNumber,
           email: data.email
         };
-  
-        // If it's the enrolledModules collection, handle it differently
-        if (collectionName !== 'students') {
-          const currentData = doc.data() as StudentData;
-          if (currentData.moduleCode) {
-            updatedData.moduleCode = currentData.moduleCode;
-          }
-        }
-  
+
         batch.update(doc.ref, updatedData);
       });
     }
-  
-    // Update in  collection for each module the student is enrolled in
-    if (this.currentUser.moduleCode) {
-      for (const moduleCode of this.currentUser.moduleCode) {
+
+    if (this.currentUser.enrolledModules) {
+      for (const moduleCode of this.currentUser.enrolledModules) {
         const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
-        const studentsRef = moduleRef.collection(moduleCode);
-  
-        const studentQuerySnapshot = await studentsRef.ref.where('studentNumber', '==', this.currentUser.studentNumber).get();
+        const enrolledArray = moduleRef.get();
         
         if (enrolledArray) {
           enrolledArray.forEach((doc) => {

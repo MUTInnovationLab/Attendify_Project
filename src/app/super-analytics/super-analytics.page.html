@@ -35,6 +35,13 @@
         </ion-select>
       </ion-item>
 
+
+      <ion-item *ngIf="facultyName" class="form-item">
+        <ion-icon name="book-outline" slot="start"></ion-icon>
+        <ion-label position="floating">Course Name</ion-label>
+        <ion-input [(ngModel)]="courseName" placeholder="Enter Course Name" class="custom-input"></ion-input>
+      </ion-item>
+
       <!-- Stream Input -->
       <ion-item class="form-item">
         <ion-icon name="trail-sign-outline" slot="start"></ion-icon>
@@ -48,6 +55,14 @@
         <ion-label position="floating">Module Name</ion-label>
         <ion-input [(ngModel)]="moduleName" placeholder="Enter Module Name" class="custom-input"></ion-input>
       </ion-item>
+
+      <!-- Module Code Input -->
+<ion-item class="form-item">
+  <ion-icon name="document-text-outline" slot="start"></ion-icon>
+  <ion-label position="floating">Module Code</ion-label>
+  <ion-input [(ngModel)]="moduleCode" placeholder="Enter Module Code" class="custom-input"></ion-input>
+</ion-item>
+
 
       <!-- Credits Input -->
       <ion-item class="form-item">
@@ -64,10 +79,12 @@
       </ion-item>
 
       <!-- Add Module Button -->
-      <ion-button expand="full" class="submit-button">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Add Module
-      </ion-button>
+      <!-- Add Module Button -->
+<ion-button expand="full" class="submit-button" (click)="addModule()">
+  <ion-icon name="add-outline" slot="start"></ion-icon>
+  Add Module
+</ion-button>
+
     </ion-card-content>
   </ion-card>
 </ion-content>
