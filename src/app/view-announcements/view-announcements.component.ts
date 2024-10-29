@@ -14,7 +14,7 @@ interface Announcement {
 }
 
 interface StudentRegistration {
-  email: string;
+  studentNumber: string; // Ensure this matches your Firestore structure
   moduleCode: string[];
 }
 
@@ -30,7 +30,7 @@ interface RegisteredStaff {
 })
 export class ViewAnnouncementsComponent implements OnInit {
   announcements: Announcement[] = [];
-  studentEmail: string | null = null;
+  studentNumber: string | null = null;
 
   constructor(
     private firestore: AngularFirestore,
@@ -41,27 +41,51 @@ export class ViewAnnouncementsComponent implements OnInit {
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
-      if (user && user.email) {
-        this.studentEmail = user.email;
-        const moduleCodes = await this.getStudentModuleCodes(this.studentEmail);
-        
-        if (moduleCodes.length > 0) {
-          await this.fetchAnnouncements(moduleCodes);
+      if (user) {
+        // Fetch the student registration data from Firestore
+        this.studentNumber = await this.getStudentNumber(user.uid); // Use user.uid to fetch from Firestore
+
+        if (this.studentNumber) {
+          const moduleCodes = await this.getStudentModuleCodes(this.studentNumber);
+          
+          if (moduleCodes.length > 0) {
+            await this.fetchAnnouncements(moduleCodes);
+          } else {
+            console.log('No modules found for the student with number:', this.studentNumber);
+          }
         } else {
-          console.log('No modules found for the student with email:', this.studentEmail);
+          console.log('Student number is null.');
         }
       } else {
-        console.log('No user is logged in or email is missing.');
+        console.log('No user is logged in.');
       }
     } catch (error) {
       console.error('Error in ngOnInit:', error);
     }
   }
 
-  async getStudentModuleCodes(email: string): Promise<string[]> {
+  // Function to retrieve the student number from Firestore based on the user's UID
+  async getStudentNumber(uid: string): Promise<string | null> {
+    try {
+      const userSnapshot = await this.firestore.collection<StudentRegistration>('students') // Adjust the collection name as needed
+        .ref.where('uid', '==', uid).limit(1).get();
+
+      if (!userSnapshot.empty) {
+        return userSnapshot.docs[0].data().studentNumber; // Ensure this field exists in your Firestore data
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching student number:', error);
+      return null;
+    }
+  }
+
+  async getStudentModuleCodes(studentNumber: string): Promise<string[]> {
     try {
       const studentSnapshot = await this.firestore.collection<StudentRegistration>('enrolledModules')
-        .ref.where('email', '==', email).get();
+        .ref.where('studentNumber', '==', studentNumber).get();
+      
+      console.log('Student snapshot:', studentSnapshot.docs);
 
       if (!studentSnapshot.empty) {
         const moduleCodes: string[] = [];
@@ -71,6 +95,7 @@ export class ViewAnnouncementsComponent implements OnInit {
             moduleCodes.push(...data.moduleCode);
           }
         });
+        console.log('Module Codes:', moduleCodes);
         return moduleCodes;
       }
       return [];
@@ -103,7 +128,7 @@ export class ViewAnnouncementsComponent implements OnInit {
 
   async getFullNameByEmail(email: string): Promise<string> {
     try {
-      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('registeredStaff')
+      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('staff')
         .ref.where('email', '==', email).limit(1).get();
 
       if (!staffSnapshot.empty) {

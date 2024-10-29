@@ -1,48 +1,5 @@
-.grid {
-
-  display: flex;
-  
-  justify-content: space-between;
-  
-  margin: 10px 0;
-  
-  }
-  
-  
-  .grid-item {
-  
-  flex: 1;
-  
-  margin-right: 10px;
-  
-  }
-  
-  
-  .grid-item:last-child {
-  
-  margin-right: 0;
-  
-  }
-  
-  
-  .chart-container {
-  
-  position: relative;
-  
-  height: 400px; /* Adjust the height as needed */
-  
-  width: 100%;
-  
-  }
-  
-  
-  label {
-  
-  font-weight: bold;
-  
-  }
-  
-  
-  .value {
-  
-  font-size: 1.2em;}
+canvas {
+  width: 100% !important;
+  max-width: 600px;
+  margin: auto;
+}

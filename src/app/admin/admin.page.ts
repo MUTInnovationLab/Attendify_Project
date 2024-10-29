@@ -181,6 +181,6 @@ export class AdminPage implements OnInit {
   }
 
   goBack() {
-    this.navCtrl.navigateBack('/dashboard');
+    this.navCtrl.navigateBack('/dept-add');
   }
 }

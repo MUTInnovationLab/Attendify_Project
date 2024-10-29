@@ -375,7 +375,6 @@ export class LecturePage implements OnInit {
 
 
 
-
   async addModule() {
     if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.department) {
       alert('Please fill in all fields before submitting.');
