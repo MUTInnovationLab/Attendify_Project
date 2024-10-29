@@ -120,11 +120,11 @@ export class DeptAnPage implements OnInit {
   }
 
   navigateToLogin() {
-    this.router.navigate(['/login']);  // Adjust the path as needed
+    this.router.navigate(['/dashboard']);  // Adjust the path as needed
   }
 
   navigateToDeptAnalysis() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dept-analytics']);
   }
 
   searchLecturers() {

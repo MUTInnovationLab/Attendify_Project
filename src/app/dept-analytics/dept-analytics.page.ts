@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 Chart.register(...registerables);
@@ -39,7 +40,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
   selectedFaculty: string = 'All';
   faculties: string[] = ['All','Faculty of ICT', 'Faculty of Engineering', 'Faculty of Management Science', 'Faculty of Applied and Health Science'];
 
-  constructor(private firestore: AngularFirestore) {}
+  constructor(private firestore: AngularFirestore, private router: Router) {}
 
   ngAfterViewInit() {
     this.fetchData();
@@ -49,6 +50,10 @@ export class DeptAnalyticsPage implements AfterViewInit {
     await this.fetchLecturers();
     await this.fetchAttendedStudents();
     this.createCharts();
+  }
+
+  navigateToDeptAnalysis() {
+    this.router.navigate(['/dept-an']);
   }
 
   async fetchLecturers() {
