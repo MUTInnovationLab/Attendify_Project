@@ -1,7 +1,6 @@
-<!-- academia-management.page.html -->
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Faculty  Management</ion-title>
+    <ion-title>Faculty Management</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,8 +11,8 @@
       <ion-item class="custom-item">
         <ion-label position="floating">Select Faculty</ion-label>
         <ion-select formControlName="faculty" interface="action-sheet">
-          <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">
-            {{faculty}}
+          <ion-select-option *ngFor="let faculty of faculties" [value]="faculty.id">
+            {{faculty.id}}
           </ion-select-option>
         </ion-select>
       </ion-item>
@@ -21,16 +20,16 @@
       <ion-item class="custom-item">
         <ion-label position="floating">Select Department</ion-label>
         <ion-select formControlName="department" interface="action-sheet">
-          <ion-select-option *ngFor="let department of departments" [value]="department">
-            {{department}}
+          <ion-select-option *ngFor="let dept of selectedFaculty?.departments" [value]="dept.name">
+            {{dept.name}}
           </ion-select-option>
         </ion-select>
       </ion-item>
 
       <ion-item class="custom-item">
-        <ion-label position="floating">Select Stream</ion-label>
+        <ion-label position="floating">Select Stream (Optional)</ion-label>
         <ion-select formControlName="stream" interface="action-sheet">
-          <ion-select-option *ngFor="let stream of streams" [value]="stream">
+          <ion-select-option *ngFor="let stream of availableStreams" [value]="stream">
             {{stream}}
           </ion-select-option>
         </ion-select>
@@ -38,39 +37,29 @@
 
       <ion-item class="custom-item">
         <ion-label position="floating">Select Module</ion-label>
-        <ion-select formControlName="module" interface="action-sheet">
-          <ion-select-option *ngFor="let module of modules" [value]="module.module">
-            {{module.module}}
+        <ion-select formControlName="selectedModule" interface="action-sheet">
+          <ion-select-option *ngFor="let module of modules" [value]="module.moduleCode">
+            {{module.moduleName}} ({{module.moduleCode}})
           </ion-select-option>
         </ion-select>
       </ion-item>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <ion-button expand="block" (click)="populate()" color="tertiary">
-        POPULATE
-      </ion-button>
-      <ion-button expand="block" (click)="clear()" color="medium">
-        CLEAR
-      </ion-button>
-    </div>
-
-    <!-- Input Fields -->
-    <div class="input-fields">
-      <ion-item class="custom-item">
-        <ion-label position="floating">Faculty Name</ion-label>
-        <ion-input formControlName="facultyName" type="text"></ion-input>
-      </ion-item>
-
-      <ion-item class="custom-item">
-        <ion-label position="floating">Department Name</ion-label>
-        <ion-input formControlName="departmentName" type="text"></ion-input>
-      </ion-item>
-
+    <!-- Module Details Form -->
+    <div formGroupName="moduleDetails" class="input-fields">
       <ion-item class="custom-item">
         <ion-label position="floating">Module Name</ion-label>
         <ion-input formControlName="moduleName" type="text"></ion-input>
+      </ion-item>
+
+      <ion-item class="custom-item">
+        <ion-label position="floating">Module Code</ion-label>
+        <ion-input formControlName="moduleCode" type="text"></ion-input>
+      </ion-item>
+
+      <ion-item class="custom-item">
+        <ion-label position="floating">Module Level</ion-label>
+        <ion-input formControlName="moduleLevel" type="text"></ion-input>
       </ion-item>
 
       <div class="fields-row">
@@ -86,16 +75,17 @@
       </div>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <ion-button expand="block" (click)="clear()" color="medium">
+        CLEAR
+      </ion-button>
+    </div>
+
     <!-- CRUD Buttons -->
     <div class="crud-buttons">
-      <ion-button expand="block" (click)="addModule()" color="success">
+      <ion-button expand="block" (click)="addModule()" color="success" [disabled]="!academiaForm.valid">
         ADD
-      </ion-button>
-      <ion-button expand="block" color="warning">
-        UPDATE
-      </ion-button>
-      <ion-button expand="block" color="danger">
-        DELETE
       </ion-button>
     </div>
   </form>

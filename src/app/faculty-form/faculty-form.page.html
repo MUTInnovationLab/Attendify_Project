@@ -1,25 +1,23 @@
-<!-- faculty.page.html -->
 <ion-header>
   <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
     <ion-title>Add Faculty</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- <ion-item>
-    <ion-label position="floating">Faculty ID</ion-label>
-    <ion-input [(ngModel)]="faculty.id" type="text"></ion-input>
-  </ion-item> -->
+  <!-- Your existing content -->
   <ion-item>
     <ion-label>Select Faculty</ion-label>
-    <ion-select [(ngModel)]="faculty.id"  placeholder="Choose Faculty">
+    <ion-select [(ngModel)]="faculty.id" placeholder="Choose Faculty">
       <ion-select-option value="Faculty of Management Science">Management Science</ion-select-option>
       <ion-select-option value="Faculty of Engineering">Engineering</ion-select-option>
-      <ion-select-option value="Faculty of Applied and Health Science"> Applied and Health Science</ion-select-option>
+      <ion-select-option value="Faculty of Applied and Health Science">Applied and Health Science</ion-select-option>
     </ion-select>
   </ion-item>
   
-
   <ion-list>
     <ion-list-header>
       <ion-label>Departments</ion-label>
@@ -50,11 +48,6 @@
         </ion-item-divider>
 
         <ion-item-group *ngFor="let stream of department.streams![streamKey]; let si = index">
-          <!-- <ion-item>
-            <ion-label position="floating">Credits</ion-label>
-            <ion-input [(ngModel)]="stream.credits" type="number"></ion-input>
-          </ion-item> -->
-
           <ion-item>
             <ion-label position="floating">Year</ion-label>
             <ion-input [(ngModel)]="stream.name" type="text"></ion-input>

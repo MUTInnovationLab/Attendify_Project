@@ -254,7 +254,7 @@ export class DashboardPage {
   }
 
   nabigateToAddModule() {
-    this.navCtrl.navigateForward('/super-analytics'); 
+    this.navCtrl.navigateForward('/faculty-form'); 
   }
 
   departmentsAnalytics = [

@@ -13,6 +13,7 @@ export interface Faculty {
   }
   
   export interface Stream {
+    name: any;
     module: string;  // The name of the module, e.g., 'Networking' or 'Anim'
     credits: number;  // Number of credits for the module
     year: string;  // Year of study, e.g., 'Y1' or '1'

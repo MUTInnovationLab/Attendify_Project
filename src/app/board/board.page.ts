@@ -1,7 +1,31 @@
 import { Component, OnInit } from '@angular/core';
-import { FacultyService } from '../services/faculty.service';
-import { ToastController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastController, LoadingController } from '@ionic/angular';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+
+interface Module {
+  moduleName: string;
+  moduleCode: string;
+  moduleLevel: string;
+  credits?: number;
+  year?: number;
+}
+
+interface Stream {
+  name: string;
+  modules: Module[];
+}
+
+interface Department {
+  name: string;
+  modules?: Module[];
+  streams?: { [key: string]: Stream[] };
+}
+
+interface Faculty {
+  id: string;
+  departments: Department[];
+}
 
 @Component({
   selector: 'app-board',
@@ -9,16 +33,20 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./board.page.scss'],
 })
 export class BoardPage implements OnInit {
-  academiaForm!: FormGroup; // Using definite assignment assertion
-  faculties: string[] = [];
-  departments: string[] = [];
-  streams: string[] = [];
-  modules: any[] = [];
+  academiaForm!: FormGroup;
+  faculties: Faculty[] = [];
+  selectedFaculty: Faculty | null = null;
+  selectedDepartment: Department | null = null;
+  selectedStream: Stream | null = null;
+  availableStreams: string[] = [];
+  
+  modules: Module[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private facultyService: FacultyService,
-    private toastController: ToastController
+    private firestore: AngularFirestore,
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController
   ) {
     this.initForm();
   }
@@ -33,104 +61,155 @@ export class BoardPage implements OnInit {
       faculty: ['', Validators.required],
       department: ['', Validators.required],
       stream: [''],
-      module: ['', Validators.required],
-      facultyName: ['', Validators.required],
-      departmentName: ['', Validators.required],
-      moduleName: ['', Validators.required],
-      credits: ['', [Validators.required, Validators.min(1)]],
-      year: ['', Validators.required]
+      selectedModule: ['', Validators.required], // New module selection control
+      moduleDetails: this.fb.group({
+        moduleName: ['', Validators.required],
+        moduleCode: ['', Validators.required],
+        moduleLevel: ['', Validators.required],
+        credits: [null, [Validators.required, Validators.min(1)]],
+        year: [null, Validators.required]
+      })
     });
   }
 
   private setupFormListeners() {
-    this.academiaForm.get('faculty')?.valueChanges.subscribe(faculty => {
-      if (faculty) {
-        this.loadDepartments(faculty);
+    this.academiaForm.get('faculty')?.valueChanges.subscribe(facultyId => {
+      if (facultyId) {
+        this.selectedFaculty = this.faculties.find(f => f.id === facultyId) || null;
+        this.academiaForm.patchValue({ department: '', stream: '', selectedModule: '' });
       }
     });
 
-    this.academiaForm.get('department')?.valueChanges.subscribe(department => {
-      if (department) {
-        const faculty = this.academiaForm.get('faculty')?.value;
-        if (faculty) {
-          this.loadStreams(faculty, department);
-        }
+    this.academiaForm.get('department')?.valueChanges.subscribe(deptName => {
+      if (deptName && this.selectedFaculty) {
+        this.selectedDepartment = this.selectedFaculty.departments.find(d => d.name === deptName) || null;
+        this.availableStreams = this.selectedDepartment?.streams ? Object.keys(this.selectedDepartment.streams) : [];
+        this.academiaForm.patchValue({ stream: '', selectedModule: '' });
+        this.loadModules(); // Load modules based on the selected department
       }
     });
 
-    this.academiaForm.get('stream')?.valueChanges.subscribe(stream => {
-      if (stream) {
-        const faculty = this.academiaForm.get('faculty')?.value;
-        const department = this.academiaForm.get('department')?.value;
-        if (faculty && department) {
-          this.loadModules(faculty, department, stream);
-        }
+    this.academiaForm.get('stream')?.valueChanges.subscribe(streamKey => {
+      if (streamKey && this.selectedDepartment?.streams?.[streamKey]) {
+        this.selectedStream = this.selectedDepartment.streams[streamKey][0];
+      } else {
+        this.selectedStream = null;
       }
+      this.loadModules(); // Load modules based on the selected stream
     });
   }
 
-  private loadFaculties() {
-    this.facultyService.getFaculties().subscribe(data => {
-      this.faculties = data;
-    });
-  }
-
-  private loadDepartments(faculty: string) {
-    this.facultyService.getDepartments(faculty).subscribe(data => {
-      this.departments = data;
-    });
-  }
-
-  private loadStreams(faculty: string, department: string) {
-    this.facultyService.getStreams(faculty, department).subscribe(data => {
-      this.streams = data;
-    });
-  }
-
-  private loadModules(faculty: string, department: string, stream: string) {
-    this.facultyService.getModules(faculty, department, stream).subscribe(data => {
-      this.modules = data;
-    });
-  }
-
-  async populate() {
-    const selectedModule = this.modules.find(m => m.module === this.academiaForm.get('module')?.value);
-    if (selectedModule) {
-      this.academiaForm.patchValue({
-        facultyName: this.academiaForm.get('faculty')?.value,
-        departmentName: this.academiaForm.get('department')?.value,
-        moduleName: selectedModule.module,
-        credits: selectedModule.credits,
-        year: selectedModule.year
-      });
+  private loadModules() {
+    if (this.selectedDepartment) {
+      this.modules = this.selectedDepartment.modules || [];
+      if (this.selectedStream) {
+        const streamModules = this.selectedDepartment.streams?.[this.selectedStream.name]?.[0].modules || [];
+        this.modules = [...this.modules, ...streamModules]; // Combine department and stream modules
+      }
     }
+  }
+
+  async loadFaculties() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading faculties...'
+    });
+    await loading.present();
+
+    try {
+      const snapshot = await this.firestore.collection('faculties').get().toPromise();
+      this.faculties = snapshot?.docs.map(doc => {
+        const data = doc.data() as Faculty; // Cast to Faculty
+        const { id: _, ...facultyData } = data; // Remove id from data
+        return {
+          id: doc.id,
+          ...facultyData // No conflict here
+        };
+      }) || [];
+    } catch (error: any) {
+      this.showToast('Error loading faculties: ' + error.message, 'danger');
+    } finally {
+      loading.dismiss();
+    }
+  }
+
+  async addModule() {
+    if (!this.academiaForm.valid) {
+        this.showToast('Please fill in all required fields', 'warning');
+        return;
+    }
+  
+    const loading = await this.loadingCtrl.create({
+        message: 'Adding module...'
+    });
+    await loading.present();
+  
+    try {
+        const formValue = this.academiaForm.value;
+        const moduleData: Module = {
+            ...formValue.moduleDetails,
+        };
+  
+        const facultyRef = this.firestore.collection('faculties').doc(formValue.faculty);
+        const faculty = await facultyRef.get().toPromise();
+        const facultyData = faculty?.data() as Faculty;
+  
+        const departmentIndex = facultyData.departments.findIndex(d => d.name === formValue.department);
+  
+        // Check if departmentIndex is valid
+        if (departmentIndex === -1) {
+            this.showToast('Department not found', 'danger');
+            return;
+        }
+  
+        if (formValue.stream) {
+            // Check if the stream exists before trying to access its modules
+            const stream = facultyData.departments[departmentIndex].streams?.[formValue.stream];
+  
+            if (stream) {
+                // Initialize modules if necessary
+                if (!stream[0].modules) {
+                    stream[0].modules = []; // Ensure modules array exists
+                }
+                stream[0].modules.push(moduleData);
+            }
+        } else {
+            // Ensure modules array exists in the department
+            const department = facultyData.departments[departmentIndex];
+  
+            // Initialize if undefined
+            if (!department.modules) {
+                department.modules = []; // Create an empty array if undefined
+            }
+  
+            // Now it's safe to push the module into the department's modules array
+            department.modules.push(moduleData);
+        }
+  
+        // Save back to Firestore
+        await facultyRef.update(facultyData);
+        this.showToast('Module added successfully!', 'success');
+    } catch (error: any) {
+        this.showToast('Error adding module: ' + error.message, 'danger');
+    } finally {
+        loading.dismiss();
+    }
+}
+
+  async showToast(message: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      color,
+      duration: 2000
+    });
+    toast.present();
   }
 
   clear() {
     this.academiaForm.reset();
-  }
-
-  async addModule() {
-    if (this.academiaForm.valid) {
-      try {
-        await this.facultyService.addModule(this.academiaForm.value);
-        this.showToast('Module added successfully');
-        this.clear();
-      } catch (error) {
-        this.showToast('Error adding module');
-      }
-    } else {
-      this.showToast('Please fill in all required fields');
-    }
-  }
-
-  private async showToast(message: string) {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      position: 'bottom',
-      color: 'dark'
-    });
-    toast.present();
+    this.modules = [];
+    this.selectedFaculty = null;
+    this.selectedDepartment = null;
+    this.selectedStream = null;
+    this.availableStreams = [];
   }
 }
