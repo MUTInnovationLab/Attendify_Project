@@ -1,12 +1,20 @@
 <ion-header class="analytics-header">
   <ion-toolbar>
-    <ion-button slot="start" [routerLink]="['/dashboard']" class="back-button">
+    <!-- <ion-button slot="start" [routerLink]="['/dept-an']" class="back-button"> -->
+
+      <ion-buttons slot="start">
+        <ion-button (click)="navigateToDeptAnalysis()">
+          <ion-icon name="analytics-outline"></ion-icon>
+          <ion-label>Dept Analysis</ion-label>
+        </ion-button>
+      </ion-buttons>
+<!-- 
       <ion-icon name="arrow-back"></ion-icon>
     </ion-button>
     <ion-title>
       <ion-icon name="analytics-outline"></ion-icon>
       Department Analytics
-    </ion-title>
+    </ion-title> -->
   </ion-toolbar>
 </ion-header>
 

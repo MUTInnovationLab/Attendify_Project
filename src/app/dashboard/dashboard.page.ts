@@ -255,6 +255,7 @@ export class DashboardPage {
 
   nabigateToAddModule() {
     this.navCtrl.navigateForward('/faculty-form'); 
+    this.navCtrl.navigateForward('/admin'); 
   }
 
   departmentsAnalytics = [
