@@ -174,12 +174,23 @@ export class LecturePage implements OnInit {
       alert('Please select a module first.');
       return;
     }
-
+  
     this.showAddStudentsModal = true;
+    
+    // Find the selected module
     this.selectedModule = this.tableData.find(module => module.id === this.selectedModuleId);
+    
+    // Check if the selected module has a department
+    if (!this.selectedModule || !this.selectedModule.department) {
+      alert('The selected module does not have an associated department.');
+      return;
+    }
+  
+    // Fetch existing and registered students
     await this.fetchExistingStudents();
-    await this.fetchRegisteredStudents();
+    await this.fetchRegisteredStudents(this.selectedModule.department); // Fetch registered students based on the module's department
   }
+  
 
   closeAddStudentsModal() {
     this.showAddStudentsModal = false;
@@ -207,17 +218,19 @@ export class LecturePage implements OnInit {
     }
   }
 
-  async fetchRegisteredStudents() {
+  async fetchRegisteredStudents(department: string) {
     try {
-      const snapshot = await this.db.collection('students').get().toPromise();
+      const snapshot = await this.db.collection('students', ref => ref.where('department', '==', department)).get().toPromise();
+      
       if (snapshot) {
         this.registeredStudents = snapshot.docs
           .map(doc => ({
             id: doc.id,
-            ...(doc.data() as { email: string; name: string; surname: string; studentNumber: string }),
+            ...(doc.data() as { email: string; name: string; surname: string; studentNumber: string; department: string }),
             selected: false
           }))
           .filter(student => !this.existingStudents.has(student.id)); // Filter out existing students
+        
         this.filteredStudents = [...this.registeredStudents];
       } else {
         this.registeredStudents = [];
@@ -228,6 +241,7 @@ export class LecturePage implements OnInit {
       alert('An error occurred while fetching registered students.');
     }
   }
+  
 
   
 
