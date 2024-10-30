@@ -83,9 +83,9 @@
     </table>
   
     <div class="action-buttons">
-      <ion-button fill="solid" (click)="showAddCard = !showAddCard" class="add-btn">
-        <ion-icon [name]="showAddCard ? 'close-outline' : 'add-outline'" slot="start"></ion-icon>
-        {{ showAddCard ? 'Close' : 'Add' }}
+      <ion-button fill="solid" (click)="navigateToBoard()" class="add-btn">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add
       </ion-button>
       <ion-button fill="solid" color="primary" (click)="viewStudents()" class="view-students-btn">
         <ion-icon name="people-circle-outline" slot="start"></ion-icon>

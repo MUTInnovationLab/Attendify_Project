@@ -94,6 +94,11 @@ export class LecturePage implements OnInit {
   }
 
 
+  navigateToBoard() {
+    this.router.navigate(['/board']);
+  }
+
+
     async getData(staffNumber: string) {
     // Get the specific document using staffNumber
     this.db.collection('assignedLectures').doc(staffNumber)

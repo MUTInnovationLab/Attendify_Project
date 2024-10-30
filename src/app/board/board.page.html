@@ -50,6 +50,7 @@
 
     <!-- Module Details Form -->
     <div formGroupName="moduleDetails" class="input-fields">
+      
       <ion-item class="custom-item">
         <ion-label position="floating">Module Name</ion-label>
         <ion-input formControlName="moduleName" type="text"></ion-input>
@@ -65,17 +66,7 @@
         <ion-input formControlName="moduleLevel" type="text"></ion-input>
       </ion-item>
 
-      <div class="fields-row">
-        <ion-item class="custom-item">
-          <ion-label position="floating">Credits</ion-label>
-          <ion-input formControlName="credits" type="number"></ion-input>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label position="floating">Year</ion-label>
-          <ion-input formControlName="year" type="number"></ion-input>
-        </ion-item>
-      </div>
+  
     </div>
 
     <!-- Action Buttons -->
@@ -83,7 +74,13 @@
       <ion-button expand="block" (click)="clear()" color="medium">
         CLEAR
       </ion-button>
-      <ion-button expand="block" (click)="addModule()" color="success" [disabled]="!academiaForm.valid">
+      <ion-button 
+        expand="block" 
+        (click)="addModule()" 
+        color="success" 
+        [disabled]="!academiaForm.get('faculty')?.value || 
+                    !academiaForm.get('department')?.value || 
+                    !academiaForm.get('selectedModule')?.value">
         ADD MODULE
       </ion-button>
     </div>
