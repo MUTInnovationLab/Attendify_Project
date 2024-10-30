@@ -19,7 +19,7 @@
 
       <ion-item class="custom-item">
         <ion-label position="floating">Select Department</ion-label>
-        <ion-select formControlName="department" interface="action-sheet">
+        <ion-select formControlName="department" interface="action-sheet" [disabled]="!selectedFaculty">
           <ion-select-option *ngFor="let dept of selectedFaculty?.departments" [value]="dept.name">
             {{dept.name}}
           </ion-select-option>
@@ -28,7 +28,7 @@
 
       <ion-item class="custom-item">
         <ion-label position="floating">Select Stream (Optional)</ion-label>
-        <ion-select formControlName="stream" interface="action-sheet">
+        <ion-select formControlName="stream" interface="action-sheet" [disabled]="!selectedDepartment">
           <ion-select-option *ngFor="let stream of availableStreams" [value]="stream">
             {{stream}}
           </ion-select-option>
@@ -37,11 +37,14 @@
 
       <ion-item class="custom-item">
         <ion-label position="floating">Select Module</ion-label>
-        <ion-select formControlName="selectedModule" interface="action-sheet">
+        <ion-select formControlName="selectedModule" interface="action-sheet" [disabled]="!selectedDepartment">
           <ion-select-option *ngFor="let module of modules" [value]="module.moduleCode">
             {{module.moduleName}} ({{module.moduleCode}})
           </ion-select-option>
         </ion-select>
+        <ion-note slot="error" *ngIf="selectedDepartment && modules.length === 0">
+          No modules available
+        </ion-note>
       </ion-item>
     </div>
 
@@ -80,12 +83,8 @@
       <ion-button expand="block" (click)="clear()" color="medium">
         CLEAR
       </ion-button>
-    </div>
-
-    <!-- CRUD Buttons -->
-    <div class="crud-buttons">
       <ion-button expand="block" (click)="addModule()" color="success" [disabled]="!academiaForm.valid">
-        ADD
+        ADD MODULE
       </ion-button>
     </div>
   </form>

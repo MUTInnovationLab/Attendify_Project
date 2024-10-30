@@ -19,31 +19,29 @@ interface Stream {
 interface Department {
   name: string;
   modules?: Module[];
-  streams?: { [key: string]: Stream[] };
+  streams?: { [key: string]: Stream[] }; // Stream keys will be strings, each holding an array of Stream objects
 }
 
 interface Faculty {
   id: string;
-  departments: Department[];
+  departments: Department[]; // An array of departments
 }
 
 @Injectable({
   providedIn: 'root'
 })
-
-
 export class FacultyService {
   constructor(private firestore: AngularFirestore) {}
 
   // Get all faculties
-  ggetFaculties(): Observable<Faculty[]> {
+  getFaculties(): Observable<Faculty[]> {
     return this.firestore.collection('faculties').snapshotChanges().pipe(
       map(actions => actions.map(a => {
-        const data = a.payload.doc.data() as Partial<Faculty>; // Use Partial to allow for optional properties
+        const data = a.payload.doc.data() as Partial<Faculty>; // Allow optional properties
         return {
           id: a.payload.doc.id,
-          ...data 
-        } as Faculty;
+          ...data // Spread the data to include it in the object
+        } as Faculty; // Cast to Faculty
       }))
     );
   }
@@ -51,10 +49,10 @@ export class FacultyService {
   // Get a single faculty by ID
   getFaculty(facultyId: string): Observable<Faculty | null> {
     return this.firestore.doc<Faculty>(`faculties/${facultyId}`).valueChanges().pipe(
-      map(faculty => faculty ?? null) 
+      map(faculty => faculty ?? null) // Convert undefined to null
     );
   }
-  
+
   // Add or update a module
   async addModule(facultyId: string, departmentName: string, moduleData: Module, streamKey?: string): Promise<void> {
     const facultyRef = this.firestore.collection('faculties').doc(facultyId);
@@ -72,48 +70,62 @@ export class FacultyService {
         throw new Error('Department not found');
       }
 
+      // Ensure streams object exists
+      const department = faculty.departments[departmentIndex];
+      if (!department.streams) {
+        department.streams = {}; // Initialize streams as an empty object if undefined
+      }
+
+      // Add module to stream or department
       if (streamKey) {
-        // Add to stream
-        if (!faculty.departments[departmentIndex].streams) {
-          faculty.departments[departmentIndex].streams = {};
-        }
-        
-        if (!faculty.departments[departmentIndex].streams![streamKey]) {
-          faculty.departments[departmentIndex].streams![streamKey] = [{
+        // Ensure the specific stream exists
+        if (!department.streams[streamKey]) {
+          department.streams[streamKey] = [{
             name: streamKey,
-            modules: []
+            modules: [] // Initialize modules array
           }];
         }
 
-        // Check for duplicate module code
-        const existingModule = faculty.departments[departmentIndex].streams![streamKey][0].modules
-          .find(m => m.moduleCode === moduleData.moduleCode);
-        
-        if (existingModule) {
-          throw new Error('Module with this code already exists in this stream');
-        }
+        // Access the modules array for the specified stream
+        const modules = department.streams[streamKey][0].modules;
 
-        faculty.departments[departmentIndex].streams![streamKey][0].modules.push(moduleData);
+        // Check for duplicate module code
+        if (modules) {
+          const existingModule = modules.find(m => m.moduleCode === moduleData.moduleCode);
+          
+          if (existingModule) {
+            throw new Error('Module with this code already exists in this stream');
+          }
+
+          // Push the new module to the modules array
+          modules.push(moduleData);
+        } else {
+          throw new Error('Modules array is undefined'); // Safeguard against undefined
+        }
       } else {
-        // Add to department
-        if (!faculty.departments[departmentIndex].modules) {
-          faculty.departments[departmentIndex].modules = [];
+        // Ensure the modules array exists for the department
+        if (!department.modules) {
+          department.modules = []; // Initialize modules array if undefined
         }
 
+        // Access the modules array for the department
+        const modules = department.modules;
+
         // Check for duplicate module code
-        const existingModule = faculty.departments[departmentIndex].modules!
-          .find(m => m.moduleCode === moduleData.moduleCode);
+        const existingModule = modules.find(m => m.moduleCode === moduleData.moduleCode);
         
         if (existingModule) {
           throw new Error('Module with this code already exists in this department');
         }
 
-        faculty.departments[departmentIndex].modules!.push(moduleData);
+        // Push the new module to the modules array
+        modules.push(moduleData);
       }
 
       await facultyRef.set(faculty);
     } catch (error) {
-      throw error;
+      console.error('Error adding module:', error);
+      throw error; // rethrowing the error to handle it outside if needed
     }
   }
 
@@ -134,42 +146,47 @@ export class FacultyService {
         throw new Error('Department not found');
       }
 
+      const department = faculty.departments[departmentIndex];
+
       if (streamKey) {
-        // Delete from stream
-        if (!faculty.departments[departmentIndex].streams?.[streamKey]?.[0].modules) {
-          throw new Error('Stream not found');
+        // Ensure the stream exists
+        const stream = department.streams?.[streamKey]?.[0];
+
+        if (!stream || !stream.modules) {
+          throw new Error('Stream or modules not found');
         }
 
-        const moduleIndex = faculty.departments[departmentIndex].streams[streamKey][0].modules
-          .findIndex(m => m.moduleCode === moduleCode);
+        const modules = stream.modules;
+        const moduleIndex = modules.findIndex(m => m.moduleCode === moduleCode);
         
         if (moduleIndex === -1) {
           throw new Error('Module not found');
         }
 
-        faculty.departments[departmentIndex].streams[streamKey][0].modules.splice(moduleIndex, 1);
+        // Remove the module
+        modules.splice(moduleIndex, 1);
       } else {
-        // Delete from department
-        if (!faculty.departments[departmentIndex].modules) {
+        // Ensure the modules array exists for the department
+        const modules = department.modules;
+
+        if (!modules) {
           throw new Error('No modules found in department');
         }
 
-        const moduleIndex = faculty.departments[departmentIndex].modules
-          .findIndex(m => m.moduleCode === moduleCode);
+        const moduleIndex = modules.findIndex(m => m.moduleCode === moduleCode);
         
         if (moduleIndex === -1) {
           throw new Error('Module not found');
         }
 
-        faculty.departments[departmentIndex].modules.splice(moduleIndex, 1);
+        // Remove the module
+        modules.splice(moduleIndex, 1);
       }
 
       await facultyRef.set(faculty);
     } catch (error) {
-      throw error;
+      console.error('Error deleting module:', error);
+      throw error; // rethrowing the error to handle it outside if needed
     }
   }
 }
-
-
-
