@@ -3,6 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { FacultyService } from '../services/faculty.service';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import { firstValueFrom } from 'rxjs';
 
 interface Module {
   moduleName: string;
@@ -42,12 +45,20 @@ export class BoardPage implements OnInit {
   availableStreams: string[] = [];
   modules: Module[] = [];
 
+  moduleName: string = '';
+  moduleCode: string = '';
+  moduleLevel: string = '';
+  userData: any;
+  department: any;
+  loadingController: any;
+  db: any;
+
   constructor(
     private fb: FormBuilder,
     private firestore: AngularFirestore,
     private facultyService: FacultyService,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController // Correctly declared loadingCtrl
   ) {
     this.initForm();
   }
@@ -68,14 +79,14 @@ export class BoardPage implements OnInit {
         moduleCode: ['', Validators.required],
         moduleLevel: ['', Validators.required],
         credits: [null, [Validators.required, Validators.min(1)]],
-        year: [null, Validators.required]
-      })
+        year: [null, Validators.required],
+      }),
     });
   }
 
   async loadFaculties() {
     const loading = await this.loadingCtrl.create({
-      message: 'Loading faculties...'
+      message: 'Loading faculties...',
     });
     await loading.present();
 
@@ -100,7 +111,7 @@ export class BoardPage implements OnInit {
     this.academiaForm.get('faculty')?.valueChanges.subscribe(async (facultyId) => {
       if (facultyId) {
         const loading = await this.loadingCtrl.create({
-          message: 'Loading faculty data...'
+          message: 'Loading faculty data...',
         });
         await loading.present();
 
@@ -111,7 +122,7 @@ export class BoardPage implements OnInit {
             this.academiaForm.patchValue({
               department: '',
               stream: '',
-              selectedModule: ''
+              selectedModule: '',
             });
             this.modules = [];
           }
@@ -130,8 +141,8 @@ export class BoardPage implements OnInit {
         ) || null;
 
         if (this.selectedDepartment) {
-          this.availableStreams = this.selectedDepartment.streams 
-            ? Object.keys(this.selectedDepartment.streams) 
+          this.availableStreams = this.selectedDepartment.streams
+            ? Object.keys(this.selectedDepartment.streams)
             : [];
           
           this.loadModulesForDepartment();
@@ -139,7 +150,7 @@ export class BoardPage implements OnInit {
 
         this.academiaForm.patchValue({
           stream: '',
-          selectedModule: ''
+          selectedModule: '',
         });
       }
     });
@@ -157,14 +168,14 @@ export class BoardPage implements OnInit {
 
     this.academiaForm.get('selectedModule')?.valueChanges.subscribe((moduleCode) => {
       if (moduleCode) {
-        const selectedModule = this.modules.find(m => m.moduleCode === moduleCode);
+        const selectedModule = this.modules.find((m) => m.moduleCode === moduleCode);
         if (selectedModule) {
           this.academiaForm.get('moduleDetails')?.patchValue({
             moduleName: selectedModule.moduleName,
             moduleCode: selectedModule.moduleCode,
             moduleLevel: selectedModule.moduleLevel,
             credits: selectedModule.credits,
-            year: selectedModule.year
+            year: selectedModule.year,
           });
         }
       }
@@ -183,8 +194,8 @@ export class BoardPage implements OnInit {
     if (streamKey && this.selectedDepartment.streams?.[streamKey]) {
       const streamModules = this.selectedDepartment.streams[streamKey][0]?.modules || [];
       
-      const existingCodes = new Set(this.modules.map(m => m.moduleCode));
-      streamModules.forEach(module => {
+      const existingCodes = new Set(this.modules.map((m) => m.moduleCode));
+      streamModules.forEach((module) => {
         if (!existingCodes.has(module.moduleCode)) {
           this.modules.push(module);
         }
@@ -194,44 +205,102 @@ export class BoardPage implements OnInit {
     this.modules.sort((a, b) => a.moduleCode.localeCompare(b.moduleCode));
   }
 
+
   async addModule() {
-    if (!this.academiaForm.valid) {
-      await this.showToast('Please fill all required fields', 'warning');
+    const moduleDetails = this.academiaForm.get('moduleDetails')?.value;
+  
+    if (!moduleDetails.moduleName || 
+        !moduleDetails.moduleCode || 
+        !moduleDetails.moduleLevel || 
+        !this.academiaForm.get('department')?.value) {
+      alert('Please fill in all fields before submitting.');
       return;
     }
-
-    const loading = await this.loadingCtrl.create({
-      message: 'Adding module...'
+  
+    const loader = await this.loadingCtrl.create({
+      message: 'Submitting...',
+      cssClass: 'custom-loader-class',
     });
-    await loading.present();
-
+    await loader.present();
+  
     try {
-      const formData = this.academiaForm.value;
-      const moduleData: Module = formData.moduleDetails;
-      const streamKey = formData.stream || undefined;
-
-      await this.facultyService.addModule(
-        formData.faculty,
-        formData.department,
-        moduleData,
-        streamKey
-      );
-
-      await this.showToast('Module added successfully!', 'success');
-      this.loadModulesForDepartment(streamKey);
-      this.academiaForm.get('moduleDetails')?.reset();
-    } catch (error: any) {
-      await this.showToast('Error adding module: ' + error.message, 'danger');
+      const user = firebase.auth().currentUser;
+  
+      if (user && user.email) {
+        // Fetch the staff number based on user email
+        const staffSnapshot = await this.firestore.collection('staff')
+          .ref.where('email', '==', user.email)
+          .get();
+  
+        if (staffSnapshot.empty) {
+          throw new Error('Staff document not found');
+        }
+  
+        const staffDoc = staffSnapshot.docs[0];
+        const staffData = staffDoc.data() as { staffNumber: string };
+        const staffNumber = staffData.staffNumber;
+  
+        if (!staffNumber) {
+          throw new Error('Staff number not found');
+        }
+  
+        // Reference to the assignedLectures document
+        const staffDocRef = this.firestore.collection('assignedLectures').doc(staffNumber);
+        
+        // Get the DocumentSnapshot as a promise, not as an observable
+        const staffAssignedDoc = await staffDocRef.get().toPromise();
+  
+        const moduleData = {
+          moduleName: moduleDetails.moduleName,
+          moduleCode: moduleDetails.moduleCode,
+          moduleLevel: moduleDetails.moduleLevel,
+          userEmail: user.email,
+          department: this.academiaForm.get('department')?.value,
+          faculty: this.selectedFaculty?.id, // Ensure only faculty ID is stored
+          scannerOpenCount: 0,
+        };
+  
+        // Check if the document exists
+        if (staffAssignedDoc && staffAssignedDoc.exists) {
+          // If document exists, add to existing modules array
+          await staffDocRef.update({
+            modules: firebase.firestore.FieldValue.arrayUnion(moduleData),
+          });
+        } else {
+          // If document doesn't exist, create new one with modules array
+          await staffDocRef.set({
+            modules: [moduleData],
+          });
+        }
+  
+        // Clear form fields
+        this.academiaForm.reset(); // Reset the entire form
+        alert('Module successfully saved');
+  
+        // Refresh the modules data using the staff number
+        this.getData(staffNumber);
+      } else {
+        alert('User not logged in.');
+      }
+    } catch (error) {
+      console.error('Error saving module:', error);
+      alert('An error occurred while saving the module: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
-      loading.dismiss();
+      loader.dismiss();  // Ensure the loader is dismissed
     }
+  }
+
+  private async getData(staffNumber: string) {
+    // Add logic to retrieve data for the given staff number.
+    console.log('Data retrieval for staff number:', staffNumber);
+    // Use firestore to fetch necessary data here if needed.
   }
 
   async showToast(message: string, color: string) {
     const toast = await this.toastCtrl.create({
       message,
       color,
-      duration: 2000
+      duration: 2000,
     });
     await toast.present();
   }
@@ -245,3 +314,10 @@ export class BoardPage implements OnInit {
     this.availableStreams = [];
   }
 }
+
+
+
+
+
+
+   
