@@ -38,6 +38,7 @@ export class LecturePage implements OnInit {
   searchTerms = new Subject<string>();
   existingStudents: Set<string> = new Set();
   department: any;
+  
 
   constructor(
     private router: Router,
@@ -273,40 +274,46 @@ export class LecturePage implements OnInit {
 
 
 
-
   async confirmAddStudents() {
-    // Validate inputs
+    // Validate module selection
     if (!this.selectedModule?.moduleCode) {
       alert('Invalid module selection. Please select a valid module.');
       return;
     }
   
-    const selectedStudents = this.filteredStudents.filter(student => student.selected);
-    if (selectedStudents.length === 0) {
-      alert('Please select at least one student.');
-      return;
-    }
-  
     try {
-      const batch = firebase.firestore().batch();
-      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(this.selectedModule.moduleCode);
-  
-      // Get current enrolled students to avoid duplicates
+      // Get current enrolled students first
+      const enrolledModulesRef = firebase.firestore()
+        .collection('enrolledModules')
+        .doc(this.selectedModule.moduleCode);
+      
       const enrolledDoc = await enrolledModulesRef.get();
       const currentEnrolled = enrolledDoc.exists ? 
         (enrolledDoc.data()?.['Enrolled'] || []) : [];
   
-      // Filter out already enrolled students
-      const newStudents = selectedStudents.filter(student =>
-        !currentEnrolled.some((enrolled: any) =>
-          enrolled.stud === student.studentNumber
+      // Filter out already enrolled students from the selection options
+      this.filteredStudents = this.filteredStudents.map(student => ({
+        ...student,
+        isEnrolled: currentEnrolled.some((enrolled: any) => 
+          enrolled.studentNumber === student.studentNumber
+        ),
+        selected: student.selected && !currentEnrolled.some((enrolled: any) => 
+          enrolled.studentNumber === student.studentNumber
         )
+      }));
+  
+      // Get only the selected and not enrolled students
+      const selectedStudents = this.filteredStudents.filter(student => 
+        student.selected && !student.isEnrolled
       );
   
-      if (newStudents.length === 0) {
-        alert('All selected students are already enrolled in this module.');
+      // Validation checks
+      if (selectedStudents.length === 0) {
+        alert('Please select at least one unenrolled student.');
         return;
       }
+  
+      const batch = firebase.firestore().batch();
   
       // Create the module document if it doesn't exist
       if (!enrolledDoc.exists) {
@@ -316,15 +323,13 @@ export class LecturePage implements OnInit {
         });
       }
   
-      // Add all new students to the Enrolled array in a single batch update
-      const newEnrollments = newStudents.map(student => ({
+      // Prepare new enrollments
+      const newEnrollments = selectedStudents.map(student => ({
         status: "Enrolled",
-        studentNumber: student.studentNumber,
-       // email: student.email,
-       // name: student.name,
-        //surname: student.surname
+        studentNumber: student.studentNumber
       }));
   
+      // Add all new students to the Enrolled array in a single batch update
       batch.update(enrolledModulesRef, {
         Enrolled: firebase.firestore.FieldValue.arrayUnion(...newEnrollments)
       });
@@ -332,22 +337,28 @@ export class LecturePage implements OnInit {
       await batch.commit();
   
       const toast = await this.toastController.create({
-        message: `Successfully enrolled ${newStudents.length} student(s)`,
+        message: `Successfully enrolled ${newEnrollments.length} student(s)`,
         duration: 2000,
         position: 'top'
       });
       toast.present();
+  
+      // Clear selections and refresh the list
+      this.filteredStudents = this.filteredStudents.map(student => ({
+        ...student,
+        selected: false
+      }));
   
       this.closeAddStudentsModal();
   
     } catch (error) {
       console.error('Error adding students to module:', error);
       alert('An error occurred while adding students to the module: ' + 
-            (error instanceof Error ? error.message : 'Unknown error'));
+        (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
 
-
+  
 
 
   async presentConfirmationAlert() {
@@ -597,8 +608,22 @@ async deleteModule() {
   }
 
   viewStudents() {
-    this.router.navigate(['/view-students']);
+    if (!this.selectedModuleId) {
+      alert('Please select a module first.');
+      return;
+    }
+
+    const selectedModule = this.tableData.find(module => module.id === this.selectedModuleId);
+    if (!selectedModule) {
+      alert('Module information not found.');
+      return;
+    }
+
+    this.router.navigate(['/view-students'], {
+      queryParams: { moduleCode: selectedModule.moduleCode }
+    });
   }
+
 
   gotoQRscan(moduleCode: string) {
     this.router.navigate(['qr-scan'], { queryParams: { moduleCode } });
@@ -607,6 +632,9 @@ async deleteModule() {
   gotoProfile() {
     this.router.navigate(['profile']);
   }
+
+
+  
 }     
 
 

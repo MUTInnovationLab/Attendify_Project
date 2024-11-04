@@ -10,17 +10,22 @@ interface Announcement {
   title: string;
   content: string;
   userEmail: string;
-  formattedDate: string;
+  formattedDate?: string;
 }
 
-interface StudentRegistration {
-  studentNumber: string; // Ensure this matches your Firestore structure
-  moduleCode: string[];
+interface StudentEnrollment {
+  studentNumber: string;
+  status: string;
 }
 
-interface RegisteredStaff {
+interface EnrolledModuleDocument {
+  moduleCode: string;
+  Enrolled: StudentEnrollment[];
+}
+
+interface StudentDocument {
   email: string;
-  fullName: string;
+  studentNumber: string;
 }
 
 @Component({
@@ -41,38 +46,39 @@ export class ViewAnnouncementsComponent implements OnInit {
   async ngOnInit() {
     try {
       const user = await this.afAuth.currentUser;
-      if (user) {
-        // Fetch the student registration data from Firestore
-        this.studentNumber = await this.getStudentNumber(user.uid); // Use user.uid to fetch from Firestore
-
-        if (this.studentNumber) {
-          const moduleCodes = await this.getStudentModuleCodes(this.studentNumber);
-          
-          if (moduleCodes.length > 0) {
-            await this.fetchAnnouncements(moduleCodes);
-          } else {
-            console.log('No modules found for the student with number:', this.studentNumber);
-          }
-        } else {
-          console.log('Student number is null.');
-        }
-      } else {
+      if (!user) {
         console.log('No user is logged in.');
+        return;
+      }
+
+      this.studentNumber = await this.getStudentNumber(user.email);
+      if (!this.studentNumber) {
+        console.log('Student number not found');
+        return;
+      }
+
+      const moduleCodes = await this.getStudentModuleCodes(this.studentNumber);
+      console.log('Module codes fetched for student:', moduleCodes);
+
+      if (moduleCodes.length > 0) {
+        await this.fetchAnnouncements(moduleCodes);
+      } else {
+        console.log('No modules found for student:', this.studentNumber);
       }
     } catch (error) {
       console.error('Error in ngOnInit:', error);
     }
   }
 
-  // Function to retrieve the student number from Firestore based on the user's UID
-  async getStudentNumber(uid: string): Promise<string | null> {
-    try {
-      const userSnapshot = await this.firestore.collection<StudentRegistration>('students') // Adjust the collection name as needed
-        .ref.where('uid', '==', uid).limit(1).get();
+  async getStudentNumber(email: string | null): Promise<string | null> {
+    if (!email) return null;
 
-      if (!userSnapshot.empty) {
-        return userSnapshot.docs[0].data().studentNumber; // Ensure this field exists in your Firestore data
+    try {
+      const snapshot = await this.firestore.collection<StudentDocument>('students', ref => ref.where('email', '==', email)).get().toPromise();
+      if (snapshot && !snapshot.empty) {
+        return snapshot.docs[0].data().studentNumber || null;
       }
+      console.log('No student document found for email:', email);
       return null;
     } catch (error) {
       console.error('Error fetching student number:', error);
@@ -82,23 +88,25 @@ export class ViewAnnouncementsComponent implements OnInit {
 
   async getStudentModuleCodes(studentNumber: string): Promise<string[]> {
     try {
-      const studentSnapshot = await this.firestore.collection<StudentRegistration>('enrolledModules')
-        .ref.where('studentNumber', '==', studentNumber).get();
-      
-      console.log('Student snapshot:', studentSnapshot.docs);
+      const moduleSnapshot = await this.firestore.collection<EnrolledModuleDocument>('enrolledModules').get().toPromise();
+      const enrolledModules: string[] = [];
 
-      if (!studentSnapshot.empty) {
-        const moduleCodes: string[] = [];
-        studentSnapshot.docs.forEach(doc => {
-          const data = doc.data() as StudentRegistration;
-          if (Array.isArray(data.moduleCode)) {
-            moduleCodes.push(...data.moduleCode);
+      if (moduleSnapshot) {
+        moduleSnapshot.forEach(doc => {
+          const data = doc.data();
+          const isEnrolled = data.Enrolled?.some(enrollment =>
+            enrollment.studentNumber === studentNumber &&
+            enrollment.status.toLowerCase() === 'enrolled'
+          );
+
+          if (isEnrolled && data.moduleCode) {
+            enrolledModules.push(data.moduleCode);
           }
         });
-        console.log('Module Codes:', moduleCodes);
-        return moduleCodes;
       }
-      return [];
+
+      console.log('Student enrolled in modules:', enrolledModules);
+      return enrolledModules;
     } catch (error) {
       console.error('Error fetching student module codes:', error);
       return [];
@@ -107,42 +115,53 @@ export class ViewAnnouncementsComponent implements OnInit {
 
   async fetchAnnouncements(moduleCodes: string[]) {
     try {
-      const announcementsSnapshot = await this.firestore.collection<Announcement>('announcements')
-        .ref.where('moduleCode', 'in', moduleCodes).orderBy('timestamp', 'desc').get();
+      console.log('Fetching announcements for module codes:', moduleCodes);
 
-      if (!announcementsSnapshot.empty) {
-        this.announcements = await Promise.all(announcementsSnapshot.docs.map(async doc => {
-          const data = doc.data() as Announcement;
-          const fullName = await this.getFullNameByEmail(data.userEmail);
-          return {
-            ...data,
-            userEmail: fullName,
-            formattedDate: this.formatDate(data.timestamp)
-          };
-        }));
+      const announcementChunks = this.chunkArray(moduleCodes, 10);
+      let allAnnouncements: Announcement[] = [];
+
+      for (const chunk of announcementChunks) {
+        console.log('Processing chunk:', chunk);
+
+        const announcementsSnapshot = await this.firestore.collection<Announcement>('announcements', ref =>
+          ref.where('moduleCode', 'in', chunk).orderBy('timestamp', 'desc')
+        ).get().toPromise();
+
+        if (announcementsSnapshot && !announcementsSnapshot.empty) {
+          const announcements = announcementsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              ...data,
+              formattedDate: this.formatDate(data.timestamp),
+            } as Announcement;
+          });
+          allAnnouncements = allAnnouncements.concat(announcements);
+        } else {
+          console.log('No announcements found for chunk:', chunk);
+        }
       }
+
+      this.announcements = allAnnouncements;
+      console.log('Announcements fetched successfully:', this.announcements);
     } catch (error) {
       console.error('Error fetching announcements:', error);
     }
   }
 
-  async getFullNameByEmail(email: string): Promise<string> {
-    try {
-      const staffSnapshot = await this.firestore.collection<RegisteredStaff>('staff')
-        .ref.where('email', '==', email).limit(1).get();
-
-      if (!staffSnapshot.empty) {
-        return staffSnapshot.docs[0].data().fullName || email;
-      }
-      return email;
-    } catch (error) {
-      console.error('Error fetching full name:', error);
-      return email;
-    }
+  formatDate(timestamp: firebase.firestore.Timestamp): string {
+    const date = timestamp.toDate();
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
-  formatDate(timestamp: firebase.firestore.Timestamp): string {
-    return timestamp.toDate().toLocaleString();
+  chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 
   dismiss() {
