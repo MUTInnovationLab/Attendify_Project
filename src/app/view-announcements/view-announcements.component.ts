@@ -11,6 +11,7 @@ interface Announcement {
   content: string;
   userEmail: string;
   formattedDate?: string;
+  isDeleted?: boolean; // Add a flag to track if the announcement is deleted locally
 }
 
 interface StudentEnrollment {
@@ -133,6 +134,7 @@ export class ViewAnnouncementsComponent implements OnInit {
             return {
               ...data,
               formattedDate: this.formatDate(data.timestamp),
+              isDeleted: false // Initialize as not deleted
             } as Announcement;
           });
           allAnnouncements = allAnnouncements.concat(announcements);
@@ -162,6 +164,17 @@ export class ViewAnnouncementsComponent implements OnInit {
       chunks.push(array.slice(i, i + chunkSize));
     }
     return chunks;
+  }
+
+  onAnnouncementClick(announcement: Announcement) {
+    // Handle click event, you can show a detailed view if needed
+    console.log('Announcement clicked:', announcement);
+  }
+
+  deleteAnnouncement(announcement: Announcement, event: MouseEvent) {
+    event.stopPropagation(); // Prevent triggering the click event on the parent element
+    announcement.isDeleted = true; // Mark the announcement as deleted locally
+    console.log('Announcement marked for deletion:', announcement);
   }
 
   dismiss() {
