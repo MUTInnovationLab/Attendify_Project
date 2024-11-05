@@ -632,9 +632,6 @@ async deleteModule() {
   gotoProfile() {
     this.router.navigate(['profile']);
   }
-
-
-  
 }     
 
 

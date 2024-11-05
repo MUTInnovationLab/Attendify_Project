@@ -366,7 +366,6 @@ async fetchAttendedStudents() {
 
 
 
-
   async fetchPendingRequests(moduleCode: string) {
     if (!moduleCode) {
         console.warn('Module code is missing.');
@@ -376,11 +375,20 @@ async fetchAttendedStudents() {
     try {
         console.log(`Fetching pending requests for module: ${moduleCode}`);
 
-        const enrolledModulesSnapshot = await this.firestore.collection('enrolledModules').doc(moduleCode).get().toPromise();
+        // Fetch the document for the specific module code
+        const enrolledModulesSnapshot = await this.firestore
+            .collection('enrolledModules')
+            .doc(moduleCode)
+            .get()
+            .toPromise();
 
-        if (enrolledModulesSnapshot && enrolledModulesSnapshot.exists) {
+        // Check if the document exists and is not undefined
+        if (enrolledModulesSnapshot?.exists) {
             const enrolledData = enrolledModulesSnapshot.data() as { Enrolled?: any[] };
+
+            // Filter the 'Enrolled' array for students with status 'pending'
             const pendingRequests = enrolledData.Enrolled?.filter(student => student.status === 'pending') || [];
+
             console.log('Pending Requests:', pendingRequests); // Log pending requests
 
             const newRequests = pendingRequests.map(student => ({
@@ -388,12 +396,9 @@ async fetchAttendedStudents() {
                 studentNumber: student.studentNumber,
                 status: student.status,
                 moduleCode: moduleCode,
-                // email: student.email || '',
-                // name: student.name || '',
-                // surname: student.surname || ''
             }));
 
-            // Concatenate new requests with existing ones
+            // Update the requestedInvites array with the new requests
             this.requestedInvites = [...this.requestedInvites, ...newRequests];
 
             console.log('Updated pending requests data:', this.requestedInvites); // Log final invites
@@ -404,7 +409,7 @@ async fetchAttendedStudents() {
         console.error('Error fetching pending requests data:', error);
     }
 
-    // Always set showRequestsTable to true after fetching
+    // Set showRequestsTable to true after fetching
     this.showRequestsTable = true;
 }
 

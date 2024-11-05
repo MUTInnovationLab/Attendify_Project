@@ -249,37 +249,61 @@ export class ViewModalComponent implements OnInit {
   }
 
 
-
   async addStudentToModule(module: Module) {
-    if (!this.currentStudent) {
+    // Use optional chaining to safely access `studentNumber`
+    if (!this.currentStudent?.studentNumber) {
       this.presentToast('Student information not available.', 'danger');
       return;
     }
   
-    // Check if module is already requested
+    // Check if the module is already requested
     if (this.requestedModules.has(module.moduleCode)) {
       this.presentToast(`You have already requested to join ${module.moduleCode}`, 'warning');
       return;
     }
   
     try {
+      // Get reference to the module document in 'enrolledModules' collection
+      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
+      const enrolledDoc = await enrolledModulesRef.get();
+      const currentEnrolled = enrolledDoc.exists ? (enrolledDoc.data()?.['Enrolled'] || []) : [];
+  
+      // Check if the student is already enrolled
+      const isAlreadyEnrolled = currentEnrolled.some((enrolled: any) => 
+        enrolled.studentNumber === this.currentStudent!.studentNumber
+      );
+      
+      if (isAlreadyEnrolled) {
+        this.presentToast(`You are already enrolled in ${module.moduleCode}.`, 'warning');
+        return;
+      }
+  
       const batch = firebase.firestore().batch();
   
-      const enrolledModulesRef = firebase.firestore().collection('enrolledModules').doc(module.moduleCode);
+      // If the module document doesn't exist, initialize it with an empty Enrolled array
+      if (!enrolledDoc.exists) {
+        batch.set(enrolledModulesRef, {
+          moduleCode: module.moduleCode,
+          Enrolled: []
+        });
+      }
   
-      // Ensure that we are updating the Enrolled array without creating a subcollection
-      batch.set(enrolledModulesRef, {
-        Enrolled: firebase.firestore.FieldValue.arrayUnion({
-          status: "pending", // Keep status as "pending" when requesting
-          studentNumber: this.currentStudent.studentNumber
-        })
-      }, { merge: true });
+      // Prepare the enrollment request
+      const enrollmentRequest = {
+        status: "pending",
+        studentNumber: this.currentStudent!.studentNumber
+      };
+  
+      // Add the request to the Enrolled array
+      batch.update(enrolledModulesRef, {
+        Enrolled: firebase.firestore.FieldValue.arrayUnion(enrollmentRequest)
+      });
   
       await batch.commit();
-      
+  
       // Add the module to requested modules set
       this.requestedModules.add(module.moduleCode);
-      
+  
       this.presentToast(`Requested to join ${module.moduleCode}. Pending approval.`, 'success');
     } catch (error) {
       console.error('Error requesting module:', error);
@@ -287,7 +311,6 @@ export class ViewModalComponent implements OnInit {
     }
   }
   
-
   
 
   async submitSelection() {
