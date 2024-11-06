@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { FacultyDepartmentService } from '../services/faculty-department.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-super-analytics',
@@ -15,6 +16,8 @@ export class SuperAnalyticsPage implements OnInit {
   
   facultyName: string = '';
   departmentName: string = '';
+  faculties$!: Observable<string[]>; // Observable for faculties
+  departments$!: Observable<string[]>; // Observable for departments
   courseName: string = '';
   streamName: string = '';
   moduleName: string = '';
@@ -44,15 +47,14 @@ export class SuperAnalyticsPage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.faculties = this.facultyDepartmentService.getFaculties();
+    // Fetch faculties from Firestore
+    this.faculties$ = this.facultyDepartmentService.getFaculties();
   }
 
-  onFacultyChange() {
-    if (this.facultyName) {
-      this.departments = this.facultyDepartmentService.getDepartments(this.facultyName);
-    } else {
-      this.departments = [];
-    }
+  // Method to fetch departments when a faculty is selected
+  onFacultyChange(event: any) {
+    const selectedFaculty = event.detail.value;
+    this.departments$ = this.facultyDepartmentService.getDepartments(selectedFaculty);
   }
 
   async addModule() {

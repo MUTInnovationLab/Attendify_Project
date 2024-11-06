@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { FacultyDepartmentService } from '../services/faculty-department.service'; 
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-admin',
@@ -17,9 +18,8 @@ export class AdminPage implements OnInit {
   staffNumber: string = '';
   email: string = '';
   position: string = '';
-  department: string = '';
-  faculties: string[] = [];
-  departments: string[] = [];
+  faculties$!: Observable<string[]>; // Observable for faculties
+  departments$!: Observable<string[]>; // Observable for departments
   
   selectedFaculty: string = '';
   selectedDepartment: string = '';
@@ -28,7 +28,7 @@ export class AdminPage implements OnInit {
   moduleCode: string = '';
   moduleLevel: string = '';
 
-  // Add modal references
+  // Modal references
   isLecturerModalOpen: boolean = false;
   isModuleModalOpen: boolean = false;
 
@@ -42,12 +42,23 @@ export class AdminPage implements OnInit {
     private firestore: AngularFirestore,
     private facultyDepartmentService: FacultyDepartmentService,
     private modalController: ModalController
-  ) {}
-
-  ngOnInit(): void {
-    this.faculties = this.facultyDepartmentService.getFaculties();
+  ) {
+    this.selectedFaculty = '';
+    this.selectedDepartment = '';
   }
 
+  ngOnInit(): void {
+    // Fetch faculties from Firestore
+    this.faculties$ = this.facultyDepartmentService.getFaculties();
+  }
+
+  onFacultyChange(event: any) {
+    const selectedFaculty = event.detail.value;
+    this.selectedFaculty = selectedFaculty; // Capture the selected faculty
+    this.departments$ = this.facultyDepartmentService.getDepartments(selectedFaculty);
+    this.selectedDepartment = ''; // Reset selected department when faculty changes
+  }
+  
   // Modal control methods
   openLecturerModal() {
     this.isLecturerModalOpen = true;
@@ -66,7 +77,6 @@ export class AdminPage implements OnInit {
     this.moduleName = '';
     this.moduleCode = '';
     this.moduleLevel = '';
-    this.department = '';
   }
 
   closeLecturerModal() {
@@ -77,14 +87,9 @@ export class AdminPage implements OnInit {
     this.isModuleModalOpen = false;
   }
 
-  // Existing methods
-  onFacultyChange(event: any) {
-    const selectedFaculty = event.detail.value;
-    this.departments = this.facultyDepartmentService.getDepartments(selectedFaculty);
-  }
-
   async submitForm() {
-    if (!this.fullName || !this.staffNumber || !this.email || !this.position || !this.selectedFaculty || !this.selectedDepartment) {
+    // Validate form fields
+    if (!this.fullName || !this.staffNumber || !this.email || !this.position || this.selectedFaculty === '' || this.selectedDepartment === '') {
       this.presentToast('Please fill in all fields');
       return;
     }
@@ -95,43 +100,65 @@ export class AdminPage implements OnInit {
     });
     await loader.present();
   
-    this.auth.createUserWithEmailAndPassword(this.email, this.staffNumber)
-      .then(userCredential => {
-        // Set position to 'Lecturer' if it's 'lecturer' (case-insensitive)
-        const position = this.position.trim().toLowerCase() === 'lecturer' ? 'Lecturer' : this.position;
+    try {
+      const userCredential = await this.auth.createUserWithEmailAndPassword(this.email, this.staffNumber);
+      const position = this.position.trim().toLowerCase() === 'lecturer' ? 'Lecturer' : this.position;
   
-        // Add the new staff member to Firestore
-        this.firestore.collection('staff').doc(this.staffNumber).set({
-          staffNumber: this.staffNumber,
-          email: this.email,
-          fullName: this.fullName,
-          position: position,
-          faculty: this.selectedFaculty,
-          department: this.selectedDepartment
-        });
-  
-        loader.dismiss();
-        this.closeLecturerModal();
-        this.presentToast("Successfully registered!");
-      })
-      .catch(error => {
-        loader.dismiss();
-        let errorMessage = error.message;
-  
-        switch (errorMessage) {
-          case "Firebase: The email address is badly formatted. (auth/invalid-email).":
-            this.presentToast("Badly formatted email");
-            break;
-          case "Firebase: The email address is already in use by another account. (auth/email-already-in-use).":
-            this.presentToast("Email already in use");
-            break;
-          case "Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found).":
-            this.presentToast("Invalid email");
-            break;
-          default:
-            this.presentToast(errorMessage);
-        }
+      this.closeLecturerModal();
+      
+      // Add the new staff member to Firestore
+      await this.firestore.collection('staff').doc(this.staffNumber).set({
+        staffNumber: this.staffNumber,
+        email: this.email,
+        fullName: this.fullName,
+        position: position,
+        faculty: this.selectedFaculty,
+        department: this.selectedDepartment
       });
+  
+      await loader.dismiss();
+      
+   
+      this.presentToast("Successfully registered!");
+ 
+    await this.navigateToBoard();
+
+    } catch (error) {
+      await loader.dismiss();
+      this.handleError(error);
+    }
+  }
+  
+  private async navigateToBoard() {
+    await this.router.navigate(['/board'], {
+      state: {
+        fullName: this.fullName,
+        staffNumber: this.staffNumber,
+        email: this.email,
+        position: this.position,
+        faculty: this.selectedFaculty,
+        department: this.selectedDepartment
+      }
+    });
+  }
+  
+  private handleError(error: any) {
+    let errorMessage = error.message;
+    console.error('Error:', errorMessage);
+  
+    switch (errorMessage) {
+      case "Firebase: The email address is badly formatted. (auth/invalid-email).":
+        this.presentToast("Badly formatted email");
+        break;
+      case "Firebase: The email address is already in use by another account. (auth/email-already-in-use).":
+        this.presentToast("Email already in use");
+        break;
+      case "Firebase: There is no user record corresponding to this identifier. The user may have been deleted. (auth/user-not-found).":
+        this.presentToast("Invalid email");
+        break;
+      default:
+        this.presentToast(errorMessage);
+    }
   }
   
   async addModule() {
@@ -181,6 +208,6 @@ export class AdminPage implements OnInit {
   }
 
   goBack() {
-    this.navCtrl.navigateBack('/dept-add');
+    this.navCtrl.navigateBack('/dashboard');
   }
 }

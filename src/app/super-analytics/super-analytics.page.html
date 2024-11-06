@@ -21,7 +21,7 @@
       <ion-item class="form-item">
         <ion-icon name="business-outline" slot="start"></ion-icon>
         <ion-label>Faculty Name</ion-label>
-        <ion-select [(ngModel)]="facultyName" (ionChange)="onFacultyChange()" placeholder="Select Faculty" interface="action-sheet">
+        <ion-select [(ngModel)]="facultyName" (ionChange)="onFacultyChange($event)" placeholder="Select Faculty" interface="action-sheet">
           <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">{{ faculty }}</ion-select-option>
         </ion-select>
       </ion-item>

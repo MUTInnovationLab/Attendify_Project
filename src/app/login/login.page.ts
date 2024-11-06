@@ -175,8 +175,8 @@ export class LoginPage implements OnInit {
         this.navController.navigateForward('/lecture');
         break;
       case 'dept-admin':
-      case 'hod':  // Adding case for HOD
-        this.navController.navigateForward('/admin');
+      // case 'hod':  // Adding case for HOD
+        this.navController.navigateForward('/dashboard');
         break;
       default:
         this.presentToast('Unknown user type');
