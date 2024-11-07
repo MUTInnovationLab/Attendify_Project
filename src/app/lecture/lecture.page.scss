@@ -13,12 +13,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  --color: #ffffff;
 }
 .header h4 {
   color: #4A3500;
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
+  --color: #ffffff;
 }
 .header ion-icon {
   font-size: 24px;

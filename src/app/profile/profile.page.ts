@@ -345,6 +345,8 @@ export class ProfilePage implements OnInit {
 
   
 
+  
+
 
   async checkPendingEmailUpdate() {
     const user = await this.auth.currentUser;
@@ -367,6 +369,8 @@ export class ProfilePage implements OnInit {
     }
   }
   
+
+
 
 
   async updateUserInfo(data: any) {
@@ -428,6 +432,9 @@ export class ProfilePage implements OnInit {
     console.log('User information updated successfully in Firestore');
   }
   
+
+
+
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
