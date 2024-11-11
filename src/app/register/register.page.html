@@ -31,10 +31,26 @@
           <ion-icon name="card-outline" slot="start"></ion-icon>
         </ion-item>
 
+        <!-- Faculty Dropdown -->
         <ion-item lines="none" class="input-item">
-          <ion-label position="floating">DEPARTMENT</ion-label>
-          <ion-input type="text" name="department" id="department" [(ngModel)]="department"></ion-input>
           <ion-icon name="business-outline" slot="start"></ion-icon>
+          <ion-label position="floating">FACULTY</ion-label>
+          <ion-select [(ngModel)]="selectedFaculty" name="faculty" (ionChange)="onFacultyChange($event)">
+            <ion-select-option [value]="faculty.id" *ngFor="let faculty of faculties">
+              {{faculty.id}}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Department Dropdown -->
+        <ion-item lines="none" class="input-item">
+          <ion-icon name="git-branch-outline" slot="start"></ion-icon>
+          <ion-label position="floating">DEPARTMENT</ion-label>
+          <ion-select [(ngModel)]="selectedDepartment" name="department" (ionChange)="onDepartmentChange($event)" [disabled]="!selectedFaculty">
+            <ion-select-option [value]="dept.name" *ngFor="let dept of departments">
+              {{dept.name}}
+            </ion-select-option>
+          </ion-select>
         </ion-item>
 
         <ion-item lines="none" class="input-item">
