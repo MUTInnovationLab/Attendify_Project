@@ -14,6 +14,7 @@ import { MakeAnnouncementModule } from './make-announcement/make-announcement.mo
 import { AnnouncementsModule } from './view-announcements/view-announcements.module';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 
@@ -23,6 +24,7 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
     BrowserModule, 
     FormsModule, 
     AngularFirestoreModule, 
+    ZXingScannerModule,
     
     IonicModule.forRoot(), 
     AppRoutingModule,
