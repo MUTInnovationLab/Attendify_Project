@@ -9,10 +9,14 @@ import { map } from 'rxjs/operators';
 export class AcademicCalendarService {
   constructor(private firestore: AngularFirestore) { }
 
+  // Add event with the document ID set to the event's date
   addEvent(event: any) {
-    return this.firestore.collection('academic-events').add(event);
+    const eventDate = new Date(event.date);
+    const eventDateString = eventDate.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+    return this.firestore.collection('academic-events').doc(eventDateString).set(event); // Use set to ensure the document ID is the date
   }
 
+  // Update event using its document ID (event's date)
   updateEvent(eventId: string, eventData: any) {
     return this.firestore.collection('academic-events').doc(eventId).update(eventData);
   }
