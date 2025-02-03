@@ -1,16 +1,20 @@
 ion-toolbar {
   --background: #EECC8C;
 }
+
 .back-button, .user-button {
   --color: #4A3500;
   font-weight: 500;
 }
+
 .user-button ion-icon {
   margin-left: 8px;
 }
+
 .scanner-content {
   --background: #FFF5E6;
 }
+
 .scanner-container {
   padding: 20px;
   display: flex;
@@ -18,24 +22,66 @@ ion-toolbar {
   align-items: center;
   gap: 20px;
 }
-.scanner-frame {
-  position: relative;
-  width: 280px;
-  height: 280px;
-  background: #FFFFFF;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(238, 204, 140, 0.3);
-}
-.preview-container {
-  width: 100%;
-  height: 100%;
-}
+
+// .scanner-preview {
+//   width: 100%;
+//   height: 100%;
+//   object-fit: cover;
+  
+//   &.hidden {
+//     display: none;
+//   }
+// }
+
 .scanner-preview {
   width: 100%;
-  height: 100%;
+  height: 300px;
   object-fit: cover;
+  border-radius: 8px;
 }
+
+.scanner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--ion-color-primary);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.button-container {
+  margin-top: 20px;
+  padding: 0 16px;
+}
+
+.result-card {
+  margin: 16px;
+}
+
+.scanner-frame {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.preview-container {
+  width: 100%;
+  height: 300px; // Adjust height as needed
+  overflow: hidden;
+  position: relative;
+}
+
+.scanner-frame {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
 .scanner-overlay {
   position: absolute;
   top: 0;
@@ -45,6 +91,7 @@ ion-toolbar {
   border: 2px solid #FF9800;
   box-sizing: border-box;
 }
+
 .scanner-corners::before,
 .scanner-corners::after {
   content: '';
@@ -54,16 +101,19 @@ ion-toolbar {
   border-color: #FF9800;
   border-style: solid;
 }
+
 .scanner-corners::before {
   top: 0;
   left: 0;
   border-width: 2px 0 0 2px;
 }
+
 .scanner-corners::after {
   bottom: 0;
   right: 0;
   border-width: 0 2px 2px 0;
 }
+
 .scan-line {
   position: absolute;
   width: 100%;
@@ -71,10 +121,12 @@ ion-toolbar {
   background: #FF9800;
   animation: scan 2s linear infinite;
 }
+
 @keyframes scan {
   0% { top: 0; }
   100% { top: 100%; }
 }
+
 .button-container {
   width: 100%;
   max-width: 300px;
@@ -82,18 +134,21 @@ ion-toolbar {
   flex-direction: column;
   gap: 12px;
 }
+
 .scan-button {
   --background: #FF9800;
   --background-activated: #F57C00;
   --color: #FFFFFF;
   font-weight: 600;
 }
+
 .stop-button {
   --background: #D32F2F;
   --background-activated: #B71C1C;
   --color: #FFFFFF;
   font-weight: 600;
 }
+
 .result-card {
   width: 100%;
   background: #FFFFFF;
@@ -101,6 +156,7 @@ ion-toolbar {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(238, 204, 140, 0.2);
 }
+
 .result-card ion-card-title {
   color: #FF6F00;
   font-size: 1.1rem;
@@ -108,34 +164,44 @@ ion-toolbar {
   align-items: center;
   gap: 8px;
 }
+
 .result-card ion-card-content {
   color: #5D4037;
 }
+
 .custom-fab {
   margin-bottom: 16px;
   margin-right: 16px;
 }
+
 .fab-main {
   --background: #FF9800;
   --background-activated: #F57C00;
   --color: #FFFFFF;
 }
+
 .fab-secondary {
   --background: #EECC8C;
   --background-activated: #E6B970;
   --color: #4A3500;
   margin: 8px 0;
 }
-.scan-button:hover, .stop-button:hover {
+
+.scan-button:hover, 
+.stop-button:hover {
   opacity: 0.9;
 }
-.fab-main:hover, .fab-secondary:hover {
+
+.fab-main:hover, 
+.fab-secondary:hover {
   --background: #F57C00;
   --color: #FFFFFF;
 }
+
 ion-fab-button {
   transition: transform 0.2s ease;
 }
+
 ion-fab-button:hover {
   transform: scale(1.05);
 }

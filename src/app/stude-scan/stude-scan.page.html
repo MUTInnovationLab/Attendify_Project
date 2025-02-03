@@ -1,3 +1,4 @@
+<!-- stude-scan.page.html -->
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -17,31 +18,66 @@
 
 <ion-content class="scanner-content">
   <div class="scanner-container">
+    <!-- Error Alert -->
+    <ion-alert
+      *ngIf="hasError"
+      [isOpen]="hasError"
+      header="Error"
+      [message]="errorMessage"
+      [buttons]="['OK']"
+      (didDismiss)="hasError = false">
+    </ion-alert>
+
     <div class="scanner-frame">
-      <div *ngIf="isScanning" class="preview-container">
-        <video #scannerPreview *ngIf="isWeb" class="scanner-preview"></video>
-      </div>
-      <div class="scan-line" *ngIf="!isWeb"></div>
-      <div class="scanner-overlay">
+      <!-- ZXing Scanner Component -->
+      <zxing-scanner
+      *ngIf="scannerEnabled"
+      [enable]="scannerEnabled"
+      [formats]="formatsEnabled"
+      [device]="currentDevice"
+      (scanSuccess)="onScanSuccess($event)"
+      (scanError)="onScanError($event)"
+      (camerasFound)="onCamerasFound($event)"
+      (permissionResponse)="onHasPermission($event)"
+      class="scanner-preview">
+    </zxing-scanner>
+
+      <!-- Scanner Overlay -->
+      <div class="scanner-overlay" *ngIf="scannerEnabled">
         <div class="scanner-corners"></div>
       </div>
     </div>
 
+    <!-- Camera Device Selection -->
+    <ion-item *ngIf="availableDevices.length > 1">
+      <ion-label>Select Camera</ion-label>
+      <ion-select [(ngModel)]="currentDevice" interface="popover">
+        <ion-select-option *ngFor="let device of availableDevices" [value]="device">
+          {{device.label}}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Control Buttons -->
     <div class="button-container">
       <ion-button expand="block" 
                   (click)="startScan()" 
-                  class="scan-button">
+                  class="scan-button"
+                  [disabled]="scannerEnabled">
         <ion-icon name="scan-outline" slot="start"></ion-icon>
         Start Scan
       </ion-button>
+      
       <ion-button expand="block" 
                   (click)="stopScan()" 
-                  class="stop-button">
+                  class="stop-button"
+                  [disabled]="!scannerEnabled">
         <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
         Stop Scan
       </ion-button>
     </div>
 
+    <!-- Scan Result Card -->
     <ion-card *ngIf="scanResult" class="result-card">
       <ion-card-header>
         <ion-card-title>
@@ -55,6 +91,7 @@
     </ion-card>
   </div>
 
+  <!-- FAB Menu -->
   <ion-fab vertical="bottom" horizontal="end" class="custom-fab">
     <ion-fab-button class="fab-main">
       <ion-icon name="chevron-up-circle-outline"></ion-icon>
