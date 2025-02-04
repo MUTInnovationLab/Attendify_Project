@@ -18,8 +18,8 @@ export class AdminPage implements OnInit {
   staffNumber: string = '';
   email: string = '';
   position: string = '';
-  faculties$!: Observable<string[]>; // Observable for faculties
-  departments$!: Observable<string[]>; // Observable for departments
+  faculties$!: Observable<string[]>;
+  departments$!: Observable<string[]>;
   
   selectedFaculty: string = '';
   selectedDepartment: string = '';
@@ -52,11 +52,28 @@ export class AdminPage implements OnInit {
     this.faculties$ = this.facultyDepartmentService.getFaculties();
   }
 
+  // Add missing navigation methods
+  navigateToDeptAnalytics() {
+    this.router.navigate(['/dept-analytics']);
+  }
+
+  viewLecturers() {
+    this.router.navigate(['/view-lecturers']);
+  }
+
+  viewStudents() {
+    this.router.navigate(['/view-students']);
+  }
+
+  viewLecturersAndStudents() {
+    this.router.navigate(['/dept-an']);
+  }
+
   onFacultyChange(event: any) {
     const selectedFaculty = event.detail.value;
-    this.selectedFaculty = selectedFaculty; // Capture the selected faculty
+    this.selectedFaculty = selectedFaculty;
     this.departments$ = this.facultyDepartmentService.getDepartments(selectedFaculty);
-    this.selectedDepartment = ''; // Reset selected department when faculty changes
+    this.selectedDepartment = '';
   }
   
   // Modal control methods
@@ -66,30 +83,18 @@ export class AdminPage implements OnInit {
     this.fullName = '';
     this.staffNumber = '';
     this.email = '';
-    this.position = '';
     this.selectedFaculty = '';
     this.selectedDepartment = '';
-  }
-
-  openModuleModal() {
-    this.isModuleModalOpen = true;
-    // Reset form fields
-    this.moduleName = '';
-    this.moduleCode = '';
-    this.moduleLevel = '';
   }
 
   closeLecturerModal() {
     this.isLecturerModalOpen = false;
   }
 
-  closeModuleModal() {
-    this.isModuleModalOpen = false;
-  }
-
   async submitForm() {
     // Validate form fields
-    if (!this.fullName || !this.staffNumber || !this.email || !this.position || this.selectedFaculty === '' || this.selectedDepartment === '') {
+    if (!this.fullName || !this.staffNumber || !this.email || 
+        this.selectedFaculty === '' || this.selectedDepartment === '') {
       this.presentToast('Please fill in all fields');
       return;
     }
@@ -102,7 +107,7 @@ export class AdminPage implements OnInit {
   
     try {
       const userCredential = await this.auth.createUserWithEmailAndPassword(this.email, this.staffNumber);
-      const position = this.position.trim().toLowerCase() === 'lecturer' ? 'Lecturer' : this.position;
+      const position = 'Lecturer'; // Ensure position is always 'Lecturer'
   
       this.closeLecturerModal();
       
@@ -117,11 +122,8 @@ export class AdminPage implements OnInit {
       });
   
       await loader.dismiss();
-      
-   
       this.presentToast("Successfully registered!");
- 
-    await this.navigateToBoard();
+      await this.navigateToBoard();
 
     } catch (error) {
       await loader.dismiss();
@@ -160,39 +162,6 @@ export class AdminPage implements OnInit {
         this.presentToast(errorMessage);
     }
   }
-  
-  async addModule() {
-    if (!this.moduleName || !this.moduleCode || !this.moduleLevel || !this.selectedDepartment) {
-      this.presentToast('Please fill in all fields');
-      return;
-    }
-
-    const loader = await this.loadingController.create({
-      message: 'Adding module...',
-      cssClass: 'custom-loader-class'
-    });
-    await loader.present();
-
-    try {
-      // Create a new document in the modules collection
-      await this.firestore.collection('modules').add({
-        name: this.moduleName,
-        code: this.moduleCode,
-        level: this.moduleLevel,
-        department: this.selectedDepartment,
-        faculty: this.selectedFaculty,
-        createdAt: new Date()
-      });
-
-      loader.dismiss();
-      this.closeModuleModal();
-      this.presentToast('Module added successfully');
-    } catch (error) {
-      loader.dismiss();
-      this.presentToast('Error adding module');
-      console.error('Error adding module:', error);
-    }
-  }
 
   async presentToast(message: string) {
     const toast = await this.toastController.create({
@@ -203,11 +172,36 @@ export class AdminPage implements OnInit {
     toast.present();
   }
 
-  dismiss() {
-    this.router.navigate(['/login']);
-  }
-
-  goBack() {
-    this.navCtrl.navigateBack('/dashboard');
+  async presentConfirmationAlert() {
+    const alert = await this.alertController.create({
+      header: 'Confirm Logout',
+      message: 'Are you sure you want to log out?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            // Do nothing if user cancels
+          }
+        },
+        {
+          text: 'Yes',
+          handler: async () => {
+            try {
+              // Sign out from Firebase Authentication
+              await this.auth.signOut();
+              
+              // Navigate back to login page
+              await this.router.navigate(['/login']);
+            } catch (error) {
+              console.error('Logout error:', error);
+              this.presentToast('Error logging out');
+            }
+          }
+        }
+      ]
+    });
+  
+    await alert.present();
   }
 }

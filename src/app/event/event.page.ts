@@ -57,8 +57,6 @@ export class EventPage {
     this.newEvent = { ...eventData };
   }
 
-  
-
   loadEventsForYear() {
     this.academicCalendarService.getEventsForYear(this.selectedYear).subscribe(
       events => {

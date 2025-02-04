@@ -71,7 +71,7 @@ export class LoginPage implements OnInit {
         // Staff login
         await this.auth.signInWithEmailAndPassword(staffData.email, this.password);
         loader.dismiss();
-        this.navigateBasedOnUserType(staffData.position);
+        this.navigateBasedOnUserType(staffData.position, staffData.department);
       } else {
         // Student login or unknown user
         const studentData = await this.getStudentData();
@@ -163,7 +163,7 @@ export class LoginPage implements OnInit {
     }
   }
 
-  navigateBasedOnUserType(userType: string) {
+  navigateBasedOnUserType(userType: string, department?: string) {
     // Convert userType to lowercase
     const normalizedUserType = userType.toLowerCase();
   
@@ -174,8 +174,13 @@ export class LoginPage implements OnInit {
       case 'lecturer':
         this.navController.navigateForward('/lecture');
         break;
-      case 'dept-admin':
-      // case 'hod':  // Adding case for HOD
+      case 'hod':
+        // Navigate to admin page with department info
+        this.navController.navigateForward('/admin', {
+          state: { department: department }
+        });
+        break;
+      case 'dean':
         this.navController.navigateForward('/dashboard');
         break;
       default:
@@ -183,7 +188,6 @@ export class LoginPage implements OnInit {
         break;
     }
   }
-  
 
   async presentToast(message: string) {
     const toast = await this.toastController.create({

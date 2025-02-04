@@ -1,7 +1,6 @@
-
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import firebase from 'firebase/compat/app';
 import { Observable } from 'rxjs';
 
@@ -11,16 +10,39 @@ import { Observable } from 'rxjs';
 export class AuthService {
   user$: Observable<firebase.User | null>;
 
-  constructor(private afAuth: AngularFireAuth, private http: HttpClient) {
+  constructor(
+    private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
+  ) {
     this.user$ = this.afAuth.authState;
   }
 
+  // Add password reset method
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    try {
+      await this.afAuth.sendPasswordResetEmail(email);
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw error;
+    }
+  }
+
   async login(email: string, password: string): Promise<void> {
-    await this.afAuth.signInWithEmailAndPassword(email, password);
+    try {
+      await this.afAuth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   }
 
   async logout(): Promise<void> {
-    await this.afAuth.signOut();
+    try {
+      await this.afAuth.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   }
 
   getCurrentUser(): Promise<firebase.User | null> {
@@ -32,28 +54,7 @@ export class AuthService {
     return user ? user.email : null;
   }
 
-  signUp(email: string, password: string): Promise<any> {
-    return this.afAuth.createUserWithEmailAndPassword(email, password)
-      .then((result) => {
-        console.log('User successfully registered!', result);
-        return result;
-      })
-      .catch((error) => {
-        console.error('Error during registration:', error);
-        throw error;
-      });
-  }
-
   isAuthenticated(): boolean {
-    const currentUser = firebase.auth().currentUser;
-    return currentUser !== null;
-  }
-
-  async sendPasswordResetEmail(email: string): Promise<void> {
-    return this.afAuth.sendPasswordResetEmail(email);
+    return firebase.auth().currentUser !== null;
   }
 }
-
-
-
-
