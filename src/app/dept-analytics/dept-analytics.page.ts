@@ -254,4 +254,8 @@ export class DeptAnalyticsPage implements AfterViewInit {
     }
   }
   
+
+  navigateBack(){
+    this.router.navigate(['/admin']);
+  }
 }

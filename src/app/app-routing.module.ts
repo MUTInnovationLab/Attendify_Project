@@ -115,6 +115,10 @@ const routes: Routes = [
   {
     path: 'faculty-form',
     loadChildren: () => import('./faculty-form/faculty-form.module').then( m => m.FacultyFormPageModule)
+  },
+  {
+    path: 'super-admin',
+    loadChildren: () => import('./super-admin/super-admin.module').then( m => m.SuperAdminPageModule)
   }
 
 ];

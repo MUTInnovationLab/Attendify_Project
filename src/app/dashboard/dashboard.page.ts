@@ -7,12 +7,13 @@ import { AuthService } from '../services/auth.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 interface DeptAdmin {
-  id?: string; // Optional ID for internal use
+  id?: string;
   fullName: string;
   email: string;
   position: string;
-  staffNumber: string; // This will be used as the document ID
+  staffNumber: string;
   department: string;
+  faculty: string;
 }
 
 @Component({
@@ -23,34 +24,19 @@ interface DeptAdmin {
 export class DashboardPage {
   @ViewChild('addAdminModal') addAdminModal!: IonModal;
   @ViewChild('departmentsAnalyticsModal') departmentsAnalyticsModal!: IonModal;
+  @ViewChild('addDeanModal') addDeanModal!: IonModal;
 
   currentUser: { name: string; email: string } | null = null;
-
   deptAdminFullName = '';
   deptAdminEmail = '';
   deptAdminStaffNumber = '';
   deptAdminDepartment = '';
   selectedDeptAdminId: string | null = null;
+  selectedFaculty: string = '';
 
   deptAdmins$: Observable<DeptAdmin[]>;
-
-  departments: string[] = [
-    'Agriculture',
-    'Biomedical Sciences',
-    'Building and Construction',
-    'Chemistry',
-    'Civil Engineering',
-    'Civil Engineering and Survey',
-    'Community Extension',
-    'Electrical Engineering',
-    'Environmental Health',
-    'Human Resource Management',
-    'Marketing',
-    'Mechanical Engineering',
-    'Nature Conservation',
-    'Office Management and Technology',
-    'Public Administration and Economics',
-  ];
+  faculties: string[] = [];
+  availableDepartments: string[] = [];
 
   constructor(
     private navCtrl: NavController,
@@ -61,7 +47,7 @@ export class DashboardPage {
     private afAuth: AngularFireAuth
   ) {
     this.deptAdmins$ = this.firestore
-      .collection<DeptAdmin>('staff', ref => ref.where('position', '==', 'dept-admin'))
+      .collection<DeptAdmin>('staff', ref => ref.where('position', '==', 'HOD'))
       .snapshotChanges()
       .pipe(
         map(actions => actions.map(a => {
@@ -70,94 +56,187 @@ export class DashboardPage {
           return { id, ...data };
         }))
       );
+    
+    this.loadFaculties();
   }
 
-  ngOnInit() {}
+  async loadFaculties() {
+    const facultiesSnapshot = await this.firestore.collection('specified-collection-name').get().toPromise();
+    this.faculties = facultiesSnapshot?.docs.map(doc => doc.id) || [];
+  }
 
-  openAddAdminModal() {
+  async onFacultyChange(event: any) {
+    const selectedFaculty = event.detail.value;
+    this.selectedFaculty = selectedFaculty;
+    
+    if (selectedFaculty) {
+      const facultyDoc = await this.firestore.collection('faculties').doc(selectedFaculty).get().toPromise();
+      const departments = (facultyDoc?.data() as any)?.departments || [];
+      this.availableDepartments = departments.map((dept: any) => dept.name);
+    } else {
+      this.availableDepartments = [];
+    }
+    
+    this.deptAdminDepartment = '';
+  }
+
+  openAddHODModal() {
+    this.resetForm();
     this.addAdminModal.present();
   }
 
+  openAddDeanModal() {
+    this.resetForm();
+    this.addDeanModal.present();
+  }
+
   dismissModal() {
-    this.addAdminModal.dismiss();
+    this.addAdminModal?.dismiss();
+    this.addDeanModal?.dismiss();
     this.resetForm();
   }
 
   async addDeptAdmin() {
-    const currentUser = await this.authService.getCurrentUser();
-    if (!currentUser) {
-      this.presentToast('You must be logged in to add a Dept-Admin.');
+    if (!this.selectedFaculty) {
+      this.presentToast('Please select a faculty.');
       return;
     }
 
-    if (this.deptAdminFullName && this.deptAdminEmail && this.deptAdminStaffNumber && this.deptAdminDepartment) {
-      // Check if the email already exists
-      const emailExists = await this.firestore
-        .collection<DeptAdmin>('staff', ref => ref.where('email', '==', this.deptAdminEmail))
-        .valueChanges()
-        .pipe(take(1))
-        .toPromise()
-        .then(deptAdmins => (deptAdmins ?? []).length > 0);
+    const currentUser = await this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.presentToast('You must be logged in to add a HOD.');
+      return;
+    }
 
-      if (emailExists) {
-        this.presentToast('A Dept-Admin with this email already exists.');
-        return;
-      }
+    if (!this.deptAdminFullName || !this.deptAdminEmail || !this.deptAdminStaffNumber || 
+        !this.deptAdminDepartment || !this.selectedFaculty) {
+      this.presentToast('Please fill out all required fields.');
+      return;
+    }
 
-      const newDeptAdmin: DeptAdmin = {
-        fullName: this.deptAdminFullName,
-        email: this.deptAdminEmail,
-        position: 'dept-admin',
-        staffNumber: this.deptAdminStaffNumber, // This will be used as the document ID
-        department: this.deptAdminDepartment,
-      };
+    const emailExists = await this.firestore
+      .collection<DeptAdmin>('staff', ref => ref.where('email', '==', this.deptAdminEmail))
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+      .then(deptAdmins => (deptAdmins ?? []).length > 0);
 
-      try {
-        // Create user in Firebase Authentication
-        await this.afAuth.createUserWithEmailAndPassword(this.deptAdminEmail, newDeptAdmin.staffNumber);
+    if (emailExists) {
+      this.presentToast('A HOD with this email already exists.');
+      return;
+    }
 
-        // Add Dept-Admin to Firestore using staffNumber as the document ID
-        await this.firestore.collection('staff').doc(newDeptAdmin.staffNumber).set(newDeptAdmin);
+    const newDeptAdmin: DeptAdmin = {
+      fullName: this.deptAdminFullName,
+      email: this.deptAdminEmail,
+      position: 'HOD',
+      staffNumber: this.deptAdminStaffNumber,
+      department: this.deptAdminDepartment,
+      faculty: this.selectedFaculty
+    };
 
-        // Optionally, send a password reset email to let the admin set their password
-        await this.afAuth.sendPasswordResetEmail(this.deptAdminEmail);
+    try {
+      await this.afAuth.createUserWithEmailAndPassword(this.deptAdminEmail, newDeptAdmin.staffNumber);
+      await this.firestore.collection('staff').doc(newDeptAdmin.staffNumber).set(newDeptAdmin);
+      await this.afAuth.sendPasswordResetEmail(this.deptAdminEmail);
+      
+      this.presentToast('HOD successfully added! A login email has been sent.');
+      this.dismissModal();
+    } catch (error) {
+      console.error('Error adding HOD: ', error);
+      this.presentToast('Error adding HOD.');
+    }
+  }
 
-        this.presentToast('Dept-Admin successfully added! A login email has been sent.');
-        this.dismissModal();
-      } catch (error) {
-        console.error('Error adding Dept-Admin: ', error);
-        this.presentToast('Error adding Dept-Admin.');
-      }
-    } else {
-      this.presentToast('Please fill out all fields.');
+  async addDean() {
+    if (!this.selectedFaculty) {
+      this.presentToast('Please select a faculty.');
+      return;
+    }
+
+    const currentUser = await this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.presentToast('You must be logged in to add a Dean.');
+      return;
+    }
+
+    if (!this.deptAdminFullName || !this.deptAdminEmail || !this.deptAdminStaffNumber || !this.selectedFaculty) {
+      this.presentToast('Please fill out all required fields.');
+      return;
+    }
+
+    const emailExists = await this.firestore
+      .collection<DeptAdmin>('staff', ref => ref.where('email', '==', this.deptAdminEmail))
+      .valueChanges()
+      .pipe(take(1))
+      .toPromise()
+      .then(deptAdmins => (deptAdmins ?? []).length > 0);
+
+    if (emailExists) {
+      this.presentToast('A Dean with this email already exists.');
+      return;
+    }
+
+    const newDean: DeptAdmin = {
+      fullName: this.deptAdminFullName,
+      email: this.deptAdminEmail,
+      position: 'Dean',
+      staffNumber: this.deptAdminStaffNumber,
+      department: '', // No department for Dean
+      faculty: this.selectedFaculty
+    };
+
+    try {
+      await this.afAuth.createUserWithEmailAndPassword(this.deptAdminEmail, newDean.staffNumber);
+      await this.firestore.collection('staff').doc(newDean.staffNumber).set(newDean);
+      await this.afAuth.sendPasswordResetEmail(this.deptAdminEmail);
+      
+      this.presentToast('Dean successfully added! A login email has been sent.');
+      this.dismissModal();
+    } catch (error) {
+      console.error('Error adding Dean: ', error);
+      this.presentToast('Error adding Dean.');
     }
   }
 
   editDeptAdmin(deptAdmin: DeptAdmin) {
-    this.selectedDeptAdminId = deptAdmin.staffNumber; // Use staffNumber as the ID
+    this.selectedDeptAdminId = deptAdmin.staffNumber;
     this.deptAdminFullName = deptAdmin.fullName;
     this.deptAdminEmail = deptAdmin.email;
     this.deptAdminStaffNumber = deptAdmin.staffNumber;
     this.deptAdminDepartment = deptAdmin.department;
-    this.openAddAdminModal();
+    this.selectedFaculty = deptAdmin.faculty;
+    
+    if (deptAdmin.position === 'Dean') {
+      this.openAddDeanModal();
+    } else {
+      this.openAddHODModal();
+    }
   }
 
   async updateDeptAdmin() {
+    if (!this.selectedFaculty) {
+      this.presentToast('Please select a faculty.');
+      return;
+    }
+
     if (this.selectedDeptAdminId) {
       const updatedDeptAdmin: DeptAdmin = {
         fullName: this.deptAdminFullName,
         email: this.deptAdminEmail,
-        position: 'dept-admin',
+        position: this.addDeanModal.isOpen ? 'Dean' : 'HOD',
         staffNumber: this.deptAdminStaffNumber,
-        department: this.deptAdminDepartment,
+        department: this.addDeanModal.isOpen ? '' : this.deptAdminDepartment,
+        faculty: this.selectedFaculty
       };
+      
       try {
         await this.firestore.collection('staff').doc(this.selectedDeptAdminId).update(updatedDeptAdmin);
-        this.presentToast('Dept-Admin successfully updated!');
+        this.presentToast(`${updatedDeptAdmin.position} successfully updated!`);
         this.dismissModal();
       } catch (error) {
-        console.error('Error updating Dept-Admin: ', error);
-        this.presentToast('Error updating Dept-Admin.');
+        console.error(`Error updating ${updatedDeptAdmin.position}: `, error);
+        this.presentToast(`Error updating ${updatedDeptAdmin.position}.`);
       }
     }
   }
@@ -165,13 +244,13 @@ export class DashboardPage {
   async deleteDeptAdmin(deptAdminId: string) {
     const currentUser = await this.authService.getCurrentUser();
     if (!currentUser) {
-      this.presentToast('You must be logged in to delete a Dept-Admin.');
+      this.presentToast('You must be logged in to delete a staff member.');
       return;
     }
 
     const alert = await this.alertController.create({
       header: 'Confirm Deletion',
-      message: 'Are you sure you want to delete this Dept-Admin? This action cannot be undone.',
+      message: 'Are you sure you want to delete this staff member? This action cannot be undone.',
       buttons: [
         {
           text: 'Cancel',
@@ -185,12 +264,11 @@ export class DashboardPage {
           cssClass: 'danger',
           handler: async () => {
             try {
-              // Use the staffNumber as the document ID for deletion
               await this.firestore.collection('staff').doc(deptAdminId).delete();
-              this.presentToast('Dept-Admin successfully deleted!');
+              this.presentToast('Staff member successfully deleted!');
             } catch (error) {
-              console.error('Error deleting Dept-Admin: ', error);
-              this.presentToast('Error deleting Dept-Admin.');
+              console.error('Error deleting staff member: ', error);
+              this.presentToast('Error deleting staff member.');
             }
           }
         }
@@ -203,7 +281,7 @@ export class DashboardPage {
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message: message,
-      duration: 1500,
+      duration: 2000,
       position: 'top'
     });
     toast.present();
@@ -213,7 +291,11 @@ export class DashboardPage {
     if (this.selectedDeptAdminId) {
       await this.updateDeptAdmin();
     } else {
-      await this.addDeptAdmin();
+      if (this.addDeanModal.isOpen) {
+        await this.addDean();
+      } else {
+        await this.addDeptAdmin();
+      }
     }
   }
 
@@ -222,7 +304,9 @@ export class DashboardPage {
     this.deptAdminEmail = '';
     this.deptAdminStaffNumber = '';
     this.deptAdminDepartment = '';
+    this.selectedFaculty = '';
     this.selectedDeptAdminId = null;
+    this.availableDepartments = [];
   }
 
   async presentConfirmationAlert() {
@@ -237,7 +321,7 @@ export class DashboardPage {
         {
           text: 'Logout',
           handler: () => {
-            this.navCtrl.navigateRoot('/login');
+            this.logout();
           },
         },
       ],
@@ -246,24 +330,16 @@ export class DashboardPage {
   }
 
   navigateToDeptAnalytics() {
-    this.navCtrl.navigateForward('/dept-analytics'); 
+    this.navCtrl.navigateForward('/super-admin');
   }
 
   navigateToEvents() {
-    this.navCtrl.navigateForward('/event'); 
+    this.navCtrl.navigateForward('/event');
   }
 
   nabigateToAddModule() {
-    this.navCtrl.navigateForward('/faculty-form'); 
-    
+    this.navCtrl.navigateForward('/faculty-form');
   }
-
-  departmentsAnalytics = [
-    { name: 'IT', adminCount: 3, activeUsers: 50 },
-    { name: 'HR', adminCount: 2, activeUsers: 30 },
-    { name: 'Finance', adminCount: 2, activeUsers: 25 },
-    { name: 'Marketing', adminCount: 1, activeUsers: 20 },
-  ];
 
   openDepartmentsAnalyticsModal() {
     this.departmentsAnalyticsModal.present();
@@ -273,7 +349,13 @@ export class DashboardPage {
     this.departmentsAnalyticsModal.dismiss();
   }
 
-  logout() {
-    this.navCtrl.navigateRoot('/login');
+  async logout() {
+    try {
+      await this.authService.logout();
+      this.navCtrl.navigateRoot('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.presentToast('Error during logout. Please try again.');
+    }
   }
 }

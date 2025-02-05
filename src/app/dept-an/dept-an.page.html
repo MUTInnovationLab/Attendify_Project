@@ -1,19 +1,14 @@
-<ion-header>
+<ion-header class="analytics-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="navigateToLogin()">
-        <ion-icon name="grid-outline"></ion-icon>
-        <ion-label>Dashboard</ion-label>
+      <ion-button (click)="navigateBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-buttons slot="end">
-      <ion-button (click)="navigateToDeptAnalysis()">
-        <ion-icon name="analytics-outline"></ion-icon>
-        <ion-label>Dept Analysis</ion-label>
-      </ion-button>
-    </ion-buttons>
+    <ion-title class="ion-text-center">Analytics Dashboard</ion-title>
   </ion-toolbar>
 </ion-header>
+
 
 <ion-content [fullscreen]="true" class="user-management-content">
   <ion-segment [(ngModel)]="selectedSegment" class="user-segment">

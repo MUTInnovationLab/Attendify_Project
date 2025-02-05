@@ -172,36 +172,7 @@ export class AdminPage implements OnInit {
     toast.present();
   }
 
-  async presentConfirmationAlert() {
-    const alert = await this.alertController.create({
-      header: 'Confirm Logout',
-      message: 'Are you sure you want to log out?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            // Do nothing if user cancels
-          }
-        },
-        {
-          text: 'Yes',
-          handler: async () => {
-            try {
-              // Sign out from Firebase Authentication
-              await this.auth.signOut();
-              
-              // Navigate back to login page
-              await this.router.navigate(['/login']);
-            } catch (error) {
-              console.error('Logout error:', error);
-              this.presentToast('Error logging out');
-            }
-          }
-        }
-      ]
-    });
-  
-    await alert.present();
+  presentConfirmationAlert(){
+    
   }
 }

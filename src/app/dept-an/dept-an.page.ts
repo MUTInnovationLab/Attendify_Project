@@ -2,8 +2,32 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { getFirestore, doc, collection, getDocs } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { DataService } from '../services/data.service';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+
+
+interface Module {
+  moduleCode: string;
+  moduleName: string;
+  department: string;
+}
+
+interface AssignedLecturesData {
+  userEmail: string;
+  modules: Module[];
+}
+
+interface Lecturer {
+  staffNumber: string;
+  name: string;
+  surname: string;
+  email: string;
+  department: string;
+  position: string;
+  modules?: Module[];
+}
+
 
 @Component({
   selector: 'app-dept-an',
@@ -28,39 +52,105 @@ export class DeptAnPage implements OnInit {
   searchStudentNumber: string = '';
   presentToast: any;
   selectedSegment: string = 'lecturers';
+  hodDepartment: string = '';
+  userEmail: string = '';
 
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private afAuth: AngularFireAuth
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    const db = getFirestore();
+    await this.getCurrentUser();
+    await this.getHodDepartment();
     this.loadLecturers();
     this.loadStudents();
-    const db = getFirestore();
   }
 
-  // Simulate data loading with a delay
+  private async getCurrentUser() {
+    const user = await this.afAuth.currentUser;
+    if (user) {
+      this.userEmail = user.email || '';
+    }
+  }
+
+  private async getHodDepartment() {
+    const staffSnapshot = await this.firestore.collection('staff', ref => 
+      ref.where('email', '==', this.userEmail)
+         .where('position', '==', 'HOD')
+    ).get().toPromise();
+
+    if (staffSnapshot && !staffSnapshot.empty) {
+      this.hodDepartment = (staffSnapshot.docs[0].data() as any)['department'];
+    }
+  }
+
   private loadDataWithDelay(data: any[], page: number, pageSize: number, callback: (data: any[]) => void) {
     setTimeout(() => {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       callback(data.slice(startIndex, endIndex));
-    }, 500); // 500ms delay
+    }, 500);
   }
 
   loadLecturers() {
-    this.firestore.collection('/staff/').valueChanges().subscribe((staff: any[]) => {
-      this.lecturers = staff.filter(staffMember => staffMember.position === 'lecturer');
-      this.loadDataWithDelay(this.lecturers, this.currentLecturerPage, this.lecturersPageSize, (data) => {
-        this.displayedLecturers = data;
-      });
+    this.firestore.collection('staff', ref => 
+      ref.where('department', '==', this.hodDepartment)
+         .where('position', '==', 'lecturer')
+    ).snapshotChanges().subscribe(async (lecturerDocs) => {
+      this.lecturers = [];
+      
+      for (const lecturerDoc of lecturerDocs) {
+        const lecturer = lecturerDoc.payload.doc.data() as Lecturer;
+        
+        try {
+          const assignedModulesSnapshot = await this.firestore
+            .collection('assignedLectures')
+            .ref.where('userEmail', '==', lecturer.email)
+            .get();
+  
+          let modules: Module[] = [];
+          
+          assignedModulesSnapshot.forEach(doc => {
+            const assignedData = doc.data() as AssignedLecturesData;
+            if (assignedData.modules && Array.isArray(assignedData.modules)) {
+              const departmentModules = assignedData.modules.filter(module => 
+                module.department === this.hodDepartment
+              );
+              modules = [...modules, ...departmentModules];
+            }
+          });
+  
+          if (modules.length > 0) {
+            this.lecturers.push({
+              ...lecturer,
+              modules
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching modules for lecturer ${lecturer.email}:`, error);
+        }
+      }
+  
+      this.loadDataWithDelay(
+        this.lecturers,
+        this.currentLecturerPage,
+        this.lecturersPageSize,
+        (data) => {
+          this.displayedLecturers = data;
+        }
+      );
     });
   }
 
+
   loadStudents() {
-    this.firestore.collection('/students/').valueChanges().subscribe((students: any[]) => {
+    this.firestore.collection('students', ref =>
+      ref.where('department', '==', this.hodDepartment)
+    ).valueChanges().subscribe((students: any[]) => {
       this.students = students.map(student => ({
         ...student,
         fullName: `${student.name} ${student.surname}`
@@ -119,72 +209,80 @@ export class DeptAnPage implements OnInit {
     this.showStudents = false;
   }
 
-  navigateToLogin() {
-    this.router.navigate(['/login']);  // Adjust the path as needed
+  /*navigateToLogin() {
+    this.router.navigate(['/login']);
   }
 
   navigateToDeptAnalysis() {
     this.router.navigate(['/admin']);
-  }
+  }*/
 
   searchLecturers() {
     if (this.searchStaffNumber.trim() !== '') {
-      this.currentLecturerPage = 1; 
+      this.currentLecturerPage = 1;
 
       this.firestore.collection('staff', ref => ref
+        .where('department', '==', this.hodDepartment)
+        .where('position', '==', 'lecturer')
         .where('staffNumber', '>=', this.searchStaffNumber)
-        .where('staffNumber', '<=', this.searchStaffNumber + '\uf8ff')) // This ensures partial matching
-        .valueChanges()
-        .subscribe((staff: any[]) => {
-          this.lecturers = staff.filter(staffMember => staffMember.position === 'lecturer');
-  
-          // Display the matching lecturers with pagination
-          this.loadDataWithDelay(this.lecturers, this.currentLecturerPage, this.lecturersPageSize, (data) => {
-            this.displayedLecturers = data;
+        .where('staffNumber', '<=', this.searchStaffNumber + '\uf8ff')
+      ).valueChanges().subscribe(async (lecturers: any[]) => {
+        this.lecturers = [];
+        
+        for (const lecturer of lecturers) {
+          const assignedModulesSnapshot = await this.firestore.collection('assignedLectures', ref =>
+            ref.where('userEmail', '==', lecturer.email)
+          ).get().toPromise();
+
+          let modules: any[] = [];
+          if (assignedModulesSnapshot) {
+            assignedModulesSnapshot.docs.forEach(doc => {
+              const data = doc.data();
+              if ((data as any).modules) {
+                modules = modules.concat((data as any).modules.filter((module: any) => 
+                  module.department === this.hodDepartment
+                ));
+              }
+            });
+          }
+
+          this.lecturers.push({
+            ...lecturer,
+            modules: modules
           });
+        }
+
+        this.loadDataWithDelay(this.lecturers, this.currentLecturerPage, this.lecturersPageSize, (data) => {
+          this.displayedLecturers = data;
         });
+      });
     } else {
       this.loadLecturers();
     }
-  }  
+  }
 
   searchStudents() {
     if (this.searchStudentNumber.trim() !== '') {
-      // Use Firestore query with '>=', '==' and limit for partial matches
       this.firestore.collection('students', ref => ref
+        .where('department', '==', this.hodDepartment)
         .where('studentNumber', '>=', this.searchStudentNumber)
-        .where('studentNumber', '<=', this.searchStudentNumber + '\uf8ff')) // Ensures partial matching
-        .valueChanges()
-        .subscribe((students: any[]) => {
-          this.students = students.map(student => ({
-            ...student,
-            fullName: `${student.name} ${student.surname}`
-          }));
-  
-          // Display the matching students with pagination
-          this.loadDataWithDelay(this.students, this.currentStudentPage, this.studentsPageSize, (data) => {
-            this.displayedStudents = data;
-          });
-        });
-    } else {
-      this.loadStudents(); // Reset search if the input is empty
-    }
-  }  
+        .where('studentNumber', '<=', this.searchStudentNumber + '\uf8ff')
+      ).valueChanges().subscribe((students: any[]) => {
+        this.students = students.map(student => ({
+          ...student,
+          fullName: `${student.name} ${student.surname}`
+        }));
 
-  updateLecturer(lecturer: any) {
-    this.firestore.collection('/staff/').doc(lecturer.staffNumber).update({
-      fullName: lecturer.fullName,
-      email: lecturer.email,
-      position: lecturer.position,
-      department: lecturer.department
-    }).then(() => {
-      this.showToast('Lecturer updated successfully');
-      this.editingLecturerStaffNumber = null; // Exit editing mode
-    });
+        this.loadDataWithDelay(this.students, this.currentStudentPage, this.studentsPageSize, (data) => {
+          this.displayedStudents = data;
+        });
+      });
+    } else {
+      this.loadStudents();
+    }
   }
 
   deleteLecturer(staffNumber: string) {
-    // alert(staffNumber);
     this.firestore.collection('staff')
       .ref.where('staffNumber', '==', staffNumber)
       .get()
@@ -192,26 +290,14 @@ export class DeptAnPage implements OnInit {
         querySnapshot.forEach(doc => {
           doc.ref.delete();
         });
-        this.presentToast('Lecturer successfully deleted!');
+        this.showToast('Lecturer successfully deleted!');
       })
       .catch(error => {
         console.error("Error deleting lecturer: ", error);
       });
   }
 
-  updateStudent(student: any) {
-    this.firestore.collection('/students/').doc(student.studentNumber).update({
-      name: student.name,
-      email: student.email,
-      surname: student.surname
-    }).then(() => {
-      this.showToast('Student updated successfully');
-      this.editingStudentNumber = null; // Exit editing mode
-    });
-  }
-
   deleteStudent(studentNumber: string) {
-    // alert(studentNumber);
     this.firestore.collection('students')
       .ref.where('studentNumber', '==', studentNumber)
       .get()
@@ -219,10 +305,10 @@ export class DeptAnPage implements OnInit {
         querySnapshot.forEach(doc => {
           doc.ref.delete();
         });
-        this.presentToast('Lecturer successfully deleted!');
+        this.showToast('Student successfully deleted!');
       })
       .catch(error => {
-        console.error("Error deleting lecturer: ", error);
+        console.error("Error deleting student: ", error);
       });
   }
 
@@ -234,4 +320,14 @@ export class DeptAnPage implements OnInit {
     });
     toast.present();
   }
+
+  navigateBack(){
+    this.router.navigate(['/admin']);
+  }
 }
+
+
+
+
+
+
