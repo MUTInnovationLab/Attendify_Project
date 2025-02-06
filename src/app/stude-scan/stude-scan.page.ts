@@ -205,10 +205,6 @@ export class StudeScanPage implements OnInit {
   }
 
 
-
-
- 
-  
   async checkPermissions(): Promise<void> {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();

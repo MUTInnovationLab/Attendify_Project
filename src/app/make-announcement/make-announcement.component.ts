@@ -2,7 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AuthService } from '../services/auth.service';
-import { ToastController, ModalController } from '@ionic/angular'; // Add ModalController import
+import { ToastController, ModalController } from '@ionic/angular';
+import { arrayUnion } from 'firebase/firestore';
 
 @Component({
   selector: 'app-make-announcement',
@@ -20,8 +21,8 @@ export class MakeAnnouncementComponent implements OnInit {
     private navCtrl: NavController,
     private firestore: AngularFirestore,
     private authService: AuthService,
-    private toastController: ToastController, // ToastController injection
-    private modalController: ModalController // ModalController injection
+    private toastController: ToastController,
+    private modalController: ModalController
   ) {}
 
   async ngOnInit() {
@@ -44,7 +45,6 @@ export class MakeAnnouncementComponent implements OnInit {
     }
   }
 
-  // Toast message method
   async presentToast(message: string, color: string = 'success') {
     const toast = await this.toastController.create({
       message: message,
@@ -75,16 +75,29 @@ export class MakeAnnouncementComponent implements OnInit {
             userEmail: userEmail
           };
 
-          await this.firestore.collection('announcements').doc(this.moduleCode).set(announcement);
+          // Get reference to the announcements document
+          const announcementRef = this.firestore.collection('announcements').doc(this.moduleCode);
+
+          // First, check if the document exists
+          const doc = await announcementRef.get().toPromise();
+
+          if (!doc?.exists) {
+            // If document doesn't exist, create it with an array containing the first announcement
+            await announcementRef.set({
+              announcements: [announcement]
+            });
+          } else {
+            // If document exists, update it by adding the new announcement to the array
+            await announcementRef.update({
+              announcements: arrayUnion(announcement)
+            });
+          }
+
           console.log('Announcement submitted:', announcement);
-          
-          // Show success message
           await this.presentToast('Announcement submitted successfully!');
 
           this.title = '';
           this.content = '';
-          
-          // Optional: Navigate back after successful submission
           this.dismiss();
         } else {
           await this.presentToast('User email is not available!', 'danger');
@@ -110,9 +123,6 @@ export class MakeAnnouncementComponent implements OnInit {
     });
   }
 }
-
-
-
 
 
 
