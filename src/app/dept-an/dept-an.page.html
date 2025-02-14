@@ -1,14 +1,19 @@
-<ion-header class="analytics-header">
+<ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="navigateBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
+      <ion-button (click)="navigateToLogin()">
+        <ion-icon name="grid-outline"></ion-icon>
+        <ion-label>Dashboard</ion-label>
       </ion-button>
     </ion-buttons>
-    <ion-title class="ion-text-center">Analytics Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="navigateToDeptAnalysis()">
+        <ion-icon name="analytics-outline"></ion-icon>
+        <ion-label>Dept Analysis</ion-label>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
-
 
 <ion-content [fullscreen]="true" class="user-management-content">
   <ion-segment [(ngModel)]="selectedSegment" class="user-segment">
@@ -39,7 +44,8 @@
                 <th>Position</th>
                 <th>Staff Number</th>
                 <th>Department</th>
-                <th>Actions</th>
+                <th>Faculty</th>
+                <th *ngIf="canDelete()">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -49,7 +55,8 @@
                 <td>{{ lecturer.position }}</td>
                 <td>{{ lecturer.staffNumber }}</td>
                 <td>{{ lecturer.department }}</td>
-                <td>
+                <td>{{ lecturer.faculty }}</td>
+                <td *ngIf="canDelete()">
                   <ion-button fill="clear" (click)="deleteLecturer(lecturer.staffNumber)" 
                             class="delete-button">
                     <ion-icon name="trash-outline" color="danger"></ion-icon>
@@ -90,8 +97,9 @@
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Student Number</th>
-                <th>Surname</th>
-                <th>Actions</th>
+                <th>Department</th>
+                <th>Faculty</th>
+                <th *ngIf="canDelete()">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -99,8 +107,9 @@
                 <td>{{ student.fullName }}</td>
                 <td>{{ student.email }}</td>
                 <td>{{ student.studentNumber }}</td>
-                <td>{{ student.surname }}</td>
-                <td>
+                <td>{{ student.department }}</td>
+                <td>{{ student.faculty }}</td>
+                <td *ngIf="canDelete()">
                   <ion-button fill="clear" (click)="deleteStudent(student.studentNumber)" 
                             class="delete-button">
                     <ion-icon name="trash-outline" color="danger"></ion-icon>

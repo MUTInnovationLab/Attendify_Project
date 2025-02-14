@@ -183,6 +183,9 @@ export class LoginPage implements OnInit {
       case 'dean':
         this.navController.navigateForward('/dashboard');
         break;
+      case 'super-admin':
+        this.navController.navigateForward('/dashboard');
+        break;
       default:
         this.presentToast('Unknown user type');
         break;

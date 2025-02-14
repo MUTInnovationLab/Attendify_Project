@@ -94,6 +94,10 @@ const routes: Routes = [
     loadChildren: () => import('./dept-analytics/dept-analytics.module').then( m => m.DeptAnalyticsPageModule)
   },
   {
+    path: 'hod-analytics',
+    loadChildren: () => import('./hod-analytics/hod-analytics.module').then( m => m.HodAnalyticsPageModule)
+  },
+  {
     path: 'student-records',
     loadChildren: () => import('./student-records/student-records.module').then( m => m.StudentRecordsPageModule)
   },
@@ -108,7 +112,8 @@ const routes: Routes = [
   {
     path: 'manage-timetable',
     loadChildren: () => import('./manage-timetable/manage-timetable.module').then( m => m.ManageTimetablePageModule)
-  },  {
+  },
+  {
     path: 'board',
     loadChildren: () => import('./board/board.module').then( m => m.BoardPageModule)
   },

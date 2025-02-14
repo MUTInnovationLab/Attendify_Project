@@ -256,6 +256,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
   
 
   navigateBack(){
-    this.router.navigate(['/admin']);
+    this.router.navigate(['/dashboard']);
   }
 }
