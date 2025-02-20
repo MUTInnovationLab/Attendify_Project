@@ -88,11 +88,6 @@ interface AttendanceRecord {
   }[];
 }
 
-// interface ModuleData {
-//   enrolledStudents?: string[];
-//   attendedStudents?: string[];
-// }
-
 interface LecturerData {
   staffNumber: string;
   email: string;
@@ -154,27 +149,6 @@ totalPages: number = 1;
     private afAuth: AngularFireAuth
   ) {}
 
-  // async ngOnInit() {
-  //   try {
-  //     const user = await this.afAuth.currentUser;
-  //     if (user) {
-  //       this.currentLecturerEmail = user.email || '';
-        
-  //       // Fetch modules associated with the current lecturer
-  //       await this.fetchModulesForLecturer();
-        
-  //       // Fetch attendance data for modules
-  //       await this.fetchAttendedStudents();
-
-  //       // Fetch pending requests for modules
-  //       for (const module of this.modules) {
-  //         await this.fetchPendingRequests(module.moduleCode);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching lecturer details:', error);
-  //   }
-  // }
 
   async ngOnInit() {
     try {
@@ -421,7 +395,7 @@ async fetchAttendedStudents() {
     this.showRequestsTable = !this.showRequestsTable;
   }
 
-  async updateStudentStatus(request: any, action: 'enroll' | 'remove') {
+  async updateStudentStatus(request: any, action: 'Enroll' | 'remove') {
     console.log('--- Start of updateStudentStatus ---');
 
     if (!request.moduleCode || !request.studentNumber) {
@@ -439,11 +413,11 @@ async fetchAttendedStudents() {
         const data = doc.data() as { Enrolled?: any[] };
         let enrolledArray = data.Enrolled || [];
 
-        if (action === 'enroll') {
+        if (action === 'Enroll') {
           // Find and update the student's status
           const studentIndex = enrolledArray.findIndex(student => student.studentNumber === request.studentNumber);
           if (studentIndex !== -1) {
-            enrolledArray[studentIndex].status = 'enrolled';
+            enrolledArray[studentIndex].status = 'Enrolled';
             await enrolledModulesRef.update({ Enrolled: enrolledArray });
             await this.presentToast('Student enrolled successfully.', 'success');
           } else {
@@ -469,7 +443,7 @@ async fetchAttendedStudents() {
 
   approveStudent(request: any) {
     console.log('Approving student:', request);
-    this.updateStudentStatus(request, 'enroll');
+    this.updateStudentStatus(request, 'Enroll');
   }
   
   declineStudent(request: any) {

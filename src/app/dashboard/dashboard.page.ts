@@ -64,13 +64,6 @@ export class DashboardPage {
   faculties: string[] = [];
   departments: string[] = [];
 
-  departmentsAnalytics = [
-    { name: 'IT', adminCount: 3, activeUsers: 50 },
-    { name: 'HR', adminCount: 2, activeUsers: 30 },
-    { name: 'Finance', adminCount: 2, activeUsers: 25 },
-    { name: 'Marketing', adminCount: 1, activeUsers: 20 },
-  ];
-
   private roleFeatures: {
     [key: string]: string[];
   } = {
