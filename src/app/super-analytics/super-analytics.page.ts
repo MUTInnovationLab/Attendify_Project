@@ -25,17 +25,6 @@ export class SuperAnalyticsPage implements OnInit {
   credits: number | undefined;
   year: string = '';
 
-  faculties: string[] = [
-    'Faculty of Management Science',
-    'Faculty of Engineering',
-    'Faculty of Applied and Health Science'
-  ];
-
-  facultyDepartments: { [key: string]: string[] } = {
-    'Faculty of Management Science': ['Accounting and Law', 'Human Resource Management'],
-    'Faculty of Engineering': ['Civil Engineering', 'Chemical Engineering'],
-    'Faculty of Applied and Health Science': ['Agriculture', 'Biomedical Sciences']
-  };
 
   courses: string[] = ['Advanced', 'Diploma', 'Access'];
   departments: string[] = [];

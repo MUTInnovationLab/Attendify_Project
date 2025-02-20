@@ -21,13 +21,20 @@ interface Module {
   staffNumber: string;
 }
 
-interface FacultyData {
-  departments: {
-    name: string;
-    streams: {
+interface Department {
+  name: string;
+  modules?: Module[];  // Add this line to handle direct modules
+  streams?: {
+    [key: string]: {
+      name: string;
       modules: Module[];
-    }[];
-  }[];
+    };
+  };
+}
+
+interface FacultyData {
+  departments: Department[];
+  id?: string;
 }
 
 interface EnrolledData {
@@ -134,73 +141,79 @@ export class ViewModalComponent implements OnInit {
   async fetchAvailableModules() {
     console.log('Fetching available modules for department:', this.currentStudent?.department);
     try {
-      if (!this.currentStudent || !this.currentStudent.department) {
+      if (!this.currentStudent?.department) {
         console.log('No department specified for the student.');
         this.presentToast('Student department not found.', 'warning');
         return;
       }
-
+  
       const facultyQuerySnapshot = await this.firestore
         .collection('faculties')
         .get()
         .toPromise();
-
-      if (!facultyQuerySnapshot || facultyQuerySnapshot.empty) {
-        console.log('No faculties found.');
-        this.presentToast('No faculties found.', 'warning');
+  
+      if (!facultyQuerySnapshot) {
+        console.log('No faculty data found.');
+        this.presentToast('No faculty data found.', 'warning');
         return;
       }
-
-      let departmentData: any = null;
-
-      facultyQuerySnapshot.forEach(doc => {
+  
+      let modulesArray: Module[] = [];
+  
+      facultyQuerySnapshot.forEach((doc) => {
+        console.log('Processing faculty document:', doc.id);
         const facultyData = doc.data() as FacultyData;
-        if (facultyData.departments) {
+        console.log('Faculty data:', facultyData);
+        
+        if (facultyData?.departments) {
+          console.log('Found departments:', facultyData.departments);
+          
           const matchingDepartment = facultyData.departments.find(
-            (dept: any) => dept.name === this.currentStudent?.department
+            (dept: { name: string }) => {
+              console.log('Comparing department:', dept.name, 'with:', this.currentStudent?.department);
+              return dept.name === this.currentStudent?.department;
+            }
           );
-
+  
+          console.log('Matching department found:', matchingDepartment);
+  
           if (matchingDepartment) {
-            departmentData = matchingDepartment;
-            return;
+            // Handle direct modules array if it exists
+            if (matchingDepartment.modules && Array.isArray(matchingDepartment.modules)) {
+              console.log('Found direct modules:', matchingDepartment.modules);
+              modulesArray = [...modulesArray, ...matchingDepartment.modules];
+            }
+            
+            // Also check for modules in streams if they exist
+            if (matchingDepartment.streams) {
+              console.log('Found streams:', matchingDepartment.streams);
+              Object.keys(matchingDepartment.streams).forEach((streamKey) => {
+                console.log('Processing stream:', streamKey);
+                const stream = matchingDepartment.streams?.[streamKey];
+                console.log('Stream data:', stream);
+                
+                if (stream?.modules && Array.isArray(stream.modules)) {
+                  console.log('Found modules in stream:', stream.modules);
+                  modulesArray = [...modulesArray, ...stream.modules];
+                }
+              });
+            }
           }
         }
       });
-
-      if (!departmentData) {
-        console.log(`Department ${this.currentStudent?.department} not found in any faculty.`);
+  
+      console.log('Final modules array:', modulesArray);
+  
+      if (modulesArray.length === 0) {
+        console.log('No modules found in the streams.');
         this.presentToast('No modules found for this department.', 'warning');
         return;
       }
-
-      if (departmentData.streams && typeof departmentData.streams === 'object') {
-        const modulesArray: Module[] = [];
-
-        Object.keys(departmentData.streams).forEach((streamKey: string) => {
-          const stream = departmentData.streams[streamKey];
-
-          if (Array.isArray(stream)) {
-            stream.forEach((streamObj: any) => {
-              if (Array.isArray(streamObj.modules)) {
-                modulesArray.push(...streamObj.modules);
-              } else {
-                console.log(`Stream ${streamKey} does not contain a valid modules array.`);
-              }
-            });
-          } else {
-            console.log(`Stream ${streamKey} is not an array.`);
-          }
-        });
-
-        this.availableModules = modulesArray;
-      } else {
-        console.log('Streams data is not an object or is undefined.');
-        this.presentToast('No modules found for this department.', 'warning');
-        return;
-      }
-
+  
+      this.availableModules = modulesArray;
       this.filteredModules = [...this.availableModules];
       console.log('Modules fetched for department:', this.availableModules);
+  
     } catch (error) {
       console.error('Error fetching modules:', error);
       this.presentToast('Failed to load modules. Please try again.', 'danger');
