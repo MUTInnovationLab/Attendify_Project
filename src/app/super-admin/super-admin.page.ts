@@ -1,17 +1,13 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { Chart, registerables } from 'chart.js';
+import { Chart, registerables, ChartConfiguration } from 'chart.js';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { firstValueFrom } from 'rxjs';
 
 Chart.register(...registerables);
 
 interface AttendanceData {
   [date: string]: AttendanceRecord[];
-}
-
-interface FirestoreDoc {
-  data(): any;
-  exists: boolean;
 }
 
 interface Student {
@@ -50,6 +46,9 @@ interface AssignedLectureDoc {
   modules: AssignedModule[];
 }
 
+interface FacultyData {
+  departments: Array<{ name: string }>;
+}
 @Component({
   selector: 'app-super-admin',
   templateUrl: './super-admin.page.html',
@@ -63,12 +62,11 @@ export class SuperAdminPage implements AfterViewInit {
   lecturerCount: number = 0;
   nonAttendingCount: number = 0;
   attendingCount: number = 0;
-  lecturerChart: any;
-  studentChart: any;
+  lecturerChart: Chart | null = null;
+  studentChart: Chart | null = null;
   selectedFaculty: string = 'All';
   faculties: string[] = ['All'];
   availableDepartments: string[] = [];
-  assignedLectureIds = ['22446688', '33557799', '987001'];
   lecturerModules: Map<string, AssignedModule[]> = new Map();
   lecturerAttendanceRates: Map<string, number> = new Map();
   isLoading: boolean = true;
@@ -82,10 +80,8 @@ export class SuperAdminPage implements AfterViewInit {
 
   async loadFaculties() {
     try {
-      const facultiesSnapshot = await this.firestore.collection('faculties').get().toPromise();
-      if (facultiesSnapshot) {
-        this.faculties = ['All', ...facultiesSnapshot.docs.map(doc => doc.id)];
-      }
+      const facultiesSnapshot = await firstValueFrom(this.firestore.collection('faculties').get());
+      this.faculties = ['All', ...facultiesSnapshot.docs.map(doc => doc.id)];
     } catch (error) {
       console.error('Error loading faculties:', error);
     }
@@ -108,16 +104,17 @@ export class SuperAdminPage implements AfterViewInit {
 
   async fetchAssignedLectures() {
     try {
-      for (const lectureId of this.assignedLectureIds) {
-        const lectureDoc = await this.firestore.collection('assignedLectures').doc(lectureId).get().toPromise();
-        if (lectureDoc?.exists) {
-          const data = lectureDoc.data() as AssignedLectureDoc;
-          if (data && Array.isArray(data.modules)) {
-            for (const module of data.modules) {
-              const existingModules = this.lecturerModules.get(module.userEmail) || [];
-              existingModules.push(module);
-              this.lecturerModules.set(module.userEmail, existingModules);
-            }
+      const assignedLecturesSnapshot = await firstValueFrom(
+        this.firestore.collection('assignedLectures').get()
+      );
+
+      for (const doc of assignedLecturesSnapshot.docs) {
+        const data = doc.data() as AssignedLectureDoc;
+        if (data && Array.isArray(data.modules)) {
+          for (const module of data.modules) {
+            const existingModules = this.lecturerModules.get(module.userEmail) || [];
+            existingModules.push(module);
+            this.lecturerModules.set(module.userEmail, existingModules);
           }
         }
       }
@@ -128,14 +125,14 @@ export class SuperAdminPage implements AfterViewInit {
 
   async fetchLecturers() {
     try {
-      const lecturersSnapshot = await this.firestore.collection<Lecturer>('staff', ref =>
-        ref.where('position', 'in', ['lecturer', 'Lecturer'])
-      ).get().toPromise();
+      const lecturersSnapshot = await firstValueFrom(
+        this.firestore.collection<Lecturer>('staff', ref =>
+          ref.where('position', 'in', ['lecturer', 'Lecturer'])
+        ).get()
+      );
 
-      if (lecturersSnapshot) {
-        this.lecturers = lecturersSnapshot.docs.map(doc => doc.data() as Lecturer);
-        this.updateLecturerCount();
-      }
+      this.lecturers = lecturersSnapshot.docs.map(doc => doc.data() as Lecturer);
+      this.updateLecturerCount();
     } catch (error) {
       console.error('Error fetching lecturers:', error);
     }
@@ -143,71 +140,92 @@ export class SuperAdminPage implements AfterViewInit {
 
   async fetchStudentsAndAttendance() {
     try {
-      const studentsSnapshot = await this.firestore.collection('students').get().toPromise();
-      if (studentsSnapshot) {
-        this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
-        this.updateStudentCount();
-      }
+      const studentsSnapshot = await firstValueFrom(
+        this.firestore.collection('students').get()
+      );
+      
+      this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
+      this.updateStudentCount();
 
       this.attendingStudents.clear();
 
       // Fetch attendance for each lecturer's modules
-      for (const [lecturerEmail, modules] of this.lecturerModules.entries()) {
+      const attendancePromises: Promise<void>[] = [];
+
+      for (const [, modules] of this.lecturerModules.entries()) {
         for (const module of modules) {
-          try {
-            const moduleDoc = await this.firestore.collection('Attended').doc(module.moduleCode).get().toPromise();
-            if (moduleDoc?.exists) {
-              const moduleData = moduleDoc.data() as AttendanceData;
-              if (moduleData) {
-                Object.entries(moduleData).forEach(([date, dailyAttendance]) => {
-                  if (Array.isArray(dailyAttendance)) {
-                    dailyAttendance.forEach((record: AttendanceRecord) => {
-                      if (record.studentNumber) {
-                        this.attendingStudents.add(record.studentNumber);
-                      }
-                    });
-                  }
-                });
-              }
-            }
-          } catch (error) {
-            console.error(`Error fetching attendance for module ${module.moduleCode}:`, error);
-          }
+          attendancePromises.push(this.fetchModuleAttendance(module));
         }
       }
 
+      await Promise.all(attendancePromises);
       this.updateAttendanceCounts();
     } catch (error) {
       console.error('Error fetching students and attendance:', error);
     }
   }
 
-  async calculateLecturerAttendanceRates() {
-    for (const [lecturerEmail, modules] of this.lecturerModules.entries()) {
-      let totalScannerCount = 0;
-      let totalAttendance = 0;
+  private async fetchModuleAttendance(module: AssignedModule): Promise<void> {
+    try {
+      const moduleDoc = await firstValueFrom(
+        this.firestore.collection('Attended').doc(module.moduleCode).get()
+      );
 
-      for (const module of modules) {
-        totalScannerCount += module.scannerOpenCount || 0;
-        try {
-          const moduleDoc = await this.firestore.collection('Attended').doc(module.moduleCode).get().toPromise();
-          if (moduleDoc?.exists) {
-            const moduleData = moduleDoc.data() as AttendanceData;
-            if (moduleData) {
-              const daysWithAttendance = Object.keys(moduleData).length;
-              totalAttendance += daysWithAttendance;
+      if (moduleDoc.exists) {
+        const moduleData = moduleDoc.data() as AttendanceData;
+        if (moduleData) {
+          Object.values(moduleData).forEach(dailyAttendance => {
+            if (Array.isArray(dailyAttendance)) {
+              dailyAttendance.forEach((record: AttendanceRecord) => {
+                if (record.studentNumber) {
+                  this.attendingStudents.add(record.studentNumber);
+                }
+              });
             }
-          }
-        } catch (error) {
-          console.error(`Error calculating attendance for module ${module.moduleCode}:`, error);
+          });
         }
       }
-
-      const attendanceRate = totalScannerCount > 0 
-        ? (totalAttendance / totalScannerCount) * 100 
-        : 0;
-      this.lecturerAttendanceRates.set(lecturerEmail, attendanceRate);
+    } catch (error) {
+      console.error(`Error fetching attendance for module ${module.moduleCode}:`, error);
     }
+  }
+
+  async calculateLecturerAttendanceRates() {
+    const attendancePromises: Promise<void>[] = [];
+
+    for (const [lecturerEmail, modules] of this.lecturerModules.entries()) {
+      attendancePromises.push(this.calculateLecturerRate(lecturerEmail, modules));
+    }
+
+    await Promise.all(attendancePromises);
+  }
+
+  private async calculateLecturerRate(lecturerEmail: string, modules: AssignedModule[]): Promise<void> {
+    let totalScannerCount = 0;
+    let totalAttendance = 0;
+
+    for (const module of modules) {
+      totalScannerCount += module.scannerOpenCount || 0;
+      try {
+        const moduleDoc = await firstValueFrom(
+          this.firestore.collection('Attended').doc(module.moduleCode).get()
+        );
+        
+        if (moduleDoc.exists) {
+          const moduleData = moduleDoc.data() as AttendanceData;
+          if (moduleData) {
+            totalAttendance += Object.keys(moduleData).length;
+          }
+        }
+      } catch (error) {
+        console.error(`Error calculating attendance for module ${module.moduleCode}:`, error);
+      }
+    }
+
+    const attendanceRate = totalScannerCount > 0 
+      ? (totalAttendance / totalScannerCount) * 100 
+      : 0;
+    this.lecturerAttendanceRates.set(lecturerEmail, attendanceRate);
   }
 
   updateLecturerCount() {
@@ -235,7 +253,7 @@ export class SuperAdminPage implements AfterViewInit {
   }
 
   createStudentAttendanceChart() {
-    const studentCanvas = <HTMLCanvasElement>document.getElementById('studentAttendanceChart');
+    const studentCanvas = document.getElementById('studentAttendanceChart') as HTMLCanvasElement;
     const studentCtx = studentCanvas?.getContext('2d');
 
     if (studentCtx) {
@@ -243,7 +261,7 @@ export class SuperAdminPage implements AfterViewInit {
         this.studentChart.destroy();
       }
 
-      this.studentChart = new Chart(studentCtx, {
+      const config: ChartConfiguration = {
         type: 'pie',
         data: {
           labels: ['Attending', 'Not Attending'],
@@ -260,12 +278,12 @@ export class SuperAdminPage implements AfterViewInit {
           plugins: {
             tooltip: {
               callbacks: {
-                label: (tooltipItem: any) => {
+                label: (tooltipItem) => {
                   const dataset = tooltipItem.dataset;
                   const dataIndex = tooltipItem.dataIndex;
                   const dataValue = dataset.data[dataIndex];
-                  const total = dataset.data.reduce((sum: number, value: number) => sum + value, 0);
-                  const percentage = ((dataValue / total) * 100).toFixed(2);
+                  const total = (dataset.data as number[]).reduce((sum, value) => sum + value, 0);
+                  const percentage = ((dataValue as number / total) * 100).toFixed(2);
                   return `${tooltipItem.label}: ${dataValue} students (${percentage}%)`;
                 }
               }
@@ -276,12 +294,14 @@ export class SuperAdminPage implements AfterViewInit {
             }
           }
         },
-      });
+      };
+
+      this.studentChart = new Chart(studentCtx, config);
     }
   }
 
   createLecturerAttendanceChart() {
-    const lecturerCanvas = <HTMLCanvasElement>document.getElementById('lecturerAttendanceChart');
+    const lecturerCanvas = document.getElementById('lecturerAttendanceChart') as HTMLCanvasElement;
     const lecturerCtx = lecturerCanvas?.getContext('2d');
 
     if (lecturerCtx) {
@@ -346,12 +366,16 @@ export class SuperAdminPage implements AfterViewInit {
   async onFacultyChange() {
     try {
       if (this.selectedFaculty && this.selectedFaculty !== 'All') {
-        const facultyDoc = await this.firestore.collection('faculties').doc(this.selectedFaculty).get().toPromise();
-        const departments = (facultyDoc?.data() as any)?.departments || [];
-        this.availableDepartments = departments.map((dept: any) => dept.name);
+        const facultyDoc = await firstValueFrom(
+          this.firestore.collection('faculties').doc(this.selectedFaculty).get()
+        );
+        const data = facultyDoc.data() as FacultyData;
+        this.availableDepartments = data?.departments?.map(dept => dept.name) || [];
       } else {
         this.availableDepartments = [];
       }
+      
+      this.updateLecturerCount();
       this.updateStudentCount();
       this.updateAttendanceCounts();
       this.createCharts();
