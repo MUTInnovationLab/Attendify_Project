@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import firebase from 'firebase/compat/app';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
 
 interface UserData {
   uid?: string;
@@ -66,7 +66,6 @@ export class AuthService {
   async getCurrentUser(): Promise<UserData | null> {
     try {
       const user = await this.afAuth.currentUser;
-      
       if (user) {
         const userDocByEmail = await this.firestore
           .collection('staff')
@@ -76,10 +75,7 @@ export class AuthService {
 
         if (userDocByEmail && userDocByEmail.exists) {
           const userData = userDocByEmail.data() as UserData;
-          return {
-            ...userData,
-            role: userData.position?.toLowerCase()
-          };
+          return { ...userData, role: userData.position };
         }
 
         const querySnapshot = await this.firestore
@@ -90,13 +86,9 @@ export class AuthService {
 
         if (!querySnapshot.empty) {
           const userData = querySnapshot.docs[0].data() as UserData;
-          return {
-            ...userData,
-            role: userData.position?.toLowerCase()
-          };
+          return { ...userData, role: userData.position };
         }
       }
-      
       return null;
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -119,7 +111,6 @@ export class AuthService {
           return data['name'];
         });
       }
-      
       return [];
     } catch (error) {
       console.error('Error getting departments:', error);
@@ -129,33 +120,25 @@ export class AuthService {
 
   getStaffByFaculty(facultyName: string): Observable<UserData[]> {
     return this.firestore
-      .collection<UserData>('staff', ref => 
-        ref.where('faculty', '==', facultyName)
-      )
+      .collection<UserData>('staff', ref => ref.where('faculty', '==', facultyName))
       .valueChanges();
   }
 
   getStaffByDepartment(departmentName: string): Observable<UserData[]> {
     return this.firestore
-      .collection<UserData>('staff', ref => 
-        ref.where('department', '==', departmentName)
-      )
+      .collection<UserData>('staff', ref => ref.where('department', '==', departmentName))
       .valueChanges();
   }
 
   getStudentsByFaculty(facultyName: string): Observable<any[]> {
     return this.firestore
-      .collection('students', ref => 
-        ref.where('faculty', '==', facultyName)
-      )
+      .collection('students', ref => ref.where('faculty', '==', facultyName))
       .valueChanges();
   }
 
   getStudentsByDepartment(departmentName: string): Observable<any[]> {
     return this.firestore
-      .collection('students', ref => 
-        ref.where('department', '==', departmentName)
-      )
+      .collection('students', ref => ref.where('department', '==', departmentName))
       .valueChanges();
   }
 
@@ -170,7 +153,6 @@ export class AuthService {
       if (!querySnapshot.empty) {
         return querySnapshot.docs[0].data() as UserData;
       }
-
       return null;
     } catch (error) {
       console.error('Error getting user by email:', error);
@@ -241,17 +223,13 @@ export class AuthService {
 
   getDepartmentUsers(department: string): Observable<UserData[]> {
     return this.firestore
-      .collection<UserData>('staff', ref => 
-        ref.where('department', '==', department)
-      )
+      .collection<UserData>('staff', ref => ref.where('department', '==', department))
       .valueChanges();
   }
 
   getUsersByRole(role: string): Observable<UserData[]> {
     return this.firestore
-      .collection<UserData>('staff', ref => 
-        ref.where('position', '==', role)
-      )
+      .collection<UserData>('staff', ref => ref.where('position', '==', role))
       .valueChanges();
   }
 }

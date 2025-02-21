@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,11 @@ export class FacultyDepartmentService {
     return this.firestore.collection('faculties').snapshotChanges().pipe(
       map(actions =>
         actions.map(a => a.payload.doc.id) // Retrieve the document IDs as faculty names
-      )
+      ),
+      catchError(error => {
+        console.error('Error fetching faculties:', error);
+        return [];
+      })
     );
   }
 

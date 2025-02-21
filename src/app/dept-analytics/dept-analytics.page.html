@@ -11,15 +11,39 @@
 
 
 <ion-content class="analytics-content">
-  <!-- Faculty Dropdown -->
-  <ion-item class="faculty-dropdown">
-    <ion-label>Select Faculty</ion-label>
-    <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange()">
-      <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">
-        {{ faculty }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+  <!-- Faculty Dropdown - Only visible for super-admin -->
+  <div class="faculty-selector" *ngIf="isSuperAdmin">
+    <ion-card class="selector-card">
+      <ion-card-content>
+        <div class="selector-container">
+          <ion-icon name="school-outline" class="selector-icon"></ion-icon>
+          <ion-item lines="none" class="custom-select">
+            <ion-label position="stacked">Select Faculty</ion-label>
+            <ion-select [(ngModel)]="selectedFaculty" (ionChange)="onFacultyChange()" interface="popover">
+              <ion-select-option *ngFor="let faculty of faculties" [value]="faculty">
+                {{ faculty }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Faculty display for Dean -->
+  <div class="faculty-display" *ngIf="!isSuperAdmin && userFaculty">
+    <ion-card class="selector-card">
+      <ion-card-content>
+        <div class="selector-container">
+          <ion-icon name="school-outline" class="selector-icon"></ion-icon>
+          <div class="faculty-name">
+            <ion-label class="label-stacked">Your Faculty</ion-label>
+            <div class="faculty-value">{{ userFaculty }}</div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
   <!-- Summary Cards -->
   <div class="summary-cards">

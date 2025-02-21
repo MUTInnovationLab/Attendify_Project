@@ -1,10 +1,19 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFirestore, Query } from '@angular/fire/compat/firestore';
+import { AuthService } from '../services/auth.service';
+import { FacultyDepartmentService } from '../services/faculty-department.service';
 
 Chart.register(...registerables);
 
+// Updated User interface to better match UserData
+interface User {
+  uid?: string;
+  email: string | null;
+  role?: string;
+  faculty?: string;
+}
 interface Student {
   attendance: number;
   email: string;
@@ -38,63 +47,178 @@ export class DeptAnalyticsPage implements AfterViewInit {
   studentChart: any;
   moduleCode: string = ' ';
   selectedFaculty: string = 'All';
-  faculties: string[] = ['All','Faculty of ICT', 'Faculty of Engineering', 'Faculty of Management Science', 'Faculty of Applied and Health Science'];
+  faculties: string[] = ['All'];
 
-  constructor(private firestore: AngularFirestore, private router: Router) {}
+  currentUser: User | null = null;
+  isLoading: boolean = true;
+  userFaculty: string = '';
+  isSuperAdmin: boolean = false;
+
+  constructor(private firestore: AngularFirestore, private router: Router, private authService: AuthService, private facultyService: FacultyDepartmentService) {}
 
   ngAfterViewInit() {
-    this.fetchData();
+    this.loadFaculties();
+    this.initializeUserData();
   }
 
   async fetchData() {
     await this.fetchLecturers();
     await this.fetchAttendedStudents();
-    this.createCharts();
+    // Ensure that charts are created after Angular has updated the view
+    setTimeout(() => {
+      this.createCharts();
+    }, 0);
   }
 
   navigateToDeptAnalysis() {
     this.router.navigate(['/dept-an']);
   }
 
+  async initializeUserData() {
+    try {
+      const userData = await this.authService.getCurrentUser();
+      if (userData) {
+        console.log('User data received:', userData);
+        this.currentUser = {
+          uid: userData.uid,
+          email: userData.email,
+          role: userData.position,
+          faculty: userData.faculty
+        };
+        
+        const userPosition = userData.position?.trim();
+        console.log('User position:', userPosition);
+        
+        this.isSuperAdmin = userPosition === 'super-admin';
+        
+        if (userPosition === 'Dean' && userData.faculty) {
+          console.log('Dean detected for faculty:', userData.faculty);
+          this.userFaculty = userData.faculty;
+          this.selectedFaculty = userData.faculty;
+          this.faculties = [userData.faculty];
+        }
+        
+        await this.loadRoleSpecificData();
+      } else {
+        console.error('No user data found');
+        this.router.navigate(['/login']);
+      }
+    } catch (error) {
+      console.error('Error in initializeUserData:', error);
+      this.router.navigate(['/login']);
+    }
+  }
+
+  // Helper method to normalize role strings
+  private normalizeRole(position?: string): string | undefined {
+    if (position) {
+      return position.toLowerCase();
+    }
+    return undefined;
+  }
+
+  private async loadFaculties() {
+    try {
+      this.facultyService.getFaculties().subscribe(
+        (facultyNames) => {
+          // Add 'All' option and combine with fetched faculties
+          this.faculties = ['All', ...facultyNames];
+          console.log('Loaded faculties:', this.faculties);
+        },
+        (error) => {
+          console.error('Error loading faculties:', error);
+        }
+      );
+    } catch (error) {
+      console.error('Error in loadFaculties:', error);
+    }
+  }
+
+  async loadRoleSpecificData() {
+    try {
+      console.log('Loading role specific data for:', this.currentUser?.role);
+      if (this.currentUser) {
+        const position = this.currentUser.role?.trim();
+        
+        if (position === 'Dean' && this.currentUser.faculty) {
+          console.log('Fetching data for Dean of faculty:', this.currentUser.faculty);
+          this.selectedFaculty = this.currentUser.faculty;
+          // For Dean, only show their faculty
+          this.faculties = [this.currentUser.faculty];
+          await this.fetchData();
+        } else if (position === 'super-admin') {
+          console.log('Fetching data for super-admin');
+          // Super admin will see all faculties loaded from loadFaculties()
+          await this.fetchData();
+        } else {
+          console.error('Unknown position:', position);
+        }
+      }
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Error in loadRoleSpecificData:', error);
+      this.isLoading = false;
+    }
+  }
+
   async fetchLecturers() {
     try {
-      const lecturersSnapshot = await this.firestore.collection<Lecturer>('staff', ref =>
-        ref.where('position', 'in', ['lecturer', 'Lecturer'])
-      ).get().toPromise();
-  
-      if (lecturersSnapshot) {
+      console.log('Fetching lecturers for faculty:', this.selectedFaculty);
+      
+      let query = this.firestore.collection<Lecturer>('staff')
+        .ref.where('position', 'in', ['lecturer', 'Lecturer']) as Query<Lecturer>;
+
+      // Add faculty filter for deans
+      if (this.currentUser?.role === 'Dean' && this.currentUser.faculty) {
+        query = query.where('faculty', '==', this.currentUser.faculty) as Query<Lecturer>;
+      } else if (this.selectedFaculty !== 'All') {
+        query = query.where('faculty', '==', this.selectedFaculty) as Query<Lecturer>;
+      }
+
+      const lecturersSnapshot = await query.get();
+      console.log('Lecturers found:', lecturersSnapshot.size);
+      
+      if (!lecturersSnapshot.empty) {
         this.lecturers = lecturersSnapshot.docs.map(doc => doc.data() as Lecturer);
         this.updateLecturerCount();
       } else {
-        console.error('No lecturers data found');
+        console.log('No lecturers found for faculty:', this.selectedFaculty);
+        this.lecturers = [];
+        this.updateLecturerCount();
       }
     } catch (error) {
       console.error('Error fetching lecturers:', error);
+      this.lecturers = [];
+      this.updateLecturerCount();
     }
   }
-  
 
   async fetchAttendedStudents() {
     try {
-      // Step 1: Fetch all registered students
-      const studentsSnapshot = await this.firestore.collection('students').get().toPromise();
+      let query = this.firestore.collection('students').ref as Query<Student>;
+
+      // Add faculty filter for deans
+      if (this.currentUser?.role === 'Dean' && this.currentUser.faculty) {
+        query = query.where('faculty', '==', this.currentUser.faculty) as Query<Student>;
+      } else if (this.selectedFaculty !== 'All') {
+        query = query.where('faculty', '==', this.selectedFaculty) as Query<Student>;
+      }
+
+      const studentsSnapshot = await query.get();
       
-      if (studentsSnapshot && !studentsSnapshot.empty) {
+      if (!studentsSnapshot.empty) {
         this.students = studentsSnapshot.docs.map(doc => doc.data() as Student);
         this.updateStudentCount();
 
         const attendedStudentNumbers: Set<string> = new Set();
-
         const attendedModulesSnapshot = await this.firestore.collection('Attended').get().toPromise();
 
         if (attendedModulesSnapshot && !attendedModulesSnapshot.empty) {
           for (const moduleDoc of attendedModulesSnapshot.docs) {
             const attendedData = moduleDoc.data() as Record<string, any>;
-            
             for (const date in attendedData) {
               if (attendedData.hasOwnProperty(date)) {
                 const studentsArray = attendedData[date];
-
                 if (Array.isArray(studentsArray)) {
                   studentsArray.forEach(studentInfo => {
                     if (typeof studentInfo === 'object' && studentInfo.studentNumber) {
@@ -105,16 +229,13 @@ export class DeptAnalyticsPage implements AfterViewInit {
               }
             }
           }
-
           this.attendingStudents = Array.from(attendedStudentNumbers);
           this.updateNonAttendingCount();
         } else {
-          console.error('No attendance data found in any modules.');
           this.attendingStudents = [];
           this.updateNonAttendingCount();
         }
       } else {
-        console.error('No registered students data found');
         this.resetCounts();
       }
     } catch (error) {
@@ -134,11 +255,12 @@ export class DeptAnalyticsPage implements AfterViewInit {
       : this.students.filter(s => s.faculty === this.selectedFaculty).length;
   }
 
+  // Updated to compare using studentNumber instead of email
   updateNonAttendingCount() {
     const attendingCount = this.selectedFaculty === 'All' 
       ? this.attendingStudents.length 
-      : this.attendingStudents.filter(email => 
-          this.students.find(s => s.email === email && s.faculty === this.selectedFaculty)
+      : this.attendingStudents.filter(studentNumber => 
+          this.students.find(s => s.studentNumber === studentNumber && s.faculty === this.selectedFaculty)
         ).length;
     this.nonAttendingCount = this.studentCount - attendingCount;
   }
@@ -169,9 +291,7 @@ export class DeptAnalyticsPage implements AfterViewInit {
       if (this.studentChart) {
         this.studentChart.destroy();
       }
-
       const attendingCount = this.studentCount - this.nonAttendingCount;
-
       this.studentChart = new Chart(studentCtx, {
         type: 'pie',
         data: {
@@ -219,18 +339,16 @@ export class DeptAnalyticsPage implements AfterViewInit {
       if (this.lecturerChart) {
         this.lecturerChart.destroy();
       }
-
       const filteredLecturers = this.selectedFaculty === 'All' 
         ? this.lecturers 
         : this.lecturers.filter(l => l.faculty === this.selectedFaculty);
-
       this.lecturerChart = new Chart(lecturerCtx, {
         type: 'bar',
         data: {
           labels: filteredLecturers.map(lecturer => lecturer.fullName),
           datasets: [{
             label: 'Lecturer Attendance',
-            data: filteredLecturers.map(() => Math.random() * 10), // Replace with actual data
+            data: filteredLecturers.map(() => Math.random() * 10), // Replace with actual data if available
             backgroundColor: 'rgba(75, 192, 192, 0.7)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
@@ -240,12 +358,8 @@ export class DeptAnalyticsPage implements AfterViewInit {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: {
-              beginAtZero: true,
-            },
-            y: {
-              beginAtZero: true,
-            },
+            x: { beginAtZero: true },
+            y: { beginAtZero: true },
           },
         },
       });
@@ -254,7 +368,6 @@ export class DeptAnalyticsPage implements AfterViewInit {
     }
   }
   
-
   navigateBack(){
     this.router.navigate(['/dashboard']);
   }

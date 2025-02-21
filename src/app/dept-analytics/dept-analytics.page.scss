@@ -148,3 +148,97 @@ ion-spinner {
     height: 250px;
   }
 }
+
+.faculty-selector {
+  padding: 16px;
+  
+  .selector-card {
+    margin: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    
+    ion-card-content {
+      padding: 12px;
+    }
+  }
+
+  .selector-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .selector-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    margin-left: 8px;
+  }
+
+  .custom-select {
+    flex: 1;
+    --background: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+
+    ion-label {
+      color: var(--ion-color-medium);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    ion-select {
+      --padding-start: 0;
+      font-weight: 500;
+      color: var(--ion-color-dark);
+      
+      &::part(text) {
+        font-size: 16px;
+      }
+
+      &::part(icon) {
+        color: var(--ion-color-primary);
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Add this if you want to style the select options popup
+ion-select::part(placeholder),
+ion-select::part(text) {
+  color: var(--ion-color-dark);
+  opacity: 1;
+}
+
+// Optional: Add animation for smooth transitions
+.selector-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.faculty-display {
+  padding: 16px;
+  
+  .faculty-name {
+    flex: 1;
+
+    .label-stacked {
+      color: var(--ion-color-medium);
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .faculty-value {
+      color: var(--ion-color-dark);
+      font-size: 16px;
+      font-weight: 500;
+      padding: 8px 0;
+    }
+  }
+}
