@@ -183,15 +183,15 @@ ngOnDestroy() {
             const attendanceCount = await this.getAttendanceCount(moduleId);
             const scannerOpenCount = await this.getScannerOpenCount(moduleId);
   
+            console.log(`Module ${moduleId}:`, {
+              attendanceCount,
+              scannerOpenCount
+            });
+  
             modules.push(moduleId);
             attendanceCounts.push(attendanceCount);
-  
             this.totalAttendance += attendanceCount;
             this.totalRequiredAttendance += scannerOpenCount;
-  
-            if (attendanceCount > maxAttendanceCount) {
-              maxAttendanceCount = attendanceCount;
-            }
           }
         }
       }
@@ -200,6 +200,11 @@ ngOnDestroy() {
       console.log('Attendance Counts:', attendanceCounts);
       console.log('Total Attendance:', this.totalAttendance);
       console.log('Total Required Attendance:', this.totalRequiredAttendance);
+  
+      // Calculate percentage correctly
+      if (this.totalRequiredAttendance > 0) {
+        this.progressPercentage = Math.round((this.totalAttendance / this.totalRequiredAttendance) * 100);
+      }
   
       this.calculateProgress();
       this.createChart(modules, attendanceCounts, maxAttendanceCount);

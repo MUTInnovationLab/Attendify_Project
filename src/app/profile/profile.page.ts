@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { ModalController, AlertController, LoadingController } from '@ionic/angular';
+import { ModalController, AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
+import { AuthService } from '../services/auth.service';
 
 interface StudentData {
   email: string;
@@ -41,7 +42,10 @@ export class ProfilePage implements OnInit {
     private modalController: ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private router: Router
+    private toastController: ToastController,
+    private router: Router,
+    private navCtrl: NavController,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -52,10 +56,43 @@ export class ProfilePage implements OnInit {
     this.showUserInfo = !this.showUserInfo;
   }
 
-  dismiss() {
-    this.router.navigate(['/login']);
+  async presentConfirmationAlert() {
+    const alert = await this.alertController.create({
+      header: 'Confirm Logout',
+      message: 'Are you sure you want to logout?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Logout',
+          handler: () => {
+            this.logout();
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
-
+  
+  async logout() {
+    try {
+      await this.authService.signOut();
+      this.navCtrl.navigateRoot('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.presentToast('Error during logout. Please try again.');
+    }
+  }
+  async presentToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 1500,
+      position: 'top'
+    });
+    toast.present();
+  }
   async openAnnouncementsModal() {
     const modal = await this.modalController.create({
       component: ViewAnnouncementsComponent
