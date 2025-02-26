@@ -29,6 +29,7 @@ interface EnrolledModule {
   Enrolled: EnrolledEntry[]; // Array of enrolled entries
 }
 
+
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
