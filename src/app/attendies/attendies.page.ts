@@ -421,7 +421,7 @@ async fetchAttendedStudents() {
             enrolledArray[studentIndex].status = 'Enrolled';
             await enrolledModulesRef.update({ Enrolled: enrolledArray });
             await this.presentToast('Student enrolled successfully.', 'success');
-            this.notificationService.addNotification('You have been enrolled in the module.');
+            this.notificationService.addNotification(`You have been enrolled in the ${request.moduleCode} module.`);
           } else {
             await this.presentToast('Student not found in the module.', 'danger');
           }
@@ -430,7 +430,7 @@ async fetchAttendedStudents() {
           enrolledArray = enrolledArray.filter(student => student.studentNumber !== request.studentNumber);
           await enrolledModulesRef.update({ Enrolled: enrolledArray });
           await this.presentToast('Student removed successfully.', 'success');
-          this.notificationService.addNotification('You have been removed from the module.');
+          this.notificationService.addNotification(`You have been removed from the ${request.moduleCode} module.`);
         }
 
         // Refresh the pending requests
