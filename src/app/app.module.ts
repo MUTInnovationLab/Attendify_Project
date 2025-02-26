@@ -17,9 +17,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
+import { NotificationPopoverComponent } from './notification-popover/notification-popover.component';
+
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent,
+    NotificationPopoverComponent
+  ],
   imports: [
     BrowserModule, 
     FormsModule, 

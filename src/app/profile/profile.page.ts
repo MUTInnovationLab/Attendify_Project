@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { ModalController, AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
+import { ModalController, AlertController, LoadingController, NavController, ToastController, PopoverController } from '@ionic/angular';
 import { ViewAnnouncementsComponent } from '../view-announcements/view-announcements.component';
 import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service'; // Import NotificationService
-
+import { NotificationPopoverComponent } from '../notification-popover/notification-popover.component';
 
 interface StudentData {
   email: string;
@@ -29,7 +29,6 @@ interface EnrolledModule {
   Enrolled: EnrolledEntry[]; // Array of enrolled entries
 }
 
-
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -39,6 +38,7 @@ export class ProfilePage implements OnInit {
   showUserInfo = false;
   currentUser: StudentData = { email: '', name: '', studentNumber: '', surname: '' };
   notifications: string[] = [];
+  preventPopover = false;
 
   constructor(
     private auth: AngularFireAuth,
@@ -50,13 +50,17 @@ export class ProfilePage implements OnInit {
     private router: Router,
     private navCtrl: NavController,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private popoverController: PopoverController
   ) {}
 
   ngOnInit() {
     this.getCurrentUser();
     this.notificationService.notifications$.subscribe(notifications => {
       this.notifications = notifications;
+      if (notifications.length > 0) {
+        this.presentNotificationPopover();
+      }
     });
   }
 
@@ -72,6 +76,24 @@ export class ProfilePage implements OnInit {
     if (this.currentUser.studentNumber === studentNumber) {
       this.notifications.push(message);
     }
+  }
+
+  async presentNotificationPopover() {
+    if (this.preventPopover) {
+      return;
+    }
+    const popover = await this.popoverController.create({
+      component: NotificationPopoverComponent,
+      event: undefined,
+      translucent: true,
+      showBackdrop: false,
+      cssClass: 'notification-popover',
+      componentProps: { notifications: this.notifications }
+    });
+    await popover.present();
+    setTimeout(() => {
+      popover.dismiss();
+    }, 6000); // Dismiss after 6 seconds
   }
 
   async presentConfirmationAlert() {
@@ -93,7 +115,7 @@ export class ProfilePage implements OnInit {
     });
     await alert.present();
   }
-  
+
   async logout() {
     try {
       await this.authService.signOut();
@@ -103,6 +125,7 @@ export class ProfilePage implements OnInit {
       this.presentToast('Error during logout. Please try again.');
     }
   }
+
   async presentToast(message: string) {
     const toast = await this.toastController.create({
       message: message,
@@ -111,6 +134,7 @@ export class ProfilePage implements OnInit {
     });
     toast.present();
   }
+
   async openAnnouncementsModal() {
     const modal = await this.modalController.create({
       component: ViewAnnouncementsComponent
@@ -130,7 +154,7 @@ export class ProfilePage implements OnInit {
       if (user) {
         const userEmail = user.email; // Email for user information
         console.log('User signed in:', userEmail);
-  
+
         // First, fetch user information using email
         this.firestore
           .collection('students', (ref) =>
@@ -297,45 +321,45 @@ export class ProfilePage implements OnInit {
 
   async updateStudentNumber(newStudentNumber: string): Promise<boolean> {
     const batch = this.firestore.firestore.batch();
-  
+
     try {
       // Ensure currentUser has a student number before proceeding
       const currentStudentNumber = this.currentUser?.studentNumber?.trim();
       if (!currentStudentNumber) {
         throw new Error("Current user has no student number");
       }
-  
+
       console.log('Fetching document for student number:', currentStudentNumber);
-  
+
       // 1. Update students collection by fetching the document using the student's current number as the document ID
       const studentRef = this.firestore.collection('students').doc(currentStudentNumber);
       const studentSnapshot = await studentRef.get().toPromise(); // Convert to promise
-  
+
       // Check if the student document exists
       if (!studentSnapshot || !studentSnapshot.exists) {
         throw new Error('Student document does not exist for student number: ' + currentStudentNumber);
       }
-  
+
       // Get the current student data
       const studentData = studentSnapshot.data() as { [key: string]: any };
-  
+
       // Create a new document with the new student number
       const newStudentRef = this.firestore.collection('students').doc(newStudentNumber.trim());
       batch.set(newStudentRef.ref, {
         ...studentData, // Copy the existing student data
         studentNumber: newStudentNumber.trim() // Update the student number
       });
-  
+
       // Delete the old document that has the old student number
       batch.delete(studentRef.ref);
-  
+
       // 2. Update enrolledModules collection
       const modulesSnapshot = await this.firestore.collection('enrolledModules').get().toPromise(); // Convert to promise
-  
+
       if (modulesSnapshot && !modulesSnapshot.empty) {
         for (const moduleDoc of modulesSnapshot.docs) {
           const moduleData = moduleDoc.data() as { Enrolled: Array<{ studentNumber: string }> };
-  
+
           if (moduleData.Enrolled) {
             const updatedEnrolled = moduleData.Enrolled.map(student => {
               if (student.studentNumber === currentStudentNumber) {
@@ -343,20 +367,20 @@ export class ProfilePage implements OnInit {
               }
               return student;
             });
-  
+
             // Update the enrolled students with the new student number
             batch.update(moduleDoc.ref, { Enrolled: updatedEnrolled });
           }
         }
       }
-  
+
       // 3. Update Attended collection
       const attendedSnapshot = await this.firestore.collection('Attended').get().toPromise(); // Convert to promise
-  
+
       if (attendedSnapshot && !attendedSnapshot.empty) {
         for (const attendedDoc of attendedSnapshot.docs) {
           const attendedData = attendedDoc.data() as { [date: string]: Array<{ studentNumber: string }> };
-  
+
           // Loop through each date in the attendance records
           for (const [date, attendanceArray] of Object.entries(attendedData)) {
             if (Array.isArray(attendanceArray)) {
@@ -366,21 +390,21 @@ export class ProfilePage implements OnInit {
                 }
                 return record;
               });
-  
+
               // Update the attendance records for this date
               batch.update(attendedDoc.ref, { [date]: updatedAttendance });
             }
           }
         }
       }
-  
+
       // Commit the batch updates
       await batch.commit();
-  
+
       // Update the local user object with the new student number
       this.currentUser.studentNumber = newStudentNumber.trim();
       console.log('Student number updated successfully in all collections');
-  
+
       return true;
     } catch (error) {
       console.error('Error updating student number:', error);
@@ -394,16 +418,16 @@ export class ProfilePage implements OnInit {
       if (user.email === this.currentUser.pendingEmail) {
         // Email has been successfully updated in Authentication
         await this.updateEmailInFirestore(this.currentUser.pendingEmail);
-        
+
         // Remove pendingEmail field now that it's confirmed
         delete this.currentUser.pendingEmail;
-        
+
         // Update Firestore with the new email and removal of pendingEmail
         await this.updateUserInfo({
           ...this.currentUser,
           email: this.currentUser.pendingEmail // Make sure email is updated
         });
-  
+
         this.showAlert('Email Updated', 'Your email has been successfully updated.');
       }
     }
@@ -412,13 +436,13 @@ export class ProfilePage implements OnInit {
   async updateUserInfo(data: any) {
     const collectionsToUpdate = ['enrolledModules', 'attended', 'students','assignedLectures'];
     const batch = this.firestore.firestore.batch();
-  
+
     for (const collectionName of collectionsToUpdate) {
       const querySnapshot = await this.firestore
         .collection(collectionName)
         .ref.where('email', '==', this.currentUser.email)
         .get();
-  
+
       querySnapshot.docs.forEach((doc) => {
         const updatedData: Partial<StudentData> = {
           name: data.name,
@@ -426,7 +450,7 @@ export class ProfilePage implements OnInit {
           studentNumber: data.studentNumber,
           email: data.email // Make sure to update the email field directly
         };
-  
+
         // If it's the enrolledModules collection, handle it differently
         if (collectionName !== 'students') {
           const currentData = doc.data() as StudentData;
@@ -434,19 +458,19 @@ export class ProfilePage implements OnInit {
             updatedData.moduleCode = currentData.moduleCode;
           }
         }
-  
+
         batch.update(doc.ref, updatedData);
       });
     }
-  
+
     // Update in  collection for each module the student is enrolled in
     if (this.currentUser.moduleCode) {
       for (const moduleCode of this.currentUser.moduleCode) {
         const moduleRef = this.firestore.collection('enrolledModules').doc(moduleCode);
         const studentsRef = moduleRef.collection(moduleCode);
-  
+
         const studentQuerySnapshot = await studentsRef.ref.where('studentNumber', '==', this.currentUser.studentNumber).get();
-        
+
         if (!studentQuerySnapshot.empty) {
           studentQuerySnapshot.docs.forEach((doc) => {
             batch.update(doc.ref, {
@@ -459,10 +483,10 @@ export class ProfilePage implements OnInit {
         }
       }
     }
-  
+
     // Commit the batch
     await batch.commit();
-  
+
     // Update local user object
     this.currentUser = { ...this.currentUser, ...data };
     console.log('User information updated successfully in Firestore');

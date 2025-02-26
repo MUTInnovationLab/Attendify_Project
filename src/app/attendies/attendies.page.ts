@@ -7,6 +7,10 @@ import 'firebase/compat/firestore';
 import firebase from 'firebase/compat/app';
 import { NotificationService } from '../services/notification.service'; 
 
+import { PopoverController } from '@ionic/angular';
+import { NotificationPopoverComponent } from '../notification-popover/notification-popover.component';
+
+
 interface Module {
   id: string;
   moduleCode: string;
@@ -142,12 +146,14 @@ totalEnrolledStudents: number = 0;
 currentPage: number = 1;
 pageSize: number = 7;
 totalPages: number = 1;
+  preventPopover = false; // Add this flag
 
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
     private afAuth: AngularFireAuth,
-    private notificationService: NotificationService 
+    private notificationService: NotificationService,
+    private popoverController: PopoverController 
   ) {}
 
 
@@ -445,13 +451,17 @@ async fetchAttendedStudents() {
   }
 
   approveStudent(request: any) {
+    this.preventPopover = true;
     console.log('Approving student:', request);
     this.updateStudentStatus(request, 'Enroll');
+    //this.preventPopover = false;
   }
   
   declineStudent(request: any) {
+    this.preventPopover = true;
     console.log('Declining student:', request);
     this.updateStudentStatus(request, 'remove');
+    //this.preventPopover = false;
   }
 
 
