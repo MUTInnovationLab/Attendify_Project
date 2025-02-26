@@ -7,6 +7,8 @@ import { ViewModalComponent } from '../view-modal/view-modal.component';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
 import { AuthService } from '../services/auth.service';
+import { NotificationService } from '../services/notification.service'; // Import NotificationService
+
 
 interface StudentData {
   email: string;
@@ -35,6 +37,7 @@ interface EnrolledModule {
 export class ProfilePage implements OnInit {
   showUserInfo = false;
   currentUser: StudentData = { email: '', name: '', studentNumber: '', surname: '' };
+  notifications: string[] = [];
 
   constructor(
     private auth: AngularFireAuth,
@@ -45,15 +48,29 @@ export class ProfilePage implements OnInit {
     private toastController: ToastController,
     private router: Router,
     private navCtrl: NavController,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
     this.getCurrentUser();
+    this.notificationService.notifications$.subscribe(notifications => {
+      this.notifications = notifications;
+    });
   }
 
   toggleUserInfo() {
     this.showUserInfo = !this.showUserInfo;
+  }
+
+  clearNotifications() {
+    this.notifications = [];
+  }
+
+  sendNotification(studentNumber: string, message: string) {
+    if (this.currentUser.studentNumber === studentNumber) {
+      this.notifications.push(message);
+    }
   }
 
   async presentConfirmationAlert() {
@@ -107,8 +124,6 @@ export class ProfilePage implements OnInit {
     return await modal.present();
   }
 
-  
-
   getCurrentUser() {
     this.auth.onAuthStateChanged((user) => {
       if (user) {
@@ -141,8 +156,6 @@ export class ProfilePage implements OnInit {
       }
     });
   }
-  
-
 
   async editUserInfo() {
     const alert = await this.alertController.create({
@@ -220,8 +233,6 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-
-
   async initiateEmailUpdate(newEmail: string, password: string) {
     const user = await this.auth.currentUser;
     if (!user) {
@@ -275,8 +286,6 @@ export class ProfilePage implements OnInit {
       });
     }
 
-  
-
     // Commit the batch
     await batch.commit();
 
@@ -285,7 +294,6 @@ export class ProfilePage implements OnInit {
     console.log('Email updated successfully in Firestore');
   }
 
-  
   async updateStudentNumber(newStudentNumber: string): Promise<boolean> {
     const batch = this.firestore.firestore.batch();
   
@@ -378,12 +386,6 @@ export class ProfilePage implements OnInit {
       throw error;
     }
   }
-  
-
-  
-
-  
-
 
   async checkPendingEmailUpdate() {
     const user = await this.auth.currentUser;
@@ -405,10 +407,6 @@ export class ProfilePage implements OnInit {
       }
     }
   }
-  
-
-
-
 
   async updateUserInfo(data: any) {
     const collectionsToUpdate = ['enrolledModules', 'attended', 'students','assignedLectures'];
@@ -468,10 +466,6 @@ export class ProfilePage implements OnInit {
     this.currentUser = { ...this.currentUser, ...data };
     console.log('User information updated successfully in Firestore');
   }
-  
-
-
-
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({

@@ -44,7 +44,7 @@ ion-toolbar {
   padding: 16px;
 }
 .user-info-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 12px;
   border-left: 4px solid #FF9800;
   box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
@@ -64,6 +64,16 @@ ion-toolbar {
   font-size: 1.4rem;
   margin-right: 12px;
 }
+
+.notification-card{
+  background:  #FF9800;
+  border-radius: 12px;
+  border-left: 4px solid #613c04;
+  box-shadow: 0 4px 6px rgba(238, 204, 140, 0.2);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
 .info-text p {
   color: #4A3500;
   margin: 0;

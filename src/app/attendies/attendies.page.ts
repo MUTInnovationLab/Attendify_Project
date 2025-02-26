@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import 'firebase/compat/firestore';
 import firebase from 'firebase/compat/app';
-
+import { NotificationService } from '../services/notification.service'; 
 
 interface Module {
   id: string;
@@ -146,7 +146,8 @@ totalPages: number = 1;
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private notificationService: NotificationService 
   ) {}
 
 
@@ -420,6 +421,7 @@ async fetchAttendedStudents() {
             enrolledArray[studentIndex].status = 'Enrolled';
             await enrolledModulesRef.update({ Enrolled: enrolledArray });
             await this.presentToast('Student enrolled successfully.', 'success');
+            this.notificationService.addNotification('You have been enrolled in the module.');
           } else {
             await this.presentToast('Student not found in the module.', 'danger');
           }
@@ -428,6 +430,7 @@ async fetchAttendedStudents() {
           enrolledArray = enrolledArray.filter(student => student.studentNumber !== request.studentNumber);
           await enrolledModulesRef.update({ Enrolled: enrolledArray });
           await this.presentToast('Student removed successfully.', 'success');
+          this.notificationService.addNotification('You have been removed from the module.');
         }
 
         // Refresh the pending requests
