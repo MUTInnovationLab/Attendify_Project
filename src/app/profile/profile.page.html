@@ -11,6 +11,7 @@
       <ion-button (click)="toggleUserInfo()" class="user-button">
         <ion-label>{{ currentUser.name }}</ion-label>
         <ion-icon name="person-circle-outline"></ion-icon>
+        <ion-badge *ngIf="notifications.length > 0" color="danger">{{ notifications.length }}</ion-badge>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -61,6 +62,19 @@
         <ion-icon name="create-outline"></ion-icon>
       </ion-button>
     </ion-card>
+    <ion-card *ngIf="showUserInfo && notifications.length > 0" class="notification-card">
+      <ion-card-header>
+        <ion-card-title>Notifications</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let notification of notifications">
+            <ion-icon name="mail-outline"></ion-icon>
+            <ion-label>{{ notification }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
 
     <div *ngIf="!showUserInfo" class="container">
       <h3 class="heading">Welcome</h3>
@@ -97,3 +111,4 @@
     </div>
   </div>
 </ion-content>
+

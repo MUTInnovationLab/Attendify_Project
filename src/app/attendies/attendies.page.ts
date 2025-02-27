@@ -5,6 +5,10 @@ import { Subscription } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import 'firebase/compat/firestore';
 import firebase from 'firebase/compat/app';
+import { NotificationService } from '../services/notification.service'; 
+
+import { PopoverController } from '@ionic/angular';
+import { NotificationPopoverComponent } from '../notification-popover/notification-popover.component';
 
 
 interface Module {
@@ -142,11 +146,14 @@ export class AttendiesPage implements OnInit, OnDestroy {
   currentPage: number = 1;
   pageSize: number = 7;
   totalPages: number = 1;
+  preventPopover = false; // Add this flag
 
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private notificationService: NotificationService,
+    private popoverController: PopoverController 
   ) { }
 
 
@@ -420,6 +427,7 @@ export class AttendiesPage implements OnInit, OnDestroy {
             enrolledArray[studentIndex].status = 'Enrolled';
             await enrolledModulesRef.update({ Enrolled: enrolledArray });
             await this.presentToast('Student enrolled successfully.', 'success');
+            this.notificationService.addNotification(`You have been enrolled in the ${request.moduleCode} module.`);
           } else {
             await this.presentToast('Student not found in the module.', 'danger');
           }
@@ -428,6 +436,7 @@ export class AttendiesPage implements OnInit, OnDestroy {
           enrolledArray = enrolledArray.filter(student => student.studentNumber !== request.studentNumber);
           await enrolledModulesRef.update({ Enrolled: enrolledArray });
           await this.presentToast('Student removed successfully.', 'success');
+          this.notificationService.addNotification(`You have been removed from the ${request.moduleCode} module.`);
         }
 
         // Refresh the pending requests
@@ -442,13 +451,17 @@ export class AttendiesPage implements OnInit, OnDestroy {
   }
 
   approveStudent(request: any) {
+    this.preventPopover = true;
     console.log('Approving student:', request);
     this.updateStudentStatus(request, 'Enroll');
+    //this.preventPopover = false;
   }
 
   declineStudent(request: any) {
+    this.preventPopover = true;
     console.log('Declining student:', request);
     this.updateStudentStatus(request, 'remove');
+    //this.preventPopover = false;
   }
 
 
