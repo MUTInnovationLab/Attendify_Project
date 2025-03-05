@@ -6,7 +6,7 @@
         Reset Password
       </h1>
       
-      <!-- Step 1: Enter Email -->
+      <!-- Step 1: Enter Email (initial request) -->
       <form *ngIf="currentStep === 1" class="form">
         <ion-item lines="none" class="custom-input">
           <ion-label position="floating" class="ion-text-uppercase">Email</ion-label>
@@ -21,14 +21,14 @@
       <!-- Step 2: Email Sent Confirmation -->
       <div *ngIf="currentStep === 2" class="confirmation-message">
         <ion-icon name="mail-outline" class="large-icon"></ion-icon>
-        <h2>Password reset email sent</h2>
-        <p>A password reset email has been sent to your email address.</p>
-        <ion-button class="reset-btn ion-margin-top" (click)="goToNewPassword()" expand="block" shape="round">
-          <ion-text class="ion-text-uppercase">Set New Password</ion-text>
+        <h2>Password Reset Email Sent</h2>
+        <p>A password reset email has been sent to your email address. Please check your inbox and click on the reset link to continue.</p>
+        <ion-button class="reset-btn ion-margin-top" routerLink="/login" expand="block" shape="round">
+          <ion-text class="ion-text-uppercase">Back to Login</ion-text>
         </ion-button>
       </div>
 
-      <!-- Step 3: Enter New Password -->
+      <!-- Step 3: Enter New Password (shown when user clicks link from email) -->
       <form *ngIf="currentStep === 3" class="form">
         <ion-item lines="none" class="custom-input">
           <ion-label position="floating" class="ion-text-uppercase">New Password</ion-label>
