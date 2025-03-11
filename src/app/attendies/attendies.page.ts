@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import 'firebase/compat/firestore';
 import firebase from 'firebase/compat/app';
 import { NotificationService } from '../services/notification.service'; 
+
 
 import { PopoverController } from '@ionic/angular';
 import { NotificationPopoverComponent } from '../notification-popover/notification-popover.component';
@@ -22,6 +23,8 @@ interface Module {
   scannerOpenCount: number;
   
 }
+
+
 
 // interface AttendanceData {
 //   [key: string]: string[]; // scanDate as key and array of emails as value
@@ -148,6 +151,13 @@ pageSize: number = 7;
 totalPages: number = 1;
   preventPopover = false; // Add this flag
 
+  @ViewChild('datePicker') datePicker: any;
+  selectedDateForPicker: string | null = null;
+  minSelectableDate: string = '2020-01-01';
+  maxSelectableDate: string = new Date().toISOString();
+  datePickerOpen: boolean = false;
+  tempSelectedDate: string | null = null;
+  
   constructor(
     private firestore: AngularFirestore,
     private toastController: ToastController,
@@ -178,7 +188,74 @@ totalPages: number = 1;
       console.error('Error fetching lecturer details:', error);
     }
   }
+
+  openDatePicker() {
+    this.datePickerOpen = true;
+    // Store the current date in case user cancels
+    this.tempSelectedDate = this.selectedDateForPicker;
+  }
+
+
+// Confirm the date selection
+// Store the selected date temporarily without applying it yet
+onDateSelected(event: any) {
+  this.tempSelectedDate = event.detail.value;
+}
+
+// Then use the confirm button to actually apply the date
+confirmDateSelection() {
+  if (this.tempSelectedDate) {
+    // Convert the ISO string to your date format (YYYY-MM-DD)
+    const date = new Date(this.tempSelectedDate);
+    const formattedDate = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
+    // Update the selected date
+    this.selectDate(formattedDate);
+    this.selectedDateForPicker = this.tempSelectedDate;
+    
+    // Reset to page 1 when a new date is selected
+    this.currentPage = 1;
+    
+    // Close the modal
+    this.datePickerOpen = false;
+  }
+}
+// Add this new method to filter and display attendance for the selected date
+displayAttendanceForDate(date: string) {
+  // This will use the existing filtering mechanism in your code
+  // The getFilteredRecords and getPaginatedRecords methods will automatically
+  // use the selectedDate property to filter the records
+  console.log(`Displaying attendance for date: ${date}`);
   
+  // You can add any additional logic here to ensure the UI updates properly
+  // For example, if you need to force a UI refresh:
+  setTimeout(() => {
+    // This will trigger change detection
+  }, 0);
+}
+  // Handle cancel button in the date picker
+  cancelDateSelection() {
+    // Revert to previous selection
+    this.tempSelectedDate = this.selectedDateForPicker;
+    // Close the modal
+    this.datePickerOpen = false;
+  }
+
+  /*onDateSelected(event: any) {
+    const selectedDate = event.detail.value;
+    if (selectedDate) {
+      // Convert the ISO string to your date format (YYYY-MM-DD)
+      const date = new Date(selectedDate);
+      const formattedDate = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      
+      this.selectDate(formattedDate);
+      this.selectedDateForPicker = selectedDate;
+      
+      // Reset to page 1 when a new date is selected
+      this.currentPage = 1;
+    }
+  }*/
+
 // Fetch modules for lecturer
 async fetchModulesForLecturer() {
   try {
@@ -463,11 +540,6 @@ async fetchAttendedStudents() {
     this.updateStudentStatus(request, 'remove');
     //this.preventPopover = false;
   }
-
-
-
-
-
   // Unsubscribe from observables when the component is destroyed
   ngOnDestroy() {
     if (this.attendanceSubscription) {
