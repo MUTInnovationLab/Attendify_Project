@@ -68,7 +68,7 @@ export class DashboardPage {
     [key: string]: string[];
   } = {
     'super-admin': ['department-admins', 'departments-analytics', 'calendar', 'add-admin', 'add-hod', 'faculty-form'],
-    'Dean': ['departments-analytics', 'add-admin']
+    'Dean': ['departments-analytics']
   };
 
   constructor(

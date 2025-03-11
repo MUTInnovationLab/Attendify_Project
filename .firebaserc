@@ -1,9 +1,10 @@
 {
   "projects": {
-    "default": "attendoneapp",
+    "default": "scholarship-832f3",
     "mutattendifytracker": "attendify-6202e",
     "attendtrackerone": "mutattendifytracker",
-    "mutattendoneapp": "attendoneapp"
+    "mutattendoneapp": "attendoneapp",
+    "n": "scholarship-832f3"
   },
   "targets": {},
   "etags": {},
