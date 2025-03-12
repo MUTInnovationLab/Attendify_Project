@@ -30,6 +30,8 @@ export class RegisterPage implements OnInit {
   surname: string = "";
   studentNumber: string = "";
   password: string = "";
+  confirmPassword: string = "";
+
   
   // New properties for faculty/department selection
   faculties: Faculty[] = [];
@@ -84,28 +86,46 @@ export class RegisterPage implements OnInit {
   onDepartmentChange(event: any) {
     this.selectedDepartment = event.detail.value;
   }
+  checkEmailCapitalization() {
+    if (this.email && this.email.charAt(0) !== this.email.charAt(0).toLowerCase()) {
+      return true; // Email starts with a capital letter
+    }
+    return false;
+  }
 
   async register() {
     // Validate all required fields
-    if (!this.email || !this.password || !this.name || !this.surname || 
+    if (!this.email || !this.password || !this.confirmPassword || !this.name || !this.surname || 
         !this.studentNumber || !this.selectedFaculty || !this.selectedDepartment) {
       this.presentToast('Please fill in all required fields.', 'danger');
       return;
     }
-
+  
+    // Check if passwords match
+    if (this.password !== this.confirmPassword) {
+      this.presentToast('Passwords do not match.', 'danger');
+      return;
+    }
+  
     // Email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(this.email)) {
       this.presentToast('Please enter a valid email address.', 'danger');
       return;
     }
-
+  
+    // Check if the email starts with a capital letter
+    if (this.email.charAt(0) !== this.email.charAt(0).toLowerCase()) {
+      this.presentToast('Email cannot start with a capital letter.', 'danger');
+      return;
+    }
+  
     const loader = await this.loadingController.create({
       message: 'Signing up...',
       cssClass: 'custom-loader-class'
     });
     await loader.present();
-
+  
     try {
       const userCredential = await this.auth.createUserWithEmailAndPassword(this.email, this.password);
       
@@ -118,14 +138,14 @@ export class RegisterPage implements OnInit {
         faculty: this.selectedFaculty,
         department: this.selectedDepartment
       });
-
+  
       loader.dismiss();
       this.presentToast('Successfully registered!', 'success');
       this.router.navigateByUrl("/login");
     } catch (error: any) {
       loader.dismiss();
       const errorMessage = error.message;
-
+  
       if (errorMessage.includes('auth/missing-email')) {
         this.presentToast('Email is missing.', 'danger');
       } else if (errorMessage.includes('auth/invalid-email')) {
@@ -139,6 +159,7 @@ export class RegisterPage implements OnInit {
       }
     }
   }
+  
 
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({

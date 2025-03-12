@@ -1,68 +1,78 @@
 <ion-content [fullscreen]="true" class="register-content ion-padding">
   <div class="register-container">
     <div class="form-container">
-      <h1 class="title">
+      <h1 class="title" style="color: #4A3500; text-align: center;">
         <ion-icon name="people-circle-outline" class="title-icon"></ion-icon>
         Attendify Register
       </h1>
       
-      <form class="form">
+      <form class="form" #registerForm="ngForm">
         <ion-item lines="none" class="input-item">
           <ion-label position="floating">EMAIL</ion-label>
-          <ion-input type="email" name="email" id="email" [(ngModel)]="email"></ion-input>
+          <ion-input type="email" name="email" id="email" [(ngModel)]="email" #emailInput="ngModel" required email></ion-input>
           <ion-icon name="mail-outline" slot="start"></ion-icon>
         </ion-item>
-
+        <p *ngIf="emailInput.invalid && emailInput.touched" class="error-message" style="color: #4A3500;">Enter a valid email</p>
+        <p *ngIf="email && email.charAt(0) !== email.charAt(0).toLowerCase()" class="error-message" style="color: #4A3500;">Email cannot start with a capital letter</p>
         <ion-item lines="none" class="input-item">
           <ion-label position="floating">NAME</ion-label>
-          <ion-input type="text" name="name" id="name" [(ngModel)]="name"></ion-input>
+          <ion-input type="text" name="name" id="name" [(ngModel)]="name" #nameInput="ngModel" required></ion-input>
           <ion-icon name="person-outline" slot="start"></ion-icon>
         </ion-item>
+        <p *ngIf="nameInput.invalid && nameInput.touched" class="error-message" style="color: #4A3500;">Name is required</p>
 
         <ion-item lines="none" class="input-item">
           <ion-label position="floating">SURNAME</ion-label>
-          <ion-input type="text" name="surname" id="surname" [(ngModel)]="surname"></ion-input>
+          <ion-input type="text" name="surname" id="surname" [(ngModel)]="surname" #surnameInput="ngModel" required></ion-input>
           <ion-icon name="person-outline" slot="start"></ion-icon>
         </ion-item>
+        <p *ngIf="surnameInput.invalid && surnameInput.touched" class="error-message" style="color: #4A3500;">Surname is required</p>
 
         <ion-item lines="none" class="input-item">
           <ion-label position="floating">STUDENT NUMBER</ion-label>
-          <ion-input type="text" name="studentnumber" id="studentnumber" [(ngModel)]="studentNumber"></ion-input>
+          <ion-input type="text" name="studentnumber" id="studentnumber" [(ngModel)]="studentNumber" #studentNumberInput="ngModel" required pattern="^[0-9]+$"></ion-input>
           <ion-icon name="card-outline" slot="start"></ion-icon>
         </ion-item>
+        <p *ngIf="studentNumberInput.invalid && studentNumberInput.touched" class="error-message"style="color: #4A3500;">Enter a valid student number</p>
 
-        <!-- Faculty Dropdown -->
         <ion-item lines="none" class="input-item">
           <ion-icon name="business-outline" slot="start"></ion-icon>
           <ion-label position="floating">FACULTY</ion-label>
-          <ion-select [(ngModel)]="selectedFaculty" name="faculty" (ionChange)="onFacultyChange($event)">
+          <ion-select [(ngModel)]="selectedFaculty" name="faculty" (ionChange)="onFacultyChange($event)" #facultyInput="ngModel" required>
             <ion-select-option [value]="faculty.id" *ngFor="let faculty of faculties">
               {{faculty.id}}
             </ion-select-option>
           </ion-select>
         </ion-item>
+        <p *ngIf="facultyInput.invalid && facultyInput.touched" class="error-message"style="color: #4A3500;">Faculty selection is required</p>
 
-        <!-- Department Dropdown -->
         <ion-item lines="none" class="input-item">
           <ion-icon name="git-branch-outline" slot="start"></ion-icon>
           <ion-label position="floating">DEPARTMENT</ion-label>
-          <ion-select [(ngModel)]="selectedDepartment" name="department" (ionChange)="onDepartmentChange($event)" [disabled]="!selectedFaculty">
+          <ion-select [(ngModel)]="selectedDepartment" name="department" (ionChange)="onDepartmentChange($event)" [disabled]="!selectedFaculty" #departmentInput="ngModel" required>
             <ion-select-option [value]="dept.name" *ngFor="let dept of departments">
               {{dept.name}}
             </ion-select-option>
           </ion-select>
         </ion-item>
+        <p *ngIf="departmentInput.invalid && departmentInput.touched" class="error-message">Department selection is required</p>
 
         <ion-item lines="none" class="input-item">
           <ion-label position="floating">PASSWORD</ion-label>
-          <ion-input type="password" name="password" id="password" [(ngModel)]="password"></ion-input>
+          <ion-input type="password" name="password" id="password" [(ngModel)]="password" #passwordInput="ngModel" required minlength="6"></ion-input>
           <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-          <ion-button fill="clear" slot="end" class="forgot-btn">
-            <a routerLink="/reset">Forgot Password?</a>
-          </ion-button>
         </ion-item>
-
-        <ion-button class="sign-btn" (click)="register()" expand="block">
+        <p *ngIf="passwordInput.invalid && passwordInput.touched" class="error-message" style="color: #4A3500;">Password must be at least 6 characters long</p>
+        
+        <ion-item lines="none" class="input-item">
+          <ion-label position="floating">CONFIRM PASSWORD</ion-label>
+          <ion-input type="password" name="confirmPassword" id="confirmPassword" [(ngModel)]="confirmPassword" #confirmPasswordInput="ngModel" required></ion-input>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        </ion-item>
+        <p *ngIf="confirmPasswordInput.invalid && confirmPasswordInput.touched" class="error-message" style="color: #4A3500;">Confirm password is required</p>
+        <p *ngIf="password && confirmPassword && password !== confirmPassword" class="error-message" style="color: #4A3500;">Passwords do not match</p>
+        
+        <ion-button class="sign-btn" (click)="register()" expand="block" [disabled]="registerForm.invalid">
           SIGN UP
           <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
         </ion-button>
