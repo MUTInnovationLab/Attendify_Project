@@ -151,6 +151,12 @@ pageSize: number = 7;
 totalPages: number = 1;
   preventPopover = false; // Add this flag
 
+  lessonDate: { date: string, subtitle: string }[]= [];
+  selectedLessonDate: { date: string, subtitle: string } | null = null; // Add this property
+  currentLessonPage: number = 1;
+  lessonPageSize: number = 8;
+  totalLessonPages: number = 1;
+
   @ViewChild('datePicker') datePicker: any;
   selectedDateForPicker: string | null = null;
   minSelectableDate: string = '2020-01-01';
@@ -356,6 +362,12 @@ async fetchAttendedStudents() {
   }
 }
   
+selectLessonDate(lessonDate:  { date: string, subtitle: string }) {
+  this.selectedLessonDate = lessonDate;
+  // Add any additional logic needed when a lesson date is selected
+  console.log('Selected lesson date:', lessonDate);
+}
+
 
   selectDate(date: string) {
     this.selectedDate = this.selectedDate === date ? null : date;
@@ -364,6 +376,43 @@ async fetchAttendedStudents() {
 
   selectModule(module: Module) {
     this.selectedModule = this.selectedModule?.id === module.id ? null : module;
+    if (this.selectedModule) {
+      this.fetchLessonDates(this.selectedModule.moduleCode);
+    } else {
+      this.lessonDate = [];
+    }
+  }
+
+  // Fetch lesson dates for the selected module
+  async fetchLessonDates(moduleCode: string) {
+    try {
+      const attendedDoc = await this.firestore.collection('Attended').doc(moduleCode).get().toPromise();
+      if (attendedDoc && attendedDoc.exists) {
+        const data = attendedDoc.data() as { [key: string]: any[] };
+        this.lessonDate = Object.keys(data).map(date => ({
+          date,
+          subtitle: `Lesson on ${date}`
+        }));
+      } else {
+        this.lessonDate = [];
+        this.totalLessonPages = 1;
+        console.log(`No lesson dates found for module: ${moduleCode}`);
+      }
+    } catch (error) {
+      console.error('Error fetching lesson dates:', error);
+    }
+  }
+
+  getPaginatedLessonDates(): { date: string, subtitle: string }[] {
+    const startIndex = (this.currentLessonPage - 1) * this.lessonPageSize;
+    const endIndex = startIndex + this.lessonPageSize;
+    return this.lessonDate.slice(startIndex, endIndex);
+  }
+
+  changeLessonPage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalLessonPages) {
+      this.currentLessonPage = newPage;
+    }
   }
 
   getFilteredRecords(): AttendanceRecord[] {
