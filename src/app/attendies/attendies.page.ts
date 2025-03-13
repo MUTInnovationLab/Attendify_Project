@@ -10,6 +10,7 @@ import { NotificationService } from '../services/notification.service';
 
 import { PopoverController } from '@ionic/angular';
 import { NotificationPopoverComponent } from '../notification-popover/notification-popover.component';
+import { NonAttendedStudentsComponent } from '../components/non-attended-students/non-attended-students.component';
 
 
 interface Module {
@@ -362,10 +363,23 @@ async fetchAttendedStudents() {
   }
 }
   
-selectLessonDate(lessonDate:  { date: string, subtitle: string }) {
+async selectLessonDate(lessonDate:  { date: string, subtitle: string }) {
   this.selectedLessonDate = lessonDate;
   // Add any additional logic needed when a lesson date is selected
   console.log('Selected lesson date:', lessonDate);
+  if (this.selectedModule) {
+    const nonAttendedStudents = await this.fetchNonAttendedStudents(this.selectedModule.moduleCode, lessonDate.date);
+    this.showNonAttendedStudentsPopup(nonAttendedStudents);
+  }
+}
+
+async showNonAttendedStudentsPopup(nonAttendedStudents: { studentNumber: string }[]) {
+  const modal = await this.popoverController.create({
+    component: NonAttendedStudentsComponent,
+    componentProps: { students: nonAttendedStudents },
+    cssClass: 'non-attended-students-popup'
+  });
+  await modal.present();
 }
 
 
@@ -412,6 +426,27 @@ selectLessonDate(lessonDate:  { date: string, subtitle: string }) {
   changeLessonPage(newPage: number) {
     if (newPage >= 1 && newPage <= this.totalLessonPages) {
       this.currentLessonPage = newPage;
+    }
+  }
+
+  async fetchNonAttendedStudents(moduleCode: string, date: string) {
+    try {
+      // Fetch enrolled students for the module
+      const enrolledDoc = await this.firestore.collection('enrolledModules').doc(moduleCode).get().toPromise();
+      const enrolledData = enrolledDoc?.data() as { Enrolled: { studentNumber: string }[] };
+  
+      // Fetch attended students for the module and date
+      const attendedDoc = await this.firestore.collection('Attended').doc(moduleCode).get().toPromise();
+      const attendedData = attendedDoc?.data() as { [key: string]: { studentNumber: string }[] };
+      const attendedStudents = attendedData[date]?.map(a => a.studentNumber) || [];
+  
+      // Find non-attended students
+      const nonAttendedStudents = enrolledData.Enrolled.filter(student => !attendedStudents.includes(student.studentNumber));
+  
+      return nonAttendedStudents;
+    } catch (error) {
+      console.error('Error fetching non-attended students:', error);
+      return [];
     }
   }
 

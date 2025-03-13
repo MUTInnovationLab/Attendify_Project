@@ -18,12 +18,14 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 import { NotificationPopoverComponent } from './notification-popover/notification-popover.component';
+import { NonAttendedStudentsComponent } from './components/non-attended-students/non-attended-students.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    NotificationPopoverComponent
+    NotificationPopoverComponent,
+    NonAttendedStudentsComponent
   ],
   imports: [
     BrowserModule, 
