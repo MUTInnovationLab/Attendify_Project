@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PopoverController } from '@ionic/angular';
 
 @Component({
@@ -8,6 +8,9 @@ import { PopoverController } from '@ionic/angular';
 })
 export class NonAttendedStudentsComponent implements OnInit {
   @Input() students!: { studentNumber: string }[];
+  @Input() date!: string; // Add date input
+  @Output() markAsAttendee = new EventEmitter<{ studentNumber: string }>();
+
 
   constructor(private popoverController: PopoverController) { }
 
@@ -15,5 +18,10 @@ export class NonAttendedStudentsComponent implements OnInit {
 
   dismiss() {
     this.popoverController.dismiss();
+  }
+
+  markStudentAsAttendee(student: { studentNumber: string }) {
+    this.markAsAttendee.emit(student);
+    //this.dismiss();
   }
 }

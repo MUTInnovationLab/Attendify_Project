@@ -379,7 +379,45 @@ async showNonAttendedStudentsPopup(nonAttendedStudents: { studentNumber: string 
     componentProps: { students: nonAttendedStudents },
     cssClass: 'non-attended-students-popup'
   });
+
+  modal.onDidDismiss().then((data) => {
+    if (data.data) {
+      this.markStudentAsAttendee(data.data);
+    }
+  });
+
   await modal.present();
+}
+
+async markStudentAsAttendee(student: { studentNumber: string, date: string }) {
+  const { studentNumber, date } = student;
+  const moduleCode = this.selectedModule?.moduleCode;
+
+  if (moduleCode) {
+    try {
+      const attendedDocRef = this.firestore.collection('Attended').doc(moduleCode);
+      const attendedDoc = await attendedDocRef.get().toPromise();
+
+      if (attendedDoc && attendedDoc.exists) {
+        const data = attendedDoc.data() as { [key: string]: any[] };
+        if (!data[date]) {
+          data[date] = [];
+        }
+
+        data[date].push({
+          scanTime: new Date().toISOString(),
+          studentNumber: studentNumber
+        });
+
+        await attendedDocRef.update(data);
+        await this.fetchAttendedStudents();
+        this.presentToast('Student marked as attended.', 'success');
+      }
+    } catch (error) {
+      console.error('Error marking student as attended:', error);
+      this.presentToast('Error marking student as attended.', 'danger');
+    }
+  }
 }
 
 
