@@ -1,0 +1,44 @@
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .header-row {
+    background-color: #343a40;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  .data-row {
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.3s;
+  }
+  
+  .data-row:hover {
+    background-color: #f1f1f1;
+  }
+  
+  ion-col {
+    padding: 15px;
+    text-align: left;
+  }
+  
+  ion-button {
+    --background: #007bff;
+    --background-activated: #0056b3;
+    --background-focused: #0056b3;
+    --background-hover: #0056b3;
+    color: white;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+  }
+  
+  ion-button:hover {
+    --background: #0056b3;
+  }
