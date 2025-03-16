@@ -9,8 +9,7 @@ import { PopoverController } from '@ionic/angular';
 export class NonAttendedStudentsComponent implements OnInit {
   @Input() students!: { studentNumber: string }[];
   @Input() date!: string; // Add date input
-  @Output() markAsAttendee = new EventEmitter<{ studentNumber: string }>();
-
+  @Output() markAsAttendee = new EventEmitter<{ studentNumber: string, date: string }>();
 
   constructor(private popoverController: PopoverController) { }
 
@@ -21,7 +20,8 @@ export class NonAttendedStudentsComponent implements OnInit {
   }
 
   markStudentAsAttendee(student: { studentNumber: string }) {
-    this.markAsAttendee.emit(student);
-    //this.dismiss();
+    console.log('Emitting markAsAttendee event:', { ...student, date: this.date });
+    this.markAsAttendee.emit({ ...student, date: this.date });
+    this.popoverController.dismiss({ ...student, date: this.date });
   }
 }
