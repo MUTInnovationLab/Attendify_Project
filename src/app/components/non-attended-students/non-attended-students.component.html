@@ -1,26 +1,39 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Non-Attended Students</ion-title>
-    <ion-buttons slot="end">
+    <ion-title>Absent List</ion-title>
+    <!-- <ion-buttons>
       <ion-button (click)="dismiss()">Close</ion-button>
-    </ion-buttons>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-grid class="students-table">
-    <ion-row class="header-row">
-      <ion-col><strong>Student Number</strong></ion-col>
-      <!-- <ion-col><strong>Name</strong></ion-col>
-      <ion-col><strong>Surname</strong></ion-col> -->
-      <!-- <ion-col><strong>Action</strong></ion-col> -->
-    </ion-row>
-    <ion-row *ngFor="let student of students" class="data-row">
-      <ion-col>{{ student.studentNumber }}</ion-col>
-      <!-- <ion-col>{{ student.name }}</ion-col>
-      <ion-col>{{ student.surname }}</ion-col> -->
-      <ion-col>
-        <ion-button (click)="markStudentAsAttendee(student)">Mark as Attendee</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-</ion-content>
+
+<ion-row>
+  <ion-col size="12">
+  <div class="table-card">
+    <div class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Student Number</th>
+            <!-- <th>Name</th>
+            <th>Surname</th> -->
+            <th>Action</th>
+          </tr>
+        </thead>
+     <tbody>
+      <ng-container  *ngFor="let student of students" >
+        <tr>
+          <td>{{ student.studentNumber }}</td>
+          <!-- <td></td> 
+          <td></td>  -->
+          <td>
+            <ion-button (click)="markStudentAsAttendee(student)">Mark as Attendee</ion-button>
+          </td> 
+        </tr>
+      </ng-container>
+     </tbody>
+      </table>
+    </div>
+  </div>
+  </ion-col>
+</ion-row>

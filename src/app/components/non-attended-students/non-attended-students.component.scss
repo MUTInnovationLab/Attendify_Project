@@ -1,44 +1,131 @@
-.students-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 1em;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Header Styling */
+ion-toolbar {
+  --background: #EECC8C;
+}
+
+ion-title {
+  color: #4A3500;
+  font-weight: 600;
+}
+
+/* Content Styling */
+.attendance-content {
+  --background: #FFF5E6;
+}
+
+/* Icon Styling */
+.header-icon {
+  font-size: 32px;
+  color: #FF9800;
+  margin-bottom: 8px;
+}
+
+/* List Styling */
+ion-list {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #EECC8C;
+  margin-bottom: 16px;
+}
+
+ion-list-header {
+  text-align: center;
+}
+
+// ion-select::part(text),
+ion-select::part(placeholder),
+ion-select-option {
+  color: #5D4037;
+}
+
+/* Table Styling */
+.table-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  background: #FF9800;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.custom-table td {
+  padding: 12px;
+  border-bottom: 1px solid #FFE0B2;
+  color: #5D4037;
+}
+
+.clickable-row:hover {
+  background: #FFF8E1;
+  cursor: pointer;
+}
+
+/* Requests Section */
+.requests-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.requests-section h2 {
+  color: #4A3500;
+  margin-bottom: 16px;
+}
+
+.status-badge {
+  background: #FFE0B2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #FF9800;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Empty State */
+.no-data {
+  text-align: center;
+  color: #8D6E63;
+  padding: 24px;
+  font-style: italic;
+  background: white;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
   }
   
-  .header-row {
-    background-color: #343a40;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .custom-table td,
+  .custom-table th {
+    white-space: nowrap;
   }
   
-  .data-row {
-    border-bottom: 1px solid #dee2e6;
-    transition: background-color 0.3s;
+  .table-container {
+    margin: 8px;
   }
-  
-  .data-row:hover {
-    background-color: #f1f1f1;
-  }
-  
-  ion-col {
-    padding: 15px;
-    text-align: left;
-  }
-  
-  ion-button {
-    --background: #007bff;
-    --background-activated: #0056b3;
-    --background-focused: #0056b3;
-    --background-hover: #0056b3;
-    color: white;
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 0.9em;
-    transition: background-color 0.3s;
-  }
-  
-  ion-button:hover {
-    --background: #0056b3;
-  }
+}
